@@ -7,7 +7,7 @@ import {
   usePageQuery,
   useUpdatePageMutation,
 } from "@/features/page/queries/page-query.ts";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import classes from "@/features/page/tree/styles/tree.module.css";
 import { ActionIcon, Menu, rem } from "@mantine/core";
@@ -22,6 +22,7 @@ import {
   IconPlus,
   IconPointFilled,
   IconTrash,
+  IconExternalLink,
 } from "@tabler/icons-react";
 import { treeDataAtom } from "@/features/page/tree/atoms/tree-data-atom.ts";
 import clsx from "clsx";
@@ -229,6 +230,7 @@ export default function SpaceTree({ spaceId, readOnly }: SpaceTreeProps) {
   );
 }
 
+// TAG:单文件
 function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
   const navigate = useNavigate();
   const updatePageMutation = useUpdatePageMutation();
@@ -237,6 +239,8 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
   const { spaceSlug } = useParams();
   const timerRef = useRef(null);
   const { t } = useTranslation();
+  const [menuOpened, { open: openMenu, close: closeMenu }] = useDisclosure(false);
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
 
   const prefetchPage = () => {
     timerRef.current = setTimeout(() => {
@@ -332,6 +336,21 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
     }, 50);
   };
 
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setMenuPosition({ x: e.clientX, y: e.clientY });
+    openMenu();
+  };
+
+  const handleMenuButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMenuPosition({ x: rect.right, y: rect.top });
+    openMenu();
+  };
+
   if (
     node.willReceiveDrop &&
     node.isClosed &&
@@ -354,6 +373,7 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
         onClick={handleClick}
         onMouseEnter={prefetchPage}
         onMouseLeave={cancelPagePrefetch}
+        onContextMenu={handleContextMenu}
       >
         <PageArrow node={node} onExpandTree={() => handleLoadChildren(node)} />
 
@@ -375,7 +395,15 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
         <span className={classes.text}>{node.data.name || t("untitled")}</span>
 
         <div className={classes.actions}>
-          <NodeMenu node={node} treeApi={tree} />
+          <NodeMenu 
+            node={node} 
+            treeApi={tree} 
+            opened={menuOpened}
+            onClose={closeMenu}
+            position={menuPosition}
+            onMenuButtonClick={handleMenuButtonClick}
+            onExpandTree={() => handleLoadChildren(node)}
+          />
 
           {!tree.props.disableEdit && (
             <CreateNode
@@ -428,9 +456,14 @@ function CreateNode({ node, treeApi, onExpandTree }: CreateNodeProps) {
 interface NodeMenuProps {
   node: NodeApi<SpaceTreeNode>;
   treeApi: TreeApi<SpaceTreeNode>;
+  opened: boolean;
+  onClose: () => void;
+  position: { x: number; y: number };
+  onMenuButtonClick: (e: React.MouseEvent) => void;
+  onExpandTree?: () => void;
 }
 
-function NodeMenu({ node, treeApi }: NodeMenuProps) {
+function NodeMenu({ node, treeApi, opened, onClose, position, onMenuButtonClick, onExpandTree }: NodeMenuProps): JSX.Element {
   const { t } = useTranslation();
   const clipboard = useClipboard({ timeout: 500 });
   const { spaceSlug } = useParams();
@@ -441,6 +474,15 @@ function NodeMenu({ node, treeApi }: NodeMenuProps) {
     movePageModalOpened,
     { open: openMovePageModal, close: closeMoveSpaceModal },
   ] = useDisclosure(false);
+  const [menuOpened, { open: openMenu, close: closeMenu }] = useDisclosure(false);
+
+  useEffect(() => {
+    if (opened) {
+      openMenu();
+    } else {
+      closeMenu();
+    }
+  }, [opened]);
 
   const handleCopyLink = () => {
     const pageUrl =
@@ -449,9 +491,125 @@ function NodeMenu({ node, treeApi }: NodeMenuProps) {
     notifications.show({ message: t("Link copied") });
   };
 
+  const menuItems = (
+    <>
+      <Menu.Item
+        leftSection={<IconExternalLink size={16} />}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const pageUrl = buildPageUrl(spaceSlug, node.data.slugId, node.data.name);
+          window.open(pageUrl, '_blank');
+          closeMenu();
+          onClose();
+        }}
+      >
+        {t("在新页面打开")}
+      </Menu.Item>
+
+      <Menu.Item
+        leftSection={<IconPlus size={16} />}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (node.data.hasChildren && node.children.length === 0) {
+            node.toggle();
+            onExpandTree?.();
+            setTimeout(() => {
+              treeApi?.create({ type: "internal", parentId: node.id, index: 0 });
+            }, 500);
+          } else {
+            treeApi?.create({ type: "internal", parentId: node.id });
+          }
+          closeMenu();
+          onClose();
+        }}
+      >
+        {t("新建文件")}
+      </Menu.Item>
+
+      <Menu.Item
+        leftSection={<IconLink size={16} />}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleCopyLink();
+          closeMenu();
+          onClose();
+        }}
+      >
+        {t("Copy link")}
+      </Menu.Item>
+
+      <Menu.Item
+        leftSection={<IconFileExport size={16} />}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          openExportModal();
+          closeMenu();
+          onClose();
+        }}
+      >
+        {t("Export page")}
+      </Menu.Item>
+
+      {!(treeApi.props.disableEdit as boolean) && (
+        <>
+          <Menu.Item
+            leftSection={<IconArrowRight size={16} />}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              openMovePageModal();
+              closeMenu();
+              onClose();
+            }}
+          >
+            {t("Move")}
+          </Menu.Item>
+
+          <Menu.Divider />
+          <Menu.Item
+            c="red"
+            leftSection={<IconTrash size={16} />}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              openDeleteModal({ onConfirm: () => treeApi?.delete(node) });
+              closeMenu();
+              onClose();
+            }}
+          >
+            {t("Delete")}
+          </Menu.Item>
+        </>
+      )}
+    </>
+  );
+
   return (
     <>
-      <Menu shadow="md" width={200}>
+      <Menu 
+        shadow="md" 
+        width={200}
+        opened={menuOpened}
+        onChange={(opened) => {
+          if (!opened) {
+            closeMenu();
+            onClose();
+          }
+        }}
+        position="right-start"
+        offset={0}
+        styles={{
+          dropdown: {
+            position: 'fixed',
+            left: position.x,
+            top: position.y,
+          }
+        }}
+      >
         <Menu.Target>
           <ActionIcon
             variant="transparent"
@@ -459,6 +617,8 @@ function NodeMenu({ node, treeApi }: NodeMenuProps) {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              onMenuButtonClick(e);
+              openMenu();
             }}
           >
             <IconDotsVertical
@@ -468,56 +628,8 @@ function NodeMenu({ node, treeApi }: NodeMenuProps) {
           </ActionIcon>
         </Menu.Target>
 
-        <Menu.Dropdown>
-          <Menu.Item
-            leftSection={<IconLink size={16} />}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleCopyLink();
-            }}
-          >
-            {t("Copy link")}
-          </Menu.Item>
-
-          <Menu.Item
-            leftSection={<IconFileExport size={16} />}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              openExportModal();
-            }}
-          >
-            {t("Export page")}
-          </Menu.Item>
-
-          {!(treeApi.props.disableEdit as boolean) && (
-            <>
-              <Menu.Item
-                leftSection={<IconArrowRight size={16} />}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  openMovePageModal();
-                }}
-              >
-                {t("Move")}
-              </Menu.Item>
-
-              <Menu.Divider />
-              <Menu.Item
-                c="red"
-                leftSection={<IconTrash size={16} />}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  openDeleteModal({ onConfirm: () => treeApi?.delete(node) });
-                }}
-              >
-                {t("Delete")}
-              </Menu.Item>
-            </>
-          )}
+        <Menu.Dropdown onClick={(e) => e.stopPropagation()}>
+          {menuItems}
         </Menu.Dropdown>
       </Menu>
 
@@ -544,7 +656,7 @@ interface PageArrowProps {
   onExpandTree?: () => void;
 }
 
-function PageArrow({ node, onExpandTree }: PageArrowProps) {
+function PageArrow({ node, onExpandTree }: PageArrowProps): JSX.Element {
   return (
     <ActionIcon
       size={20}
@@ -554,7 +666,7 @@ function PageArrow({ node, onExpandTree }: PageArrowProps) {
         e.preventDefault();
         e.stopPropagation();
         node.toggle();
-        onExpandTree();
+        onExpandTree?.();
       }}
     >
       {node.isInternal ? (

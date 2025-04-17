@@ -27,26 +27,35 @@ export default function TopMenu() {
     return <></>;
   }
 
+  // TAG:修改头像和工作区部分
   return (
     <Menu width={250} position="bottom-end" withArrow shadow={"lg"}>
       <Menu.Target>
         <UnstyledButton>
           <Group gap={7} wrap={"nowrap"}>
             <CustomAvatar
-              avatarUrl={workspace?.logo}
-              name={workspace?.name}
+              avatarUrl={user?.avatarUrl}
+              name={user?.name}
               variant="filled"
               size="sm"
             />
             <Text fw={500} size="sm" lh={1} mr={3} lineClamp={1}>
-              {workspace?.name}
+              {user?.name}
             </Text>
             <IconChevronDown size={16} />
           </Group>
         </UnstyledButton>
       </Menu.Target>
       <Menu.Dropdown>
-        <Menu.Label>{t("Workspace")}</Menu.Label>
+        <Menu.Label>
+          <Group wrap={"nowrap"}>
+            <div style={{width: 240}}>
+              <Text size="sm" fw={500} lineClamp={1}>
+                {workspace.name} {t("Workspace")}
+              </Text>
+            </div>
+          </Group>
+        </Menu.Label>
 
         <Menu.Item
           component={Link}

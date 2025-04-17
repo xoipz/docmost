@@ -4,7 +4,7 @@ import {
   isNodeSelection,
   useEditor,
 } from "@tiptap/react";
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState, useCallback } from "react";
 import {
   IconBold,
   IconCode,
@@ -12,10 +12,18 @@ import {
   IconStrikethrough,
   IconUnderline,
   IconMessage,
+  IconCopy,
+  IconH1,
+  IconH2,
+  IconH3,
+  IconList,
+  IconListNumbers,
+  IconTypography,
 } from "@tabler/icons-react";
 import clsx from "clsx";
 import classes from "./bubble-menu.module.css";
 import { ActionIcon, rem, Tooltip } from "@mantine/core";
+import { showNotification } from "@mantine/notifications";
 import { ColorSelector } from "./color-selector";
 import { NodeSelector } from "./node-selector";
 import { TextAlignmentSelector } from "./text-alignment-selector";
@@ -28,6 +36,7 @@ import { v7 as uuid7 } from "uuid";
 import { isCellSelection, isTextSelected } from "@docmost/editor-ext";
 import { LinkSelector } from "@/features/editor/components/bubble-menu/link-selector.tsx";
 import { useTranslation } from "react-i18next";
+import { EditorMenuProps } from "@/features/editor/components/table/types/types.ts";
 
 export interface BubbleMenuItem {
   name: string;
@@ -130,82 +139,123 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
   const [isColorSelectorOpen, setIsColorSelectorOpen] = useState(false);
   const [isLinkSelectorOpen, setIsLinkSelectorOpen] = useState(false);
 
+  const handleCopy = useCallback(() => {
+    const { state, view } = props.editor;
+    const { from, to } = state.selection;
+    
+    // 获取选中范围内的所有节点
+    const nodes = [];
+    state.doc.nodesBetween(from, to, (node) => {
+      if (node.isText) {
+        nodes.push(node.text);
+      } else if (node.type.name === 'paragraph') {
+        nodes.push('\n');
+      }
+      return true;
+    });
+    
+    // 合并文本并保留换行
+    const text = nodes.join('');
+    
+    navigator.clipboard.writeText(text).then(() => {
+      showNotification({
+        title: t("Success"),
+        message: t("Text copied to clipboard"),
+        color: "green",
+        autoClose: 2000,
+      });
+    });
+  }, [props.editor, t]);
+
+  // TAG:BubbleMenu
   return (
     <BubbleMenu {...bubbleMenuProps}>
       <div className={classes.bubbleMenu}>
-        <NodeSelector
-          editor={props.editor}
-          isOpen={isNodeSelectorOpen}
-          setIsOpen={() => {
-            setIsNodeSelectorOpen(!isNodeSelectorOpen);
-            setIsTextAlignmentOpen(false);
-            setIsColorSelectorOpen(false);
-            setIsLinkSelectorOpen(false);
-          }}
-        />
-
-        <TextAlignmentSelector
-          editor={props.editor}
-          isOpen={isTextAlignmentSelectorOpen}
-          setIsOpen={() => {
-            setIsTextAlignmentOpen(!isTextAlignmentSelectorOpen);
-            setIsNodeSelectorOpen(false);
-            setIsColorSelectorOpen(false);
-            setIsLinkSelectorOpen(false);
-          }}
-        />
-
         <ActionIcon.Group>
-          {items.map((item, index) => (
-            <Tooltip key={index} label={t(item.name)} withArrow>
-              <ActionIcon
-                key={index}
-                variant="default"
-                size="lg"
-                radius="0"
-                aria-label={t(item.name)}
-                className={clsx({ [classes.active]: item.isActive() })}
-                style={{ border: "none" }}
-                onClick={item.command}
-              >
-                <item.icon style={{ width: rem(16) }} stroke={2} />
-              </ActionIcon>
-            </Tooltip>
-          ))}
+          <Tooltip label={t("Copy")} openDelay={250} withArrow>
+            <ActionIcon
+              variant="default"
+              size="lg"
+              onClick={handleCopy}
+            >
+              <IconCopy size={18} />
+            </ActionIcon>
+          </Tooltip>
+
+          <NodeSelector
+            editor={props.editor}
+            isOpen={isNodeSelectorOpen}
+            setIsOpen={() => {
+              setIsNodeSelectorOpen(!isNodeSelectorOpen);
+              setIsTextAlignmentOpen(false);
+              setIsColorSelectorOpen(false);
+              setIsLinkSelectorOpen(false);
+            }}
+          />
+
+          <TextAlignmentSelector
+            editor={props.editor}
+            isOpen={isTextAlignmentSelectorOpen}
+            setIsOpen={() => {
+              setIsTextAlignmentOpen(!isTextAlignmentSelectorOpen);
+              setIsNodeSelectorOpen(false);
+              setIsColorSelectorOpen(false);
+              setIsLinkSelectorOpen(false);
+            }}
+          />
+
+          <ActionIcon.Group>
+            {items.map((item, index) => (
+              <Tooltip key={index} label={t(item.name)} withArrow>
+                <ActionIcon
+                  key={index}
+                  variant="default"
+                  size="lg"
+                  radius="0"
+                  aria-label={t(item.name)}
+                  className={clsx({ [classes.active]: item.isActive() })}
+                  style={{ border: "none" }}
+                  onClick={item.command}
+                >
+                  <item.icon style={{ width: rem(16) }} stroke={2} />
+                </ActionIcon>
+              </Tooltip>
+            ))}
+          </ActionIcon.Group>
+
+          <LinkSelector
+            editor={props.editor}
+            isOpen={isLinkSelectorOpen}
+            setIsOpen={() => {
+              setIsLinkSelectorOpen(!isLinkSelectorOpen);
+              setIsNodeSelectorOpen(false);
+              setIsTextAlignmentOpen(false);
+              setIsColorSelectorOpen(false);
+            }}
+          />
+
+          <ColorSelector
+            editor={props.editor}
+            isOpen={isColorSelectorOpen}
+            setIsOpen={() => {
+              setIsColorSelectorOpen(!isColorSelectorOpen);
+              setIsNodeSelectorOpen(false);
+              setIsTextAlignmentOpen(false);
+              setIsLinkSelectorOpen(false);
+            }}
+          />
+
+          <ActionIcon
+            variant="default"
+            size="lg"
+            radius="0"
+            aria-label={t(commentItem.name)}
+            style={{ border: "none" }}
+            onClick={commentItem.command}
+          >
+            <IconMessage size={16} stroke={2} />
+          </ActionIcon>
         </ActionIcon.Group>
-
-        <LinkSelector
-          editor={props.editor}
-          isOpen={isLinkSelectorOpen}
-          setIsOpen={() => {
-            setIsLinkSelectorOpen(!isLinkSelectorOpen);
-            setIsNodeSelectorOpen(false);
-            setIsTextAlignmentOpen(false);
-            setIsColorSelectorOpen(false);
-          }}
-        />
-
-        <ColorSelector
-          editor={props.editor}
-          isOpen={isColorSelectorOpen}
-          setIsOpen={() => {
-            setIsColorSelectorOpen(!isColorSelectorOpen);
-            setIsNodeSelectorOpen(false);
-            setIsTextAlignmentOpen(false);
-            setIsLinkSelectorOpen(false);
-          }}
-        />
-
-        <ActionIcon
-          variant="default"
-          size="lg"
-          radius="0"
-          aria-label={t(commentItem.name)}
-          style={{ border: "none" }}
-          onClick={commentItem.command}
-        >
-          <IconMessage size={16} stroke={2} />
-        </ActionIcon>
       </div>
     </BubbleMenu>
   );

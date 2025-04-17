@@ -21,16 +21,35 @@ export default function InviteActionMenu({ invitationId }: Props) {
   const resendInvitationMutation = useResendInvitationMutation();
   const revokeInvitationMutation = useRevokeInvitationMutation();
   const { isAdmin } = useUserRole();
-  const clipboard = useClipboard();
+  const clipboard = useClipboard({ timeout: 500 });
 
   const handleCopyLink = async (invitationId: string) => {
     try {
       const link = await getInviteLink({ invitationId });
-      clipboard.copy(link.inviteLink);
+      // TAG:邀请链接位置
+      console.log(link.inviteLink)
+      
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(link.inviteLink);
+      } else {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = link.inviteLink;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand('copy');
+        textArea.remove();
+      }
+      
       notifications.show({ message: t("Link copied") });
     } catch (err) {
+      console.error('Copy failed:', err);
       notifications.show({
-        message: err["response"]?.data?.message,
+        message: t("Failed to copy link"),
         color: "red",
       });
     }

@@ -3,6 +3,10 @@
     padding: 4px;
     border-radius: var(--mantine-radius-default);
     background-color: light-dark(var(--mantine-color-gray-0),  var(--mantine-color-dark-8));
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
     }
 
   pre {
@@ -11,6 +15,10 @@
     font-family: "JetBrainsMono", var(--mantine-font-family-monospace);
     border-radius: var(--mantine-radius-default);
     tab-size: 4;
+    user-select: text;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
 
     @mixin light {
       background-color: var(--mantine-color-gray-0);

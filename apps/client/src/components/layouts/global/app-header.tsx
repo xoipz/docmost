@@ -34,9 +34,10 @@ export function AppHeader() {
     </Link>
   ));
 
+  // TAG:Header
   return (
     <>
-      <Group h="100%" px="md" justify="space-between" wrap={"nowrap"}>
+      <Group h="100%" justify="space-between" wrap={"nowrap"}>
         <Group wrap="nowrap">
           {!isHomeRoute && (
             <>
@@ -47,6 +48,7 @@ export function AppHeader() {
                   onClick={toggleMobile}
                   hiddenFrom="sm"
                   size="sm"
+                  ml={30}
                 />
               </Tooltip>
 
@@ -57,12 +59,13 @@ export function AppHeader() {
                   onClick={toggleDesktop}
                   visibleFrom="sm"
                   size="sm"
+                  ml={30}
                 />
               </Tooltip>
             </>
           )}
 
-          <Text
+          {/* <Text
             size="lg"
             fw={600}
             style={{ cursor: "pointer", userSelect: "none" }}
@@ -70,9 +73,9 @@ export function AppHeader() {
             to="/home"
           >
             Docmost
-          </Text>
+          </Text> */}
 
-          <Group ml={50} gap={5} className={classes.links} visibleFrom="sm">
+          <Group className={classes.links}>
             {items}
           </Group>
         </Group>

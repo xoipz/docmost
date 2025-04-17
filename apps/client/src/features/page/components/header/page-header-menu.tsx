@@ -1,4 +1,4 @@
-import { ActionIcon, Group, Menu, Text, Tooltip } from "@mantine/core";
+import { ActionIcon, Group, Menu, Text, Tooltip, Switch } from "@mantine/core";
 import {
   IconArrowRight,
   IconArrowsHorizontal,
@@ -11,6 +11,10 @@ import {
   IconPrinter,
   IconTrash,
   IconWifiOff,
+  IconCheck,
+  IconArrowBackUp,
+  IconArrowForwardUp,
+  IconSettings,
 } from "@tabler/icons-react";
 import React, { useEffect } from "react";
 import useToggleAside from "@/hooks/use-toggle-aside.tsx";
@@ -35,6 +39,9 @@ import {
 import { formattedDate, timeAgo } from "@/lib/time.ts";
 import MovePageModal from "@/features/page/components/move-page-modal.tsx";
 import { useTimeAgo } from "@/hooks/use-time-ago.tsx";
+import { defaultOpenTocAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
+import { pageHeaderButtonsAtom } from "@/features/page/atoms/page-header-atoms.ts";
+import PageHeaderSettingsModal from "./page-header-settings-modal.tsx";
 
 interface PageHeaderMenuProps {
   readOnly?: boolean;
@@ -43,7 +50,18 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
   const { t } = useTranslation();
   const toggleAside = useToggleAside();
   const [yjsConnectionStatus] = useAtom(yjsConnectionStatusAtom);
+  const [pageEditor] = useAtom(pageEditorAtom);
+  const [headerButtons, setHeaderButtons] = useAtom(pageHeaderButtonsAtom);
 
+  const handleUndo = () => {
+    pageEditor?.commands.undo();
+  };
+
+  const handleRedo = () => {
+    pageEditor?.commands.redo();
+  };
+
+  // TAG:右上角快捷方式小方块
   return (
     <>
       {yjsConnectionStatus === "disconnected" && (
@@ -58,25 +76,55 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
         </Tooltip>
       )}
 
-      <Tooltip label={t("Comments")} openDelay={250} withArrow>
-        <ActionIcon
-          variant="default"
-          style={{ border: "none" }}
-          onClick={() => toggleAside("comments")}
-        >
-          <IconMessage size={20} stroke={2} />
-        </ActionIcon>
-      </Tooltip>
+      {headerButtons.showUndo && (
+        <Tooltip label={t("Undo")} openDelay={250} withArrow>
+          <ActionIcon
+            variant="default"
+            style={{ border: "none" }}
+            onClick={handleUndo}
+            disabled={!pageEditor || readOnly}
+          >
+            <IconArrowBackUp size={20} stroke={2} />
+          </ActionIcon>
+        </Tooltip>
+      )}
 
-      <Tooltip label={t("Table of contents")} openDelay={250} withArrow>
-        <ActionIcon
-          variant="default"
-          style={{ border: "none" }}
-          onClick={() => toggleAside("toc")}
-        >
-          <IconList size={20} stroke={2} />
-        </ActionIcon>
-      </Tooltip>
+      {headerButtons.showRedo && (
+        <Tooltip label={t("Redo")} openDelay={250} withArrow>
+          <ActionIcon
+            variant="default"
+            style={{ border: "none" }}
+            onClick={handleRedo}
+            disabled={!pageEditor || readOnly}
+          >
+            <IconArrowForwardUp size={20} stroke={2} />
+          </ActionIcon>
+        </Tooltip>
+      )}
+
+      {headerButtons.showComments && (
+        <Tooltip label={t("Comments")} openDelay={250} withArrow>
+          <ActionIcon
+            variant="default"
+            style={{ border: "none" }}
+            onClick={() => toggleAside("comments")}
+          >
+            <IconMessage size={20} stroke={2} />
+          </ActionIcon>
+        </Tooltip>
+      )}
+
+      {headerButtons.showToc && (
+        <Tooltip label={t("Table of contents")} openDelay={250} withArrow>
+          <ActionIcon
+            variant="default"
+            style={{ border: "none" }}
+            onClick={() => toggleAside("toc")}
+          >
+            <IconList size={20} stroke={2} />
+          </ActionIcon>
+        </Tooltip>
+      )}
 
       <PageActionMenu readOnly={readOnly} />
     </>
@@ -102,8 +150,12 @@ function PageActionMenu({ readOnly }: PageActionMenuProps) {
     movePageModalOpened,
     { open: openMovePageModal, close: closeMoveSpaceModal },
   ] = useDisclosure(false);
+  const [settingsOpened, { open: openSettings, close: closeSettings }] =
+    useDisclosure(false);
   const [pageEditor] = useAtom(pageEditorAtom);
   const pageUpdatedAt = useTimeAgo(page.updatedAt);
+  const [defaultOpenToc, setDefaultOpenToc] = useAtom(defaultOpenTocAtom);
+  const [headerButtons] = useAtom(pageHeaderButtonsAtom);
 
   const handleCopyLink = () => {
     const pageUrl =
@@ -152,10 +204,11 @@ function PageActionMenu({ readOnly }: PageActionMenuProps) {
           </Menu.Item>
           <Menu.Divider />
 
-          <Menu.Item leftSection={<IconArrowsHorizontal size={16} />}>
-            <Group wrap="nowrap">
-              <PageWidthToggle label={t("Full width")} />
-            </Group>
+          <Menu.Item
+            leftSection={<IconSettings size={16} />}
+            onClick={openSettings}
+          >
+            {t("Header Settings")}
           </Menu.Item>
 
           <Menu.Item
@@ -253,6 +306,11 @@ function PageActionMenu({ readOnly }: PageActionMenuProps) {
         currentSpaceSlug={spaceSlug}
         onClose={closeMoveSpaceModal}
         open={movePageModalOpened}
+      />
+
+      <PageHeaderSettingsModal
+        opened={settingsOpened}
+        onClose={closeSettings}
       />
     </>
   );

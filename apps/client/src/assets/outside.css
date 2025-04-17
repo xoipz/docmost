@@ -1,0 +1,61 @@
+.tiptap.ProseMirror h1,
+.tiptap.ProseMirror h2,
+.tiptap.ProseMirror h3,
+.tiptap.ProseMirror h4,
+.tiptap.ProseMirror h5 {
+  position: relative;
+}
+
+.mantine-Container-root > div:first-of-type .tiptap.ProseMirror h1::before {
+  content: none !important;
+}
+
+.tiptap.ProseMirror h1::before,
+.tiptap.ProseMirror h2::before,
+.tiptap.ProseMirror h3::before,
+.tiptap.ProseMirror h4::before,
+.tiptap.ProseMirror h5::before {
+  position: absolute;
+  left: -36px;
+  color: #888;
+}
+
+@media (max-width: 1000px) {
+  .tiptap.ProseMirror h1::before,
+  .tiptap.ProseMirror h2::before,
+  .tiptap.ProseMirror h3::before,
+  .tiptap.ProseMirror h4::before,
+  .tiptap.ProseMirror h5::before {
+    left: -24px;
+  }
+}
+
+.tiptap.ProseMirror h1::before {
+  content: "H1";
+  top: calc(50% - 8px);
+  font-size: 14px;
+}
+
+.tiptap.ProseMirror h2::before {
+  content: "H2";
+  top: calc(50% - 7px);
+  font-size: 13px;
+}
+
+.tiptap.ProseMirror h3::before {
+  content: "H3";
+  top: calc(50% - 6px);
+  font-size: 12px;
+}
+
+.tiptap.ProseMirror h4::before {
+  content: "H4";
+  top: calc(50% - 5px);
+  font-size: 11px;
+}
+
+.tiptap.ProseMirror h5::before {
+  content: "H5";
+  top: calc(50% - 4px);
+  font-size: 10px;
+}

@@ -37,6 +37,8 @@ import {
   Excalidraw,
   Embed,
   Mention,
+  HeadingShortcuts,
+  CodeBlockShortcuts,
 } from "@docmost/editor-ext";
 import {
   randomElement,
@@ -99,6 +101,8 @@ export const mainExtensions = [
       },
     },
   }),
+  HeadingShortcuts,
+  CodeBlockShortcuts,
   Placeholder.configure({
     placeholder: ({ node }) => {
       if (node.type.name === "heading") {
@@ -113,6 +117,7 @@ export const mainExtensions = [
     },
     includeChildren: true,
     showOnlyWhenEditable: true,
+    emptyNodeClass: "is-empty",
   }),
   TextAlign.configure({ types: ["heading", "paragraph"] }),
   TaskList,

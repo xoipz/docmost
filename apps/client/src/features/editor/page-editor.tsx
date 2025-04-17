@@ -18,7 +18,7 @@ import {
   collabExtensions,
   mainExtensions,
 } from "@/features/editor/extensions/extensions";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import useCollaborationUrl from "@/features/editor/hooks/use-collaboration-url";
 import { currentUserAtom } from "@/features/user/atoms/current-user-atom";
 import {
@@ -53,6 +53,9 @@ import { useParams } from "react-router-dom";
 import { extractPageSlugId } from "@/lib";
 import { FIVE_MINUTES } from "@/lib/constants.ts";
 import { jwtDecode } from "jwt-decode";
+import { TextSelection } from "@tiptap/pm/state";
+import { pageHeaderButtonsAtom } from "@/features/page/atoms/page-header-atoms";
+import { QuickInputBar } from "./components/quick-input-bar/quick-input-bar";
 
 interface PageEditorProps {
   pageId: string;
@@ -85,6 +88,7 @@ export default function PageEditor({
   const [isCollabReady, setIsCollabReady] = useState(false);
   const { pageSlug } = useParams();
   const slugId = extractPageSlugId(pageSlug);
+  const headerButtons = useAtomValue(pageHeaderButtonsAtom);
 
   const localProvider = useMemo(() => {
     const provider = new IndexeddbPersistence(documentName, ydoc);
@@ -156,30 +160,7 @@ export default function PageEditor({
       editorProps: {
         scrollThreshold: 80,
         scrollMargin: 80,
-        handleDOMEvents: {
-          keydown: (_view, event) => {
-            if (["ArrowUp", "ArrowDown", "Enter"].includes(event.key)) {
-              const slashCommand = document.querySelector("#slash-command");
-              if (slashCommand) {
-                return true;
-              }
-            }
-            if (
-              [
-                "ArrowUp",
-                "ArrowDown",
-                "ArrowLeft",
-                "ArrowRight",
-                "Enter",
-              ].includes(event.key)
-            ) {
-              const emojiCommand = document.querySelector("#emoji-command");
-              if (emojiCommand) {
-                return true;
-              }
-            }
-          },
-        },
+        handleDOMEvents: {},
         handlePaste: (view, event, slice) =>
           handlePaste(view, event, pageId, currentUser?.user.id),
         handleDrop: (view, event, _slice, moved) =>
@@ -287,6 +268,59 @@ export default function PageEditor({
     return () => clearTimeout(collabReadyTimeout);
   }, [isRemoteSynced, isLocalSynced, remoteProvider?.status]);
 
+  useEffect(() => {
+    if (!editor) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && (event.key === 's' || event.key === 't')) {
+        event.preventDefault();
+        return true;
+      }
+
+      if ((event.ctrlKey || event.metaKey) && event.key === 'x') {
+        const { state } = editor;
+        const { selection } = state;
+        const { empty, $from } = selection;
+
+        if (empty) {
+          const node = $from.node();
+          if (node && node.textContent.trim() === '') {
+            const tr = state.tr;
+            tr.delete($from.before(), $from.after());
+            editor.view.dispatch(tr);
+            return true;
+          }
+        }
+      }
+
+      if (["ArrowUp", "ArrowDown", "Enter"].includes(event.key)) {
+        const slashCommand = document.querySelector("#slash-command");
+        if (slashCommand) {
+          return true;
+        }
+      }
+      if (
+        [
+          "ArrowUp",
+          "ArrowDown",
+          "ArrowLeft",
+          "ArrowRight",
+          "Enter",
+        ].includes(event.key)
+      ) {
+        const emojiCommand = document.querySelector("#emoji-command");
+        if (emojiCommand) {
+          return true;
+        }
+      }
+    };
+
+    editor.view.dom.addEventListener('keydown', handleKeyDown);
+    return () => {
+      editor.view.dom.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [editor]);
+
   return isCollabReady ? (
     <div>
       <div ref={menuContainerRef}>
@@ -309,8 +343,17 @@ export default function PageEditor({
         {showCommentPopup && <CommentDialog editor={editor} pageId={pageId} />}
       </div>
 
+      {headerButtons.showQuickInputBar && <QuickInputBar />}
+
       <div
-        onClick={() => editor.commands.focus("end")}
+        onClick={() => {
+          editor.commands.focus("end");
+          // 确保光标在最后一个节点之后
+          const { state } = editor.view;
+          const { tr } = state;
+          tr.setSelection(TextSelection.create(state.doc, state.doc.content.size));
+          editor.view.dispatch(tr);
+        }}
         style={{ paddingBottom: "20vh" }}
       ></div>
     </div>

@@ -95,7 +95,7 @@ export default function GlobalAppShell({
       }
       padding="md"
     >
-      <AppShell.Header px="md" className={classes.header}>
+      <AppShell.Header  className={classes.header}>
         <AppHeader />
       </AppShell.Header>
       {!isHomeRoute && (
