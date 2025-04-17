@@ -41,14 +41,16 @@ export const storageDriverConfigProvider = {
         };
 
       case StorageOption.S3:
-        { const s3Config = {
+        { 
+          // TAG:修复阿里云oss无法使用的bug
+          const s3Config = {
           driver,
           config: {
             region: environmentService.getAwsS3Region(),
             endpoint: environmentService.getAwsS3Endpoint(),
             bucket: environmentService.getAwsS3Bucket(),
             baseUrl: environmentService.getAwsS3Url(),
-            forcePathStyle: environmentService.getAwsS3ForcePathStyle(),
+            // forcePathStyle: environmentService.getAwsS3ForcePathStyle(),
             credentials: undefined,
           },
         };

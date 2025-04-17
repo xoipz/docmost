@@ -362,5 +362,14 @@
   "Move page to a different space.": "将页面移动到不同的空间。",
   "Real-time editor connection lost. Retrying...": "实时编辑器连接丢失。重试中……",
   "Table of contents": "目录",
-  "Add headings (H1, H2, H3) to generate a table of contents.": "添加标题（H1，H2，H3）以生成目录。"
+  "Add headings (H1, H2, H3) to generate a table of contents.": "添加标题（H1，H2，H3）以生成目录。",
+  "Default open outline": "默认打开大纲",
+  "Undo": "撤回",
+  "Redo": "重做",
+  "Header Settings": "设置",
+  "Show undo button": "显示撤回按钮",
+  "Show redo button": "显示重做按钮",
+  "Show comments button": "显示评论按钮",
+  "Show outline button": "显示大纲按钮",
+  "Show quick input bar": "显示快速输入栏"
 }

@@ -12,6 +12,7 @@ export default defineConfig(({ mode }) => {
     CLOUD,
     SUBDOMAIN_HOST,
     COLLAB_URL,
+    ROUTER_MODE,
   } = loadEnv(mode, envPath, "");
 
   return {
@@ -31,6 +32,26 @@ export default defineConfig(({ mode }) => {
       alias: {
         "@": "/src",
       },
+    },
+    build: {
+      target: 'esnext',
+      minify: 'terser',
+      terserOptions: {
+        compress: {
+          drop_console: true,
+          drop_debugger: true
+        }
+      },
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'react-vendor': ['react', 'react-dom'],
+            'ui-vendor': ['@mantine/core', '@mantine/hooks'],
+            'editor-vendor': ['@tiptap/core', '@tiptap/react', '@tiptap/starter-kit']
+          }
+        }
+      },
+      chunkSizeWarningLimit: 1000
     },
     server: {
       proxy: {

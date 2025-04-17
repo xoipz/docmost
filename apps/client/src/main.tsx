@@ -5,7 +5,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import { mantineCssResolver, theme } from '@/theme';
 import { MantineProvider } from "@mantine/core";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, HashRouter } from "react-router-dom";
 import { ModalsProvider } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -23,22 +23,19 @@ export const queryClient = new QueryClient({
   },
 });
 
+const Router = import.meta.env.VITE_ROUTER_MODE === 'hash' ? HashRouter : BrowserRouter;
 
-const root = ReactDOM.createRoot(
-  document.getElementById("root") as HTMLElement
-);
-
-root.render(
-  <BrowserRouter>
-    <MantineProvider theme={theme} cssVariablesResolver={mantineCssResolver}>
-      <ModalsProvider>
-        <QueryClientProvider client={queryClient}>
-          <Notifications position="bottom-center" limit={3} />
-          <HelmetProvider>
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <Router>
+    <QueryClientProvider client={queryClient}>
+      <HelmetProvider>
+        <MantineProvider theme={theme} cssVariablesResolver={mantineCssResolver}>
+          <ModalsProvider>
+            <Notifications />
             <App />
-          </HelmetProvider>
-        </QueryClientProvider>
-      </ModalsProvider>
-    </MantineProvider>
-  </BrowserRouter>
+          </ModalsProvider>
+        </MantineProvider>
+      </HelmetProvider>
+    </QueryClientProvider>
+  </Router>
 );
