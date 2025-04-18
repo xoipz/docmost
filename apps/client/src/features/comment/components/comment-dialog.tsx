@@ -87,7 +87,7 @@ function CommentDialog({ editor, pageId }: CommentDialogProps) {
       size="lg"
       radius="md"
       w={300}
-      position={{ bottom: 500, right: 50 }}
+      position={{ top: 50, right: 50 }}
       withCloseButton
       withBorder
     >
