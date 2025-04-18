@@ -652,11 +652,19 @@ function NodeMenu({ node, treeApi, opened, onClose, position, onMenuButtonClick,
         }}
         position="right-start"
         offset={0}
+        closeOnItemClick
+        withinPortal={true}
+        zIndex={1000}
         styles={{
           dropdown: {
-            position: 'fixed',
+            maxHeight: "calc(100vh - 20px)",
+            overflow: "auto",
+            position: "fixed",
             left: position.x,
-            top: position.y,
+            top: Math.min(
+              position.y,
+              window.innerHeight - 240 // 确保至少有300px的空间显示菜单
+            ),
           }
         }}
       >

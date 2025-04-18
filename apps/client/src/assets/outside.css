@@ -60,7 +60,7 @@
   font-size: 10px;
 }
 
-[data-placeholder="Untitled"]::after {
+[data-placeholder="Untitled"]::after,[data-placeholder="无标题"]::after {
   content: "Untitled";
   color: #888;
   position: absolute;
