@@ -5,6 +5,7 @@ import {
   Text,
   Tooltip,
   UnstyledButton,
+  Popover,
 } from "@mantine/core";
 import { spotlight } from "@mantine/spotlight";
 import {
@@ -18,7 +19,7 @@ import {
 } from "@tabler/icons-react";
 
 import classes from "./space-sidebar.module.css";
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useAtom } from "jotai";
 import { SearchSpotlight } from "@/features/search/search-spotlight.tsx";
 import { treeApiAtom } from "@/features/page/tree/atoms/tree-api-atom.ts";
@@ -47,9 +48,30 @@ export function SpaceSidebar() {
     useDisclosure(false);
   const { spaceSlug } = useParams();
   const { data: space, isLoading, isError } = useGetSpaceBySlugQuery(spaceSlug);
+  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const targetRef = useRef<HTMLDivElement>(null);
 
   const spaceRules = space?.membership?.permissions;
   const spaceAbility = useSpaceAbility(spaceRules);
+
+  useEffect(() => {
+    const handleGlobalClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.mantine-Menu-dropdown')) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener('click', handleGlobalClick);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleGlobalClick);
+    };
+  }, [isMenuOpen]);
 
   if (!space) {
     return <></>;
@@ -57,7 +79,39 @@ export function SpaceSidebar() {
 
   function handleCreatePage() {
     tree?.create({ parentId: null, type: "internal", index: 0 });
+    setIsMenuOpen(false);
   }
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // 获取视口尺寸
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    // 菜单的预估尺寸（可根据实际菜单大小调整）
+    const menuWidth = 200;
+    const menuHeight = 45;
+    
+    // 计算菜单位置，确保不超出视口
+    let x = e.pageX;
+    let y = e.pageY;
+    
+    // 检查是否会超出右边界
+    if (x + menuWidth > viewportWidth) {
+      x = viewportWidth - menuWidth; // 减去 10px 作为边距
+    }
+    
+    // 检查是否会超出底部边界
+    if (y + menuHeight > viewportHeight) {
+      y = viewportHeight - menuHeight; // 减去 10px 作为边距
+    }
+    console.log(x,y)
+    
+    setMenuPosition({ x, y });
+    setIsMenuOpen(true);
+  };
 
   return (
     <>
@@ -138,7 +192,7 @@ export function SpaceSidebar() {
           </div>
         </div>
 
-        <div className={clsx(classes.section, classes.sectionPages)}>
+        <div className={clsx(classes.section, classes.sectionPages)}  style={{borderBottom: 'none'}}>
           <Group className={classes.pagesHeader} justify="space-between">
             <Text size="xs" fw={500} c="dimmed">
               {t("Pages")}
@@ -175,6 +229,45 @@ export function SpaceSidebar() {
             />
           </div>
         </div>
+        <div 
+          ref={targetRef}
+          style={{ flex: 1,zIndex: 1000,marginTop: -30 }} 
+          onContextMenu={handleContextMenu}
+        />
+        <Menu
+          opened={isMenuOpen}
+          onClose={() => setIsMenuOpen(false)}
+          closeOnClickOutside
+          closeOnEscape
+          withinPortal
+          position="bottom"
+          offset={0}
+          styles={{
+            dropdown: {
+              position: 'fixed',
+              top: menuPosition.y,
+              left: menuPosition.x,
+              minWidth: 200,
+              maxWidth: 'calc(100vw - 20px)',
+              maxHeight: 'calc(100vh - 20px)',
+              overflow: 'auto',
+            }
+          }}
+        >
+          <Menu.Dropdown>
+            {spaceAbility.can(
+              SpaceCaslAction.Manage,
+              SpaceCaslSubject.Page,
+            ) && (
+              <Menu.Item
+                leftSection={<IconPlus size={16} />}
+                onClick={handleCreatePage}
+              >
+                {t("新建文件")}
+              </Menu.Item>
+            )}
+          </Menu.Dropdown>
+        </Menu>
       </div>
 
       <SpaceSettingsModal
