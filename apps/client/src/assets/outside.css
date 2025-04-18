@@ -59,3 +59,11 @@
   top: calc(50% - 4px);
   font-size: 10px;
 }
+
+[data-placeholder="Untitled"]::after {
+  content: "Untitled";
+  color: #888;
+  position: absolute;
+  top: 0;
+  cursor: text;
+}

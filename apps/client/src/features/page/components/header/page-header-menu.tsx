@@ -161,8 +161,50 @@ function PageActionMenu({ readOnly }: PageActionMenuProps) {
     const pageUrl =
       getAppUrl() + buildPageUrl(spaceSlug, page.slugId, page.title);
 
-    clipboard.copy(pageUrl);
-    notifications.show({ message: t("Link copied") });
+    // 检查clipboard API是否可用
+    if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(pageUrl)
+        .then(() => {
+          notifications.show({ message: t("Link copied") });
+        })
+        .catch((error) => {
+          console.error("复制失败:", error);
+          fallbackCopyTextToClipboard(pageUrl);
+        });
+    } else {
+      // 使用fallback方法
+      fallbackCopyTextToClipboard(pageUrl);
+    }
+  };
+
+  // Fallback方法：通过创建临时textarea元素来复制文本
+  const fallbackCopyTextToClipboard = (text: string) => {
+    try {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      
+      // 避免滚动到底部
+      textArea.style.top = "0";
+      textArea.style.left = "0";
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
+      
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      const successful = document.execCommand("copy");
+      document.body.removeChild(textArea);
+      
+      if (successful) {
+        notifications.show({ message: t("Link copied") });
+      } else {
+        notifications.show({ message: t("Failed to copy link"), color: "red" });
+      }
+    } catch (err) {
+      console.error("回退复制方法失败:", err);
+      notifications.show({ message: t("Failed to copy link"), color: "red" });
+    }
   };
 
   const handlePrint = () => {

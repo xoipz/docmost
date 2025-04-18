@@ -292,6 +292,13 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
   }
 
   const handleClick = () => {
+    // 如果节点有子节点，且当前未展开，则展开子节点
+    if ((node.children.length > 0 || node.data.hasChildren) && node.isClosed) {
+      node.toggle();
+      handleLoadChildren(node);
+    }
+    
+    // 导航到页面
     const pageUrl = buildPageUrl(spaceSlug, node.data.slugId, node.data.name);
     navigate(pageUrl);
   };
@@ -487,8 +494,51 @@ function NodeMenu({ node, treeApi, opened, onClose, position, onMenuButtonClick,
   const handleCopyLink = () => {
     const pageUrl =
       getAppUrl() + buildPageUrl(spaceSlug, node.data.slugId, node.data.name);
-    clipboard.copy(pageUrl);
-    notifications.show({ message: t("Link copied") });
+    
+    // 检查clipboard API是否可用
+    if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(pageUrl)
+        .then(() => {
+          notifications.show({ message: t("Link copied") });
+        })
+        .catch((error) => {
+          console.error("复制失败:", error);
+          fallbackCopyTextToClipboard(pageUrl);
+        });
+    } else {
+      // 使用fallback方法
+      fallbackCopyTextToClipboard(pageUrl);
+    }
+  };
+
+  // Fallback方法：通过创建临时textarea元素来复制文本
+  const fallbackCopyTextToClipboard = (text: string) => {
+    try {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      
+      // 避免滚动到底部
+      textArea.style.top = "0";
+      textArea.style.left = "0";
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
+      
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      const successful = document.execCommand("copy");
+      document.body.removeChild(textArea);
+      
+      if (successful) {
+        notifications.show({ message: t("Link copied") });
+      } else {
+        notifications.show({ message: t("Failed to copy link"), color: "red" });
+      }
+    } catch (err) {
+      console.error("回退复制方法失败:", err);
+      notifications.show({ message: t("Failed to copy link"), color: "red" });
+    }
   };
 
   const menuItems = (
