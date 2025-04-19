@@ -82,24 +82,33 @@ export const TableOfContents: FC<TableOfContentsProps> = (props) => {
   const handleScrollToHeading = (position: number) => {
     const { view } = props.editor;
 
+    if (!view) return;
+    
     const headerOffset = parseInt(
       window.getComputedStyle(headerPaddingRef.current).getPropertyValue("top"),
     );
 
-    const { node } = view.domAtPos(position);
-    const element = node as HTMLElement;
-    const scrollPosition =
-      element.getBoundingClientRect().top + window.scrollY - headerOffset;
+    try {
+      const domAtPosResult = view.domAtPos(position);
+      if (!domAtPosResult || !domAtPosResult.node) return;
+      
+      const { node } = domAtPosResult;
+      const element = node as HTMLElement;
+      const scrollPosition =
+        element.getBoundingClientRect().top + window.scrollY - headerOffset;
 
-    window.scrollTo({
-      top: scrollPosition,
-      behavior: "smooth",
-    });
+      window.scrollTo({
+        top: scrollPosition,
+        behavior: "smooth",
+      });
 
-    const tr = view.state.tr;
-    tr.setSelection(new TextSelection(tr.doc.resolve(position)));
-    view.dispatch(tr);
-    view.focus();
+      const tr = view.state.tr;
+      tr.setSelection(new TextSelection(tr.doc.resolve(position)));
+      view.dispatch(tr);
+      view.focus();
+    } catch (error) {
+      console.error("Error in scrollToHeading:", error);
+    }
   };
 
   const toggleHeading = (id: string) => {

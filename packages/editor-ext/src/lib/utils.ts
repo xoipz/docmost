@@ -282,30 +282,40 @@ export const isColumnGripSelected = ({
   state: EditorState;
   from: number;
 }) => {
-  const domAtPos = view.domAtPos(from).node as HTMLElement;
-  const nodeDOM = view.nodeDOM(from) as HTMLElement;
-  const node = nodeDOM || domAtPos;
+  if (!view || !editor || !state) return false;
+  
+  try {
+    const domAtPosResult = view.domAtPos(from);
+    if (!domAtPosResult || !domAtPosResult.node) return false;
+    
+    const domAtPos = domAtPosResult.node as HTMLElement;
+    const nodeDOM = view.nodeDOM(from) as HTMLElement;
+    const node = nodeDOM || domAtPos;
 
-  if (
-    !editor.isActive(Table.name) ||
-    !node ||
-    isTableSelected(state.selection)
-  ) {
+    if (
+      !editor.isActive(Table.name) ||
+      !node ||
+      isTableSelected(state.selection)
+    ) {
+      return false;
+    }
+
+    let container = node;
+
+    while (container && !["TD", "TH"].includes(container.tagName)) {
+      container = container.parentElement!;
+    }
+
+    const gripColumn =
+      container &&
+      container.querySelector &&
+      container.querySelector("a.grip-column.selected");
+
+    return !!gripColumn;
+  } catch (error) {
+    console.error("Error in isColumnGripSelected:", error);
     return false;
   }
-
-  let container = node;
-
-  while (container && !["TD", "TH"].includes(container.tagName)) {
-    container = container.parentElement!;
-  }
-
-  const gripColumn =
-    container &&
-    container.querySelector &&
-    container.querySelector("a.grip-column.selected");
-
-  return !!gripColumn;
 };
 
 export const isRowGripSelected = ({
@@ -319,30 +329,40 @@ export const isRowGripSelected = ({
   state: EditorState;
   from: number;
 }) => {
-  const domAtPos = view.domAtPos(from).node as HTMLElement;
-  const nodeDOM = view.nodeDOM(from) as HTMLElement;
-  const node = nodeDOM || domAtPos;
+  if (!view || !editor || !state) return false;
+  
+  try {
+    const domAtPosResult = view.domAtPos(from);
+    if (!domAtPosResult || !domAtPosResult.node) return false;
+    
+    const domAtPos = domAtPosResult.node as HTMLElement;
+    const nodeDOM = view.nodeDOM(from) as HTMLElement;
+    const node = nodeDOM || domAtPos;
 
-  if (
-    !editor.isActive(Table.name) ||
-    !node ||
-    isTableSelected(state.selection)
-  ) {
+    if (
+      !editor.isActive(Table.name) ||
+      !node ||
+      isTableSelected(state.selection)
+    ) {
+      return false;
+    }
+
+    let container = node;
+
+    while (container && !["TD", "TH"].includes(container.tagName)) {
+      container = container.parentElement!;
+    }
+
+    const gripRow =
+      container &&
+      container.querySelector &&
+      container.querySelector("a.grip-row.selected");
+
+    return !!gripRow;
+  } catch (error) {
+    console.error("Error in isRowGripSelected:", error);
     return false;
   }
-
-  let container = node;
-
-  while (container && !["TD", "TH"].includes(container.tagName)) {
-    container = container.parentElement!;
-  }
-
-  const gripRow =
-    container &&
-    container.querySelector &&
-    container.querySelector("a.grip-row.selected");
-
-  return !!gripRow;
 };
 
 export function isTextSelected(editor: Editor) {

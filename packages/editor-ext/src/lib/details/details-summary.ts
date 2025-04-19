@@ -57,9 +57,19 @@ export const DetailsSummary = Node.create<DetailsSummaryOptions>({
           return false;
         }
 
-        const hasOffset =
+        let hasOffset = false;
+        try {
           // @ts-ignore
-          view.domAtPos(head.after() + 1).node.offsetParent !== null;
+          const domAtPosResult = view.domAtPos(head.after() + 1);
+          if (domAtPosResult && domAtPosResult.node) {
+            const element = domAtPosResult.node as HTMLElement;
+            hasOffset = element.offsetParent !== null;
+          }
+        } catch (error) {
+          console.error("Error checking domAtPos:", error);
+          return false;
+        }
+        
         const findNode = hasOffset
           ? state.doc.nodeAt(head.after())
           : head.node(-2);
