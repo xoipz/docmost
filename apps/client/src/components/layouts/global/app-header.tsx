@@ -1,4 +1,4 @@
-import { Badge, Group, Text, Tooltip } from "@mantine/core";
+import { Badge, Group, Text, Tooltip, Box } from "@mantine/core";
 import classes from "./app-header.module.css";
 import React from "react";
 import TopMenu from "@/components/layouts/global/top-menu.tsx";
@@ -49,7 +49,7 @@ export function AppHeader() {
   return (
     <>
       <Group h="100%" justify="space-between" wrap={"nowrap"}>
-        <Group wrap="nowrap">
+        <Group wrap="nowrap" className={classes.navContainer}>
           {!isHomeRoute && (
             <>
               <Tooltip label={t("Sidebar toggle")}>
@@ -86,24 +86,25 @@ export function AppHeader() {
             Docmost
           </Text> */}
           
-          <Group className={classes.links}>
-            {homeItem}
-            
-            {spaces && spaces.items && spaces.items.length > 0 && spaces.items.map((workspaceSpace) => (
-              <Link 
-                key={workspaceSpace.id} 
-                to={getSpaceUrl(workspaceSpace.slug)} 
-                className={classes.link}
-                style={{
-                  fontWeight: spaceSlug === workspaceSpace.slug ? 600 : 400,
-                }}
-              >
-                {workspaceSpace.name}
-              </Link>
-            ))}
-          </Group>
+          {homeItem}
           
-          
+          {spaces && spaces.items && spaces.items.length > 0 && (
+            <div className={classes.spacesContainer}>
+              {spaces.items.map((workspaceSpace) => (
+                <Link 
+                  key={workspaceSpace.id} 
+                  to={getSpaceUrl(workspaceSpace.slug)} 
+                  className={classes.spaceLink}
+                  style={{
+                    fontWeight: spaceSlug === workspaceSpace.slug ? 600 : 400,
+                  }}
+                  title={workspaceSpace.name}
+                >
+                  {workspaceSpace.name}
+                </Link>
+              ))}
+            </div>
+          )}
         </Group>
 
         <Group px={"xl"} wrap="nowrap">

@@ -16,6 +16,43 @@
     color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
     font-size: var(--mantine-font-size-sm);
     font-weight: 500;
+    min-width: 52px;
+
+    @mixin hover {
+        background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
+    }
+}
+
+.navContainer {
+    display: flex;
+    align-items: center;
+    max-width: calc(100% - 150px);
+}
+
+.spacesContainer {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-width: 100%;
+    margin-left: 4px;
+    padding: 0 4px;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+.spacesContainer::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.spaceLink {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: rem(8px) rem(12px);
+    border-radius: var(--mantine-radius-sm);
+    text-decoration: none;
+    color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
+    font-size: var(--mantine-font-size-sm);
+    font-weight: 500;
 
     @mixin hover {
         background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-6));
