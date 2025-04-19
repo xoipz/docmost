@@ -118,10 +118,13 @@ export default function GlobalAppShell({
   const isSpaceRoute = location.pathname.startsWith("/s/");
   const isHomeRoute = location.pathname.startsWith("/home");
   const isPageRoute = location.pathname.includes("/p/");
+  
+  // 只在页面编辑器路由中考虑headerVisible状态，其他路由始终显示header
+  const shouldShowHeader = isPageRoute ? headerVisible : true;
 
   return (
     <AppShell
-      header={headerVisible ? { height: 45 } : undefined}
+      header={shouldShowHeader ? { height: 45 } : undefined}
       navbar={
         !isHomeRoute && {
           width: isSpaceRoute ? sidebarWidth : 300,
@@ -141,7 +144,7 @@ export default function GlobalAppShell({
       }
       padding="md"
     >
-      {headerVisible && (
+      {shouldShowHeader && (
         <AppShell.Header className={classes.header}>
           <AppHeader />
         </AppShell.Header>
