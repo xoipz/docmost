@@ -1,5 +1,5 @@
 .headerPadding {
-  display: none;
+  position: relative;
   top: calc(
     var(--app-shell-header-offset, 0rem) + var(--app-shell-header-height, 0rem)
   );

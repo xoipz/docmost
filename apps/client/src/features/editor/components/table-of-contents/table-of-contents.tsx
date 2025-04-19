@@ -84,9 +84,19 @@ export const TableOfContents: FC<TableOfContentsProps> = (props) => {
 
     if (!view) return;
     
-    const headerOffset = parseInt(
-      window.getComputedStyle(headerPaddingRef.current).getPropertyValue("top"),
-    );
+    let headerOffset = 50;
+    if (headerPaddingRef.current) {
+      try {
+        const computedStyle = window.getComputedStyle(headerPaddingRef.current);
+        const topValue = computedStyle.getPropertyValue("top");
+        // 如果top值为0或不存在，则表示header可能不可见
+        if (topValue && topValue !== "0px") {
+          headerOffset = parseInt(topValue);
+        }
+      } catch (error) {
+        console.error("Error getting header offset:", error);
+      }
+    }
 
     try {
       const domAtPosResult = view.domAtPos(position);
@@ -137,6 +147,13 @@ export const TableOfContents: FC<TableOfContentsProps> = (props) => {
   useEffect(() => {
     if (!props.editor) return;
     
+    // 初始化headerPadding元素，确保它准备好用于计算滚动位置
+    if (headerPaddingRef.current) {
+      headerPaddingRef.current.style.display = 'block';
+      headerPaddingRef.current.style.height = '0';
+      headerPaddingRef.current.style.visibility = 'hidden';
+    }
+    
     props.editor.on("update", handleUpdate);
 
     return () => {
@@ -160,11 +177,12 @@ export const TableOfContents: FC<TableOfContentsProps> = (props) => {
 
       let headerOffset = 0;
       if (headerPaddingRef.current) {
-        headerOffset = parseInt(
-          window
-            .getComputedStyle(headerPaddingRef.current)
-            .getPropertyValue("top"),
-        );
+        const computedStyle = window.getComputedStyle(headerPaddingRef.current);
+        const topValue = computedStyle.getPropertyValue("top");
+        // 如果top值为0或不存在，则表示header可能不可见
+        if (topValue && topValue !== "0px") {
+          headerOffset = parseInt(topValue);
+        }
       }
       const observerOptions: IntersectionObserverInit = {
         rootMargin: `-${headerOffset}px 0px -85% 0px`,
