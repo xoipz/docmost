@@ -23,8 +23,10 @@ export const asideStateAtom = atom({
 
 export const sidebarWidthAtom = atomWithWebStorage<number>('sidebarWidth', 300);
 
-export const defaultOpenTocAtom = atom(false);
+export const defaultOpenTocAtom = atomWithWebStorage<boolean>('defaultOpenToc', false);
 
+// 控制header的显示/隐藏状态，默认为显示
+export const headerVisibleAtom = atomWithWebStorage<boolean>('headerVisible', true);
 
 // 侧边栏宽度变量
 export const sidebarWidthsAtom = atom({

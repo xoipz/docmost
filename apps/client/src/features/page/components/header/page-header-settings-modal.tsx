@@ -1,7 +1,7 @@
-import { Modal, Group, Text, Switch, Stack } from "@mantine/core";
+import { Modal, Group, Text, Switch, Stack, Divider } from "@mantine/core";
 import { useAtom } from "jotai";
 import { pageHeaderButtonsAtom } from "@/features/page/atoms/page-header-atoms.ts";
-import { defaultOpenTocAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
+import { defaultOpenTocAtom, headerVisibleAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
 import { useTranslation } from "react-i18next";
 import {
   IconArrowBackUp,
@@ -10,6 +10,8 @@ import {
   IconList,
   IconArrowsHorizontal,
   IconKeyboard,
+  IconEyeOff,
+  IconLayoutNavbar,
 } from "@tabler/icons-react";
 
 interface PageHeaderSettingsModalProps {
@@ -24,6 +26,7 @@ export default function PageHeaderSettingsModal({
   const { t } = useTranslation();
   const [headerButtons, setHeaderButtons] = useAtom(pageHeaderButtonsAtom);
   const [defaultOpenToc, setDefaultOpenToc] = useAtom(defaultOpenTocAtom);
+  const [headerVisible, setHeaderVisible] = useAtom(headerVisibleAtom);
 
   return (
     <Modal
@@ -33,6 +36,42 @@ export default function PageHeaderSettingsModal({
       size="sm"
     >
       <Stack>
+        {/* 页面布局设置 */}
+        <Text fw={500} size="sm">{t("Layout Settings")}</Text>
+        
+        <Group wrap="nowrap" justify="space-between" w="100%">
+          <Group gap="xs">
+            <IconLayoutNavbar size={16} />
+            <Text>{t("Default show header")}</Text>
+          </Group>
+          <Switch
+            checked={headerVisible}
+            onChange={(e) => {
+              setHeaderVisible(e.currentTarget.checked);
+            }}
+            size="sm"
+          />
+        </Group>
+
+        <Group wrap="nowrap" justify="space-between" w="100%">
+          <Group gap="xs">
+            <IconArrowsHorizontal size={16} />
+            <Text>{t("Full width")}</Text>
+          </Group>
+          <Switch
+            checked={headerButtons.fullWidth}
+            onChange={(e) => {
+              setHeaderButtons({ ...headerButtons, fullWidth: e.currentTarget.checked });
+            }}
+            size="sm"
+          />
+        </Group>
+
+        <Divider my="xs" />
+
+        {/* 工具栏按钮设置 */}
+        <Text fw={500} size="sm">{t("Toolbar Buttons")}</Text>
+
         <Group wrap="nowrap" justify="space-between" w="100%">
           <Group gap="xs">
             <IconArrowBackUp size={16} />
@@ -77,6 +116,39 @@ export default function PageHeaderSettingsModal({
 
         <Group wrap="nowrap" justify="space-between" w="100%">
           <Group gap="xs">
+            <IconList size={16} />
+            <Text>{t("Show outline button")}</Text>
+          </Group>
+          <Switch
+            checked={headerButtons.showToc}
+            onChange={(e) => {
+              setHeaderButtons({ ...headerButtons, showToc: e.currentTarget.checked });
+            }}
+            size="sm"
+          />
+        </Group>
+
+        <Group wrap="nowrap" justify="space-between" w="100%">
+          <Group gap="xs">
+            <IconEyeOff size={16} />
+            <Text>{t("Show hide header button")}</Text>
+          </Group>
+          <Switch
+            checked={headerButtons.showHideHeaderButton}
+            onChange={(e) => {
+              setHeaderButtons({ ...headerButtons, showHideHeaderButton: e.currentTarget.checked });
+            }}
+            size="sm"
+          />
+        </Group>
+
+        <Divider my="xs" />
+
+        {/* 其他功能设置 */}
+        <Text fw={500} size="sm">{t("Other Features")}</Text>
+
+        <Group wrap="nowrap" justify="space-between" w="100%">
+          <Group gap="xs">
             <IconKeyboard size={16} />
             <Text>{t("Show quick input bar")}</Text>
           </Group>
@@ -92,40 +164,12 @@ export default function PageHeaderSettingsModal({
         <Group wrap="nowrap" justify="space-between" w="100%">
           <Group gap="xs">
             <IconList size={16} />
-            <Text>{t("Show outline button")}</Text>
-          </Group>
-          <Switch
-            checked={headerButtons.showToc}
-            onChange={(e) => {
-              setHeaderButtons({ ...headerButtons, showToc: e.currentTarget.checked });
-            }}
-            size="sm"
-          />
-        </Group>
-
-        <Group wrap="nowrap" justify="space-between" w="100%">
-          <Group gap="xs">
-            <IconList size={16} />
             <Text>{t("Default open outline")}</Text>
           </Group>
           <Switch
             checked={defaultOpenToc}
             onChange={(e) => {
               setDefaultOpenToc(e.currentTarget.checked);
-            }}
-            size="sm"
-          />
-        </Group>
-
-        <Group wrap="nowrap" justify="space-between" w="100%">
-          <Group gap="xs">
-            <IconArrowsHorizontal size={16} />
-            <Text>{t("Full width")}</Text>
-          </Group>
-          <Switch
-            checked={headerButtons.fullWidth}
-            onChange={(e) => {
-              setHeaderButtons({ ...headerButtons, fullWidth: e.currentTarget.checked });
             }}
             size="sm"
           />

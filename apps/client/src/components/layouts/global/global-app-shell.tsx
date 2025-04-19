@@ -6,6 +6,7 @@ import { useAtom } from "jotai";
 import {
   asideStateAtom,
   desktopSidebarAtom,
+  headerVisibleAtom,
   mobileSidebarAtom,
   sidebarWidthAtom,
 } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
@@ -21,12 +22,27 @@ export default function GlobalAppShell({
   children: React.ReactNode;
 }) {
   useTrialEndAction();
-  const [mobileOpened] = useAtom(mobileSidebarAtom);
+  const [mobileOpened, setMobileOpened] = useAtom(mobileSidebarAtom);
   const [desktopOpened] = useAtom(desktopSidebarAtom);
-  const [{ isAsideOpen }] = useAtom(asideStateAtom);
+  const [{ isAsideOpen }, setAsideState] = useAtom(asideStateAtom);
   const [sidebarWidth, setSidebarWidth] = useAtom(sidebarWidthAtom);
+  const [headerVisible] = useAtom(headerVisibleAtom);
   const [isResizing, setIsResizing] = useState(false);
-  const sidebarRef = useRef(null);
+  const sidebarRef = useRef<HTMLElement | null>(null);
+
+  // 处理侧边栏点击外部关闭
+  const handleClickOutsideSidebar = () => {
+    if (mobileOpened && window.innerWidth < 768) {
+      setMobileOpened(false);
+    }
+  };
+
+  // 处理右侧栏点击外部关闭
+  const handleClickOutsideAside = () => {
+    if (isAsideOpen && window.innerWidth < 768) {
+      setAsideState(prev => ({ ...prev, isAsideOpen: false }));
+    }
+  };
 
   const startResizing = React.useCallback((mouseDownEvent) => {
     mouseDownEvent.preventDefault();
@@ -42,7 +58,7 @@ export default function GlobalAppShell({
       if (isResizing) {
         const newWidth =
           mouseMoveEvent.clientX -
-          sidebarRef.current.getBoundingClientRect().left;
+          sidebarRef.current?.getBoundingClientRect().left;
         if (newWidth < 220) {
           setSidebarWidth(220);
           return;
@@ -67,6 +83,36 @@ export default function GlobalAppShell({
     };
   }, [resize, stopResizing]);
 
+  // 为移动设备添加点击外部关闭事件处理
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      
+      // 处理侧边栏
+      if (mobileOpened && window.innerWidth < 768) {
+        const navbarElement = document.querySelector(`.${classes.navbar}`);
+        if (navbarElement && !navbarElement.contains(event.target as Node) && 
+            !target.closest('.burger-button')) { // 确保不是点击的汉堡按钮
+          setMobileOpened(false);
+        }
+      }
+      
+      // 处理右侧栏
+      if (isAsideOpen && window.innerWidth < 768) {
+        const asideElement = document.querySelector(`.${classes.aside}`);
+        if (asideElement && !asideElement.contains(event.target as Node) &&
+            !target.closest('.aside-toggle-button')) { // 确保不是点击的侧边栏切换按钮
+          setAsideState(prev => ({ ...prev, isAsideOpen: false }));
+        }
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [mobileOpened, isAsideOpen, setMobileOpened, setAsideState]);
+
   const location = useLocation();
   const isSettingsRoute = location.pathname.startsWith("/settings");
   const isSpaceRoute = location.pathname.startsWith("/s/");
@@ -75,7 +121,7 @@ export default function GlobalAppShell({
 
   return (
     <AppShell
-      header={{ height: 45 }}
+      header={headerVisible ? { height: 45 } : undefined}
       navbar={
         !isHomeRoute && {
           width: isSpaceRoute ? sidebarWidth : 300,
@@ -95,9 +141,11 @@ export default function GlobalAppShell({
       }
       padding="md"
     >
-      <AppShell.Header  className={classes.header}>
-        <AppHeader />
-      </AppShell.Header>
+      {headerVisible && (
+        <AppShell.Header className={classes.header}>
+          <AppHeader />
+        </AppShell.Header>
+      )}
       {!isHomeRoute && (
         <AppShell.Navbar
           className={classes.navbar}
@@ -118,7 +166,11 @@ export default function GlobalAppShell({
       </AppShell.Main>
 
       {isPageRoute && (
-        <AppShell.Aside className={classes.aside} p="md" withBorder={false}>
+        <AppShell.Aside 
+          className={classes.aside} 
+          p="md" 
+          withBorder={false}
+        >
           <Aside />
         </AppShell.Aside>
       )}

@@ -2,7 +2,7 @@ import { Badge, Group, Text, Tooltip } from "@mantine/core";
 import classes from "./app-header.module.css";
 import React from "react";
 import TopMenu from "@/components/layouts/global/top-menu.tsx";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import APP_ROUTE from "@/lib/app-route.ts";
 import { useAtom } from "jotai";
 import {
@@ -14,6 +14,11 @@ import SidebarToggle from "@/components/ui/sidebar-toggle-button.tsx";
 import { useTranslation } from "react-i18next";
 import useTrial from "@/ee/hooks/use-trial.tsx";
 import { isCloud } from "@/lib/config.ts";
+import { useGetSpaceBySlugQuery } from "@/features/space/queries/space-query.ts";
+import { currentUserAtom } from "@/features/user/atoms/current-user-atom";
+import { getHostnameUrl } from "@/ee/utils.ts";
+import { useGetSpacesQuery } from "@/features/space/queries/space-query.ts";
+import { getSpaceUrl } from "@/lib/config.ts";
 
 const links = [{ link: APP_ROUTE.HOME, label: "Home" }];
 
@@ -25,14 +30,20 @@ export function AppHeader() {
   const [desktopOpened] = useAtom(desktopSidebarAtom);
   const toggleDesktop = useToggleSidebar(desktopSidebarAtom);
   const { isTrial, trialDaysLeft } = useTrial();
+  const location = useLocation();
+  const { spaceSlug } = useParams();
+  const { data: space } = useGetSpaceBySlugQuery(spaceSlug);
+  const { data: spaces, isLoading } = useGetSpacesQuery({ page: 1 });
+  const [currentUser] = useAtom(currentUserAtom);
+  const currentWorkspace = currentUser?.workspace;
 
   const isHomeRoute = location.pathname.startsWith("/home");
 
-  const items = links.map((link) => (
-    <Link key={link.label} to={link.link} className={classes.link}>
-      {t(link.label)}
+  const homeItem = (
+    <Link key="home" to={APP_ROUTE.HOME} className={classes.link}>
+      {t("Home")}
     </Link>
-  ));
+  );
 
   // TAG:Header
   return (
@@ -74,10 +85,25 @@ export function AppHeader() {
           >
             Docmost
           </Text> */}
-
+          
           <Group className={classes.links}>
-            {items}
+            {homeItem}
+            
+            {spaces && spaces.items && spaces.items.length > 0 && spaces.items.map((workspaceSpace) => (
+              <Link 
+                key={workspaceSpace.id} 
+                to={getSpaceUrl(workspaceSpace.slug)} 
+                className={classes.link}
+                style={{
+                  fontWeight: spaceSlug === workspaceSpace.slug ? 600 : 400,
+                }}
+              >
+                {workspaceSpace.name}
+              </Link>
+            ))}
           </Group>
+          
+          
         </Group>
 
         <Group px={"xl"} wrap="nowrap">

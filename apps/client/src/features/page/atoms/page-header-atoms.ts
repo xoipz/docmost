@@ -8,6 +8,7 @@ const defaultSettings = {
   showToc: true,
   fullWidth: false,
   showQuickInputBar: false,
+  showHideHeaderButton: true,
 };
 
 export const pageHeaderButtonsAtom = atomWithStorage(

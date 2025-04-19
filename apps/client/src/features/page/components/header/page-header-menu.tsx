@@ -15,6 +15,7 @@ import {
   IconArrowBackUp,
   IconArrowForwardUp,
   IconSettings,
+  IconEyeOff,
 } from "@tabler/icons-react";
 import React, { useEffect } from "react";
 import useToggleAside from "@/hooks/use-toggle-aside.tsx";
@@ -39,7 +40,7 @@ import {
 import { formattedDate, timeAgo } from "@/lib/time.ts";
 import MovePageModal from "@/features/page/components/move-page-modal.tsx";
 import { useTimeAgo } from "@/hooks/use-time-ago.tsx";
-import { defaultOpenTocAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
+import { defaultOpenTocAtom, headerVisibleAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
 import { pageHeaderButtonsAtom } from "@/features/page/atoms/page-header-atoms.ts";
 import PageHeaderSettingsModal from "./page-header-settings-modal.tsx";
 
@@ -52,6 +53,7 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
   const [yjsConnectionStatus] = useAtom(yjsConnectionStatusAtom);
   const [pageEditor] = useAtom(pageEditorAtom);
   const [headerButtons, setHeaderButtons] = useAtom(pageHeaderButtonsAtom);
+  const [headerVisible, setHeaderVisible] = useAtom(headerVisibleAtom);
 
   const handleUndo = () => {
     pageEditor?.commands.undo();
@@ -59,6 +61,10 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
 
   const handleRedo = () => {
     pageEditor?.commands.redo();
+  };
+
+  const toggleHeaderVisibility = () => {
+    setHeaderVisible(!headerVisible);
   };
 
   // TAG:右上角快捷方式小方块
@@ -122,6 +128,18 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
             onClick={() => toggleAside("toc")}
           >
             <IconList size={20} stroke={2} />
+          </ActionIcon>
+        </Tooltip>
+      )}
+
+      {headerButtons.showHideHeaderButton && (
+        <Tooltip label={t("Toggle header visibility")} openDelay={250} withArrow>
+          <ActionIcon
+            variant="default"
+            style={{ border: "none" }}
+            onClick={toggleHeaderVisibility}
+          >
+            <IconEyeOff size={20} stroke={2} />
           </ActionIcon>
         </Tooltip>
       )}
