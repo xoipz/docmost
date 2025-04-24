@@ -60,10 +60,26 @@
   font-size: 10px;
 }
 
-[data-placeholder="Untitled"]::after,[data-placeholder="无标题"]::after {
+[data-placeholder="Untitled"]::after,
+[data-placeholder="无标题"]::after {
   content: "Untitled";
   color: #888;
   position: absolute;
   top: 0;
   cursor: text;
+}
+
+/* 代码块 */
+.ProseMirror [contenteditable="false"] {
+  margin: -4px;
+  padding: 4px 2px;
+  border-radius: 4px 4px 0 0;
+}
+
+[data-mantine-color-scheme="dark"] .ProseMirror [contenteditable="false"] {
+  background: #1a1a1a;
+}
+
+[data-mantine-color-scheme="light"] .ProseMirror [contenteditable="false"] {
+  background: #dee2e6;
 }

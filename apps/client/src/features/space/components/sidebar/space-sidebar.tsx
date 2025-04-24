@@ -16,6 +16,8 @@ import {
   IconPlus,
   IconSearch,
   IconSettings,
+  IconChevronUp,
+  IconChevronDown,
 } from "@tabler/icons-react";
 
 import classes from "./space-sidebar.module.css";
@@ -52,6 +54,10 @@ export function SpaceSidebar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const targetRef = useRef<HTMLDivElement>(null);
+  const [menuCollapsed, setMenuCollapsed] = useState(() => {
+    const saved = localStorage.getItem('docmost-menu-collapsed');
+    return saved ? JSON.parse(saved) : false;
+  });
 
   const spaceRules = space?.membership?.permissions;
   const spaceAbility = useSpaceAbility(spaceRules);
@@ -72,6 +78,13 @@ export function SpaceSidebar() {
       document.removeEventListener('click', handleGlobalClick);
     };
   }, [isMenuOpen]);
+
+  // 保存折叠状态到 localStorage
+  const toggleMenuCollapse = () => {
+    const newState = !menuCollapsed;
+    setMenuCollapsed(newState);
+    localStorage.setItem('docmost-menu-collapsed', JSON.stringify(newState));
+  };
 
   if (!space) {
     return <></>;
@@ -128,68 +141,86 @@ export function SpaceSidebar() {
         </div>
 
         <div className={classes.section}>
-          <div className={classes.menuItems}>
-            <UnstyledButton
-              component={Link}
-              to={getSpaceUrl(spaceSlug)}
-              className={clsx(
-                classes.menu,
-                location.pathname.toLowerCase() === getSpaceUrl(spaceSlug)
-                  ? classes.activeButton
-                  : "",
-              )}
-            >
-              <div className={classes.menuItemInner}>
-                <IconHome
-                  size={18}
-                  className={classes.menuItemIcon}
-                  stroke={2}
-                />
-                <span>{t("Overview")}</span>
-              </div>
-            </UnstyledButton>
+          <Group className={classes.pagesHeader} justify="space-between">
+            <Text size="xs" fw={500} c="dimmed">
+              {t("导航")}
+            </Text>
+            <Tooltip label={menuCollapsed ? t("展开菜单") : t("收起菜单")} withArrow position="right">
+              <ActionIcon
+                variant="default"
+                size={18}
+                onClick={toggleMenuCollapse}
+                aria-label={menuCollapsed ? t("展开菜单") : t("收起菜单")}
+              >
+                {menuCollapsed ? <IconChevronDown size={16} /> : <IconChevronUp size={16} />}
+              </ActionIcon>
+            </Tooltip>
+          </Group>
 
-            <UnstyledButton className={classes.menu} onClick={spotlight.open}>
-              <div className={classes.menuItemInner}>
-                <IconSearch
-                  size={18}
-                  className={classes.menuItemIcon}
-                  stroke={2}
-                />
-                <span>{t("Search")}</span>
-              </div>
-            </UnstyledButton>
-
-            <UnstyledButton className={classes.menu} onClick={openSettings}>
-              <div className={classes.menuItemInner}>
-                <IconSettings
-                  size={18}
-                  className={classes.menuItemIcon}
-                  stroke={2}
-                />
-                <span>{t("Space settings")}</span>
-              </div>
-            </UnstyledButton>
-
-            {spaceAbility.can(
-              SpaceCaslAction.Manage,
-              SpaceCaslSubject.Page,
-            ) && (
+          {!menuCollapsed && (
+            <div className={classes.menuItems}>
               <UnstyledButton
-                className={classes.menu}
-                onClick={handleCreatePage}
+                component={Link}
+                to={getSpaceUrl(spaceSlug)}
+                className={clsx(
+                  classes.menu,
+                  location.pathname.toLowerCase() === getSpaceUrl(spaceSlug)
+                    ? classes.activeButton
+                    : "",
+                )}
               >
                 <div className={classes.menuItemInner}>
-                  <IconPlus
+                  <IconHome
                     size={18}
                     className={classes.menuItemIcon}
                     stroke={2}
                   />
-                  <span>{t("New page")}</span>
+                  <span>{t("Overview")}</span>
                 </div>
               </UnstyledButton>
-            )}
-          </div>
+
+              <UnstyledButton className={classes.menu} onClick={spotlight.open}>
+                <div className={classes.menuItemInner}>
+                  <IconSearch
+                    size={18}
+                    className={classes.menuItemIcon}
+                    stroke={2}
+                  />
+                  <span>{t("Search")}</span>
+                </div>
+              </UnstyledButton>
+
+              <UnstyledButton className={classes.menu} onClick={openSettings}>
+                <div className={classes.menuItemInner}>
+                  <IconSettings
+                    size={18}
+                    className={classes.menuItemIcon}
+                    stroke={2}
+                  />
+                  <span>{t("Space settings")}</span>
+                </div>
+              </UnstyledButton>
+
+              {spaceAbility.can(
+                SpaceCaslAction.Manage,
+                SpaceCaslSubject.Page,
+              ) && (
+                <UnstyledButton
+                  className={classes.menu}
+                  onClick={handleCreatePage}
+                >
+                  <div className={classes.menuItemInner}>
+                    <IconPlus
+                      size={18}
+                      className={classes.menuItemIcon}
+                      stroke={2}
+                    />
+                    <span>{t("New page")}</span>
+                  </div>
+                </UnstyledButton>
+              )}
+            </div>
+          )}
         </div>
 
         <div className={clsx(classes.section, classes.sectionPages)}  style={{borderBottom: 'none'}}>
