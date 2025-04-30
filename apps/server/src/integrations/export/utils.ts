@@ -62,7 +62,7 @@ export function isAttachmentNode(nodeType: string) {
   return attachmentNodeTypes.includes(nodeType);
 }
 
-export function updateAttachmentUrlsToLocalPaths(prosemirrorJson: any) {
+export function updateAttachmentUrlsToLocalPaths(prosemirrorJson: any, exportUrl: string = '') {
   const doc = jsonToNode(prosemirrorJson);
   if (!doc) return null;
 
@@ -71,7 +71,8 @@ export function updateAttachmentUrlsToLocalPaths(prosemirrorJson: any) {
     const prefixes = ['/files', '/api/files'];
     for (const prefix of prefixes) {
       if (url.startsWith(prefix)) {
-        return url.replace(prefix, 'files');
+        // 使用传入的exportUrl
+        return exportUrl + url;
       }
     }
     return url;

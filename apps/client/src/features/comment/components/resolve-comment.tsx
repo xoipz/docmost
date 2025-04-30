@@ -26,8 +26,6 @@ function ResolveComment({ commentId, pageId, resolvedAt }) {
         commentId,
         resolved: !isResolved,
       });
-      //TODO: remove comment mark
-      // Remove comment thread from state on resolve
     } catch (error) {
       console.error("Failed to toggle resolved state:", error);
     }

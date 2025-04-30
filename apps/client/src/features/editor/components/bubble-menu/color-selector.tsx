@@ -62,7 +62,6 @@ const TEXT_COLORS: BubbleColorMenuItem[] = [
   },
 ];
 
-// TODO: handle dark mode
 const HIGHLIGHT_COLORS: BubbleColorMenuItem[] = [
   {
     name: "Default",

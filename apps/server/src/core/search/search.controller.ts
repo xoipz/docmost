@@ -44,7 +44,6 @@ export class SearchController {
       return this.searchService.searchPage(searchDto.query, searchDto);
     }
 
-    // TODO: search all spaces user is a member of if no spaceId provided
     throw new NotImplementedException();
   }
 

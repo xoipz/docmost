@@ -145,7 +145,6 @@ export class PageController {
     return this.pageService.getRecentPages(user.id, pagination);
   }
 
-  // TODO: scope to workspaces
   @HttpCode(HttpStatus.OK)
   @Post('/history')
   async getPageHistory(

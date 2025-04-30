@@ -104,7 +104,6 @@ export class CommentController {
   @HttpCode(HttpStatus.OK)
   @Post('update')
   update(@Body() updateCommentDto: UpdateCommentDto, @AuthUser() user: User) {
-    //TODO: only comment creators can update their comments
     return this.commentService.update(
       updateCommentDto.commentId,
       updateCommentDto,
@@ -115,7 +114,6 @@ export class CommentController {
   @HttpCode(HttpStatus.OK)
   @Post('delete')
   remove(@Body() input: CommentIdDto, @AuthUser() user: User) {
-    // TODO: only comment creators and admins can delete their comments
     return this.commentService.remove(input.commentId, user);
   }
 }

@@ -55,6 +55,8 @@ export class ExportService {
         getProsemirrorContent(page.content),
         page.workspaceId,
       );
+      const exportUrl = this.environmentService.getExportUrl();
+      prosemirrorJson = updateAttachmentUrlsToLocalPaths(prosemirrorJson, exportUrl);
     } else {
       // mentions is already turned to links during the zip process
       prosemirrorJson = getProsemirrorContent(page.content);
@@ -164,6 +166,7 @@ export class ExportService {
     includeAttachments = true,
   ): Promise<void> {
     const slugIdToPath: Record<string, string> = {};
+    const exportUrl = this.environmentService.getExportUrl();
 
     computeLocalPath(tree, format, null, '', slugIdToPath);
 
@@ -193,7 +196,7 @@ export class ExportService {
 
         if (includeAttachments) {
           await this.zipAttachments(updatedJsonContent, page.spaceId, folder);
-          updatedJsonContent = updateAttachmentUrlsToLocalPaths(updatedJsonContent);
+          updatedJsonContent = updateAttachmentUrlsToLocalPaths(updatedJsonContent, exportUrl);
         }
 
         const pageTitle = getPageTitle(page.title);

@@ -189,4 +189,8 @@ export class EnvironmentService {
       .toLowerCase();
     return disable === 'true';
   }
+
+  getExportUrl(): string {
+    return this.configService.get<string>('EXPORT_URL', '');
+  }
 }

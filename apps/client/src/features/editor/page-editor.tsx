@@ -321,6 +321,7 @@ export default function PageEditor({
     };
   }, [editor]);
 
+  // TAG:page-editor
   return isCollabReady ? (
     <div>
       <div ref={menuContainerRef}>

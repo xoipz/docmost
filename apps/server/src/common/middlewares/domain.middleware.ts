@@ -22,7 +22,6 @@ export class DomainMiddleware implements NestMiddleware {
         return next();
       }
 
-      // TODO: unify
       (req as any).workspaceId = workspace.id;
       (req as any).workspace = workspace;
     } else if (this.environmentService.isCloud()) {
