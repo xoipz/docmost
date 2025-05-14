@@ -9,6 +9,7 @@ const defaultSettings = {
   fullWidth: false,
   showQuickInputBar: false,
   showHideHeaderButton: true,
+  showKeyboardStatus: true,
 };
 
 export const pageHeaderButtonsAtom = atomWithStorage(

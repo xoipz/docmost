@@ -163,6 +163,20 @@ export default function PageHeaderSettingsModal({
 
         <Group wrap="nowrap" justify="space-between" w="100%">
           <Group gap="xs">
+            <IconKeyboard size={16} />
+            <Text>{t("Show keyboard shortcuts status")}</Text>
+          </Group>
+          <Switch
+            checked={headerButtons.showKeyboardStatus}
+            onChange={(e) => {
+              setHeaderButtons({ ...headerButtons, showKeyboardStatus: e.currentTarget.checked });
+            }}
+            size="sm"
+          />
+        </Group>
+
+        <Group wrap="nowrap" justify="space-between" w="100%">
+          <Group gap="xs">
             <IconList size={16} />
             <Text>{t("Default open outline")}</Text>
           </Group>

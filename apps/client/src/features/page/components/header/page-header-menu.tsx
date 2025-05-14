@@ -16,10 +16,12 @@ import {
   IconArrowForwardUp,
   IconSettings,
   IconEyeOff,
+  IconKeyboard,
+  IconKeyboardOff,
 } from "@tabler/icons-react";
 import React, { useEffect } from "react";
 import useToggleAside from "@/hooks/use-toggle-aside.tsx";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { historyAtoms } from "@/features/page-history/atoms/history-atoms.ts";
 import { useClipboard, useDisclosure } from "@mantine/hooks";
 import { useParams } from "react-router-dom";
@@ -36,6 +38,7 @@ import ExportModal from "@/components/common/export-modal";
 import {
   pageEditorAtom,
   yjsConnectionStatusAtom,
+  keyboardShortcutsStatusAtom,
 } from "@/features/editor/atoms/editor-atoms.ts";
 import { formattedDate, timeAgo } from "@/lib/time.ts";
 import MovePageModal from "@/features/page/components/move-page-modal.tsx";
@@ -54,6 +57,7 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
   const [pageEditor] = useAtom(pageEditorAtom);
   const [headerButtons, setHeaderButtons] = useAtom(pageHeaderButtonsAtom);
   const [headerVisible, setHeaderVisible] = useAtom(headerVisibleAtom);
+  const keyboardStatus = useAtomValue(keyboardShortcutsStatusAtom);
 
   const handleUndo = () => {
     pageEditor?.commands.undo();
@@ -78,6 +82,33 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
         >
           <ActionIcon variant="default" c="red" style={{ border: "none" }}>
             <IconWifiOff size={20} stroke={2} />
+          </ActionIcon>
+        </Tooltip>
+      )}
+      
+      {/* 显示快捷键状态指示器 - 根据设置控制显示 */}
+      {headerButtons.showKeyboardStatus && (
+        <Tooltip
+          label={keyboardStatus.enabled ? t("Keyboard shortcuts are working") : t("Keyboard shortcuts may not be working correctly")}
+          openDelay={250}
+          withArrow
+        >
+          <ActionIcon 
+            variant="default" 
+            c={keyboardStatus.enabled ? "green" : "red"} 
+            style={{ border: "none" }}
+            onClick={() => {
+              if (!keyboardStatus.enabled) {
+                // 尝试重新激活快捷键
+                window.location.reload();
+              }
+            }}
+          >
+            {keyboardStatus.enabled ? (
+              <IconKeyboard size={20} stroke={2} />
+            ) : (
+              <IconKeyboardOff size={20} stroke={2} />
+            )}
           </ActionIcon>
         </Tooltip>
       )}

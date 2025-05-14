@@ -24,6 +24,7 @@ import { currentUserAtom } from "@/features/user/atoms/current-user-atom";
 import {
   pageEditorAtom,
   yjsConnectionStatusAtom,
+  keyboardShortcutsStatusAtom,
 } from "@/features/editor/atoms/editor-atoms";
 import { asideStateAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom";
 import {
@@ -89,6 +90,7 @@ export default function PageEditor({
   const { pageSlug } = useParams();
   const slugId = extractPageSlugId(pageSlug);
   const headerButtons = useAtomValue(pageHeaderButtonsAtom);
+  const [keyboardShortcutsStatus, setKeyboardShortcutsStatus] = useAtom(keyboardShortcutsStatusAtom);
 
   const localProvider = useMemo(() => {
     const provider = new IndexeddbPersistence(documentName, ydoc);
@@ -272,8 +274,19 @@ export default function PageEditor({
     if (!editor) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      // 更新快捷键活动状态
+      setKeyboardShortcutsStatus(prev => ({
+        ...prev,
+        lastActivity: Date.now()
+      }));
+
       if ((event.ctrlKey || event.metaKey) && (event.key === 's' || event.key === 't')) {
         event.preventDefault();
+        // 检测快捷键是否生效
+        setKeyboardShortcutsStatus(prev => ({
+          ...prev,
+          enabled: true
+        }));
         return true;
       }
 
@@ -288,6 +301,11 @@ export default function PageEditor({
             const tr = state.tr;
             tr.delete($from.before(), $from.after());
             editor.view.dispatch(tr);
+            // 检测快捷键是否生效
+            setKeyboardShortcutsStatus(prev => ({
+              ...prev,
+              enabled: true
+            }));
             return true;
           }
         }
@@ -315,11 +333,43 @@ export default function PageEditor({
       }
     };
 
+    // 设置一个定期检查的定时器，如果长时间没有快捷键活动响应，标记为禁用
+    const shortcutCheckInterval = setInterval(() => {
+      const { enabled, lastActivity } = keyboardShortcutsStatus;
+      const now = Date.now();
+      // 如果超过3秒没有快捷键活动，且当前状态为启用，则可能是失效了
+      if (enabled && now - lastActivity > 3000) {
+        // 尝试测试快捷键是否响应
+        try {
+          const testEvent = new KeyboardEvent('keydown', { 
+            key: 's', 
+            ctrlKey: true,
+            bubbles: true
+          });
+          const handled = handleKeyDown(testEvent);
+          // 如果没有正确处理，标记为禁用
+          if (!handled) {
+            setKeyboardShortcutsStatus(prev => ({
+              ...prev,
+              enabled: false
+            }));
+          }
+        } catch (e) {
+          console.error('快捷键测试失败', e);
+          setKeyboardShortcutsStatus(prev => ({
+            ...prev,
+            enabled: false
+          }));
+        }
+      }
+    }, 5000);
+
     editor.view.dom.addEventListener('keydown', handleKeyDown);
     return () => {
       editor.view.dom.removeEventListener('keydown', handleKeyDown);
+      clearInterval(shortcutCheckInterval);
     };
-  }, [editor]);
+  }, [editor, keyboardShortcutsStatus]);
 
   // TAG:page-editor
   return isCollabReady ? (
