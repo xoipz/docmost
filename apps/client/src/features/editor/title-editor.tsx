@@ -119,11 +119,12 @@ export function TitleEditor({
     }
   }, [pageId, title, titleEditor]);
 
-  useEffect(() => {
-    setTimeout(() => {
-      titleEditor?.commands.focus("end");
-    }, 500);
-  }, [titleEditor]);
+  // TODO: 防止手机端聚焦
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     titleEditor?.commands.focus("end");
+  //   }, 500);
+  // }, [titleEditor]);
 
   useEffect(() => {
     return () => {
