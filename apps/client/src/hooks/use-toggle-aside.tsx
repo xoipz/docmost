@@ -1,14 +1,27 @@
-import { asideStateAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom";
+import { asideStateAtom, defaultOpenTocAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
 import { useAtom } from "jotai";
 
 const useToggleAside = () => {
   const [asideState, setAsideState] = useAtom(asideStateAtom);
+  const [, setDefaultOpenToc] = useAtom(defaultOpenTocAtom);
 
   const toggleAside = (tab: string) => {
+    let newIsAsideOpen;
     if (asideState.tab === tab) {
-      setAsideState({ tab, isAsideOpen: !asideState.isAsideOpen });
+      newIsAsideOpen = !asideState.isAsideOpen;
+      setAsideState({ tab, isAsideOpen: newIsAsideOpen });
     } else {
-      setAsideState({ tab, isAsideOpen: true });
+      newIsAsideOpen = true;
+      setAsideState({ tab, isAsideOpen: newIsAsideOpen });
+    }
+
+    if (tab === "toc") {
+      setDefaultOpenToc(newIsAsideOpen);
+    } else {
+      // If another tab is opened, toc is no longer "default open"
+      if (newIsAsideOpen) { 
+        setDefaultOpenToc(false);
+      }
     }
   };
 

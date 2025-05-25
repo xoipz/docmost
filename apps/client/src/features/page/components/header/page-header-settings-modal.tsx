@@ -174,20 +174,6 @@ export default function PageHeaderSettingsModal({
             size="sm"
           />
         </Group>
-
-        <Group wrap="nowrap" justify="space-between" w="100%">
-          <Group gap="xs">
-            <IconList size={16} />
-            <Text>{t("Default open outline")}</Text>
-          </Group>
-          <Switch
-            checked={defaultOpenToc}
-            onChange={(e) => {
-              setDefaultOpenToc(e.currentTarget.checked);
-            }}
-            size="sm"
-          />
-        </Group>
       </Stack>
     </Modal>
   );
