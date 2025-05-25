@@ -91,12 +91,22 @@ export default function PageEditor({
   const slugId = extractPageSlugId(pageSlug);
   const headerButtons = useAtomValue(pageHeaderButtonsAtom);
   const [keyboardShortcutsStatus, setKeyboardShortcutsStatus] = useAtom(keyboardShortcutsStatusAtom);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const localProvider = useMemo(() => {
     const provider = new IndexeddbPersistence(documentName, ydoc);
 
     provider.on("synced", () => {
-      setLocalSynced(true);
+      if (isMountedRef.current) {
+        setLocalSynced(true);
+      }
     });
 
     return provider;
@@ -120,25 +130,34 @@ export default function PageEditor({
       },
       onStatus: (status) => {
         if (status.status === "connected") {
-          setYjsConnectionStatus(status.status);
+          if (isMountedRef.current) {
+            setYjsConnectionStatus(status.status);
+          }
         }
       },
     });
 
     provider.on("synced", () => {
-      setRemoteSynced(true);
+      if (isMountedRef.current) {
+        setRemoteSynced(true);
+      }
     });
 
     provider.on("disconnect", () => {
-      setYjsConnectionStatus(WebSocketStatus.Disconnected);
+      if (isMountedRef.current) {
+        setYjsConnectionStatus(WebSocketStatus.Disconnected);
+      }
     });
 
     return provider;
   }, [ydoc, pageId, collabQuery?.token]);
 
   useLayoutEffect(() => {
-    remoteProvider.connect();
+    const timeoutId = setTimeout(() => {
+      remoteProvider.connect();
+    });
     return () => {
+      clearTimeout(timeoutId);
       setRemoteSynced(false);
       setLocalSynced(false);
       remoteProvider.destroy();
@@ -226,7 +245,9 @@ export default function PageEditor({
   useEffect(() => {
     if (remoteProvider?.status === WebSocketStatus.Connecting) {
       const timeout = setTimeout(() => {
-        setYjsConnectionStatus(WebSocketStatus.Disconnected);
+        if (isMountedRef.current) {
+          setYjsConnectionStatus(WebSocketStatus.Disconnected);
+        }
       }, 5000);
       return () => clearTimeout(timeout);
     }
@@ -250,7 +271,9 @@ export default function PageEditor({
       resetIdle();
       remoteProvider.connect();
       setTimeout(() => {
-        setIsCollabReady(true);
+        if (isMountedRef.current) {
+          setIsCollabReady(true);
+        }
       }, 600);
     }
   }, [isIdle, documentState, remoteProvider]);
@@ -264,7 +287,9 @@ export default function PageEditor({
         isSynced &&
         remoteProvider?.status === WebSocketStatus.Connected
       ) {
-        setIsCollabReady(true);
+        if (isMountedRef.current) {
+          setIsCollabReady(true);
+        }
       }
     }, 500);
     return () => clearTimeout(collabReadyTimeout);
