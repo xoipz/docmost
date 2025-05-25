@@ -19,5 +19,16 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 200px;
+
+    @media (max-width: 48em) {
+        max-width: 150px;
+    }
+}
+
+.mobileFilename {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    overflow: hidden;
 }
 

@@ -9,6 +9,7 @@ import {
   Breadcrumbs,
   ActionIcon,
   Text,
+  Box,
 } from "@mantine/core";
 import { IconDots } from "@tabler/icons-react";
 import { Link, useParams } from "react-router-dom";
@@ -17,6 +18,7 @@ import { SpaceTreeNode } from "@/features/page/tree/types.ts";
 import { buildPageUrl } from "@/features/page/page.utils.ts";
 import { usePageQuery } from "@/features/page/queries/page-query.ts";
 import { extractPageSlugId } from "@/lib";
+import { useMediaQuery } from "@mantine/hooks";
 
 function getTitle(name: string, icon: string) {
   if (icon) {
@@ -34,6 +36,7 @@ export default function Breadcrumb() {
   const { data: currentPage } = usePageQuery({
     pageId: extractPageSlugId(pageSlug),
   });
+  const isMobile = useMediaQuery('(max-width: 48em)');
 
   useEffect(() => {
     if (treeData?.length > 0 && currentPage) {
@@ -71,6 +74,17 @@ export default function Breadcrumb() {
       {getTitle(node.name, node.icon)}
     </Anchor>
   );
+
+  if (isMobile && breadcrumbNodes && breadcrumbNodes.length > 0) {
+    const lastNode = breadcrumbNodes[breadcrumbNodes.length - 1];
+    return (
+      <Box className={classes.mobileFilename}>
+        <Text fz="sm" className={classes.truncatedText}>
+          {getTitle(lastNode.name, lastNode.icon)}
+        </Text>
+      </Box>
+    );
+  }
 
   const getBreadcrumbItems = () => {
     if (!breadcrumbNodes) return [];
