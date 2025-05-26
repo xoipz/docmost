@@ -559,7 +559,6 @@ function NodeMenu({ node, treeApi, opened, onClose, position, onMenuButtonClick,
           e.stopPropagation();
           const pageUrl = buildPageUrl(spaceSlug, node.data.slugId, node.data.name);
           window.open(pageUrl, '_blank');
-          closeMenu();
           onClose();
         }}
       >
@@ -580,7 +579,6 @@ function NodeMenu({ node, treeApi, opened, onClose, position, onMenuButtonClick,
           } else {
             treeApi?.create({ type: "internal", parentId: node.id });
           }
-          closeMenu();
           onClose();
         }}
       >
@@ -593,7 +591,6 @@ function NodeMenu({ node, treeApi, opened, onClose, position, onMenuButtonClick,
           e.preventDefault();
           e.stopPropagation();
           handleCopyLink();
-          closeMenu();
           onClose();
         }}
       >
@@ -606,7 +603,6 @@ function NodeMenu({ node, treeApi, opened, onClose, position, onMenuButtonClick,
           e.preventDefault();
           e.stopPropagation();
           openExportModal();
-          closeMenu();
           onClose();
         }}
       >
@@ -621,7 +617,6 @@ function NodeMenu({ node, treeApi, opened, onClose, position, onMenuButtonClick,
               e.preventDefault();
               e.stopPropagation();
               openMovePageModal();
-              closeMenu();
               onClose();
             }}
           >
@@ -634,7 +629,6 @@ function NodeMenu({ node, treeApi, opened, onClose, position, onMenuButtonClick,
               e.preventDefault();
               e.stopPropagation();
               openCopyPageModal();
-              closeMenu();
               onClose();
             }}
           >
@@ -649,7 +643,6 @@ function NodeMenu({ node, treeApi, opened, onClose, position, onMenuButtonClick,
               e.preventDefault();
               e.stopPropagation();
               openDeleteModal({ onConfirm: () => treeApi?.delete(node) });
-              closeMenu();
               onClose();
             }}
           >
@@ -665,10 +658,9 @@ function NodeMenu({ node, treeApi, opened, onClose, position, onMenuButtonClick,
       <Menu 
         shadow="md" 
         width={200}
-        opened={menuOpened}
-        onChange={(opened) => {
-          if (!opened) {
-            closeMenu();
+        opened={opened}
+        onChange={(isOpened) => {
+          if (!isOpened) {
             onClose();
           }
         }}
@@ -698,7 +690,6 @@ function NodeMenu({ node, treeApi, opened, onClose, position, onMenuButtonClick,
               e.preventDefault();
               e.stopPropagation();
               onMenuButtonClick(e);
-              openMenu();
             }}
           >
             <IconDotsVertical
