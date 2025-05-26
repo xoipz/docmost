@@ -5,6 +5,8 @@ export const pageEditorAtom = atom<Editor | null>(null);
 
 export const titleEditorAtom = atom<Editor | null>(null);
 
+export const readOnlyEditorAtom = atom<Editor | null>(null);
+
 export const yjsConnectionStatusAtom = atom<string>("");
 
 // 用于追踪键盘快捷键是否正常工作的状态

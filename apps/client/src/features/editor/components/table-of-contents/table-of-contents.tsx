@@ -10,6 +10,7 @@ import { IconChevronDown, IconChevronRight, IconChevronsDown, IconChevronsUp } f
 
 type TableOfContentsProps = {
   editor: ReturnType<typeof useEditor>;
+  isShare?: boolean;
 };
 
 export type HeadingLink = {
@@ -161,9 +162,12 @@ export const TableOfContents: FC<TableOfContentsProps> = (props) => {
     };
   }, [props.editor]);
 
-  useEffect(() => {
-    handleUpdate();
-  }, []);
+  useEffect(
+    () => {
+      handleUpdate();
+    },
+    props.isShare ? [props.editor] : [],
+  );
 
   useEffect(() => {
     try {
@@ -270,15 +274,28 @@ export const TableOfContents: FC<TableOfContentsProps> = (props) => {
   if (!links.length) {
     return (
       <>
-        <Text size="sm">
-          {t("Add headings (H1, H2, H3) to generate a table of contents.")}
-        </Text>
+        {!props.isShare && (
+          <Text size="sm">
+            {t("Add headings (H1, H2, H3) to generate a table of contents.")}
+          </Text>
+        )}
+
+        {props.isShare && (
+          <Text size="sm" c="dimmed">
+            {t("No table of contents.")}
+          </Text>
+        )}
       </>
     );
   }
 
   return (
     <>
+      {props.isShare && (
+        <Text mb="md" fw={500}>
+          {t("Table of contents")}
+        </Text>
+      )}
       <Group gap={4}>
         <Button
           variant="transparent"
@@ -315,7 +332,7 @@ export const TableOfContents: FC<TableOfContentsProps> = (props) => {
           {t("收起全部")}
         </Button>
       </Group>
-      <div>
+      <div className={props.isShare ? classes.leftBorder : ""}>
         {links
           .filter(item => item.parentId === null)
           .map((item) => renderHeading(item, links.indexOf(item)))}

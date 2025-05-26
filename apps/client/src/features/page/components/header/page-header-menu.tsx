@@ -19,7 +19,7 @@ import {
   IconKeyboard,
   IconKeyboardOff,
 } from "@tabler/icons-react";
-import React, { useEffect } from "react";
+import React from "react";
 import useToggleAside from "@/hooks/use-toggle-aside.tsx";
 import { useAtom, useAtomValue } from "jotai";
 import { historyAtoms } from "@/features/page-history/atoms/history-atoms.ts";
@@ -46,6 +46,7 @@ import { useTimeAgo } from "@/hooks/use-time-ago.tsx";
 import { defaultOpenTocAtom, headerVisibleAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
 import { pageHeaderButtonsAtom } from "@/features/page/atoms/page-header-atoms.ts";
 import PageHeaderSettingsModal from "./page-header-settings-modal.tsx";
+import ShareModal from "@/features/share/components/share-modal.tsx";
 
 interface PageHeaderMenuProps {
   readOnly?: boolean;
@@ -85,6 +86,8 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
           </ActionIcon>
         </Tooltip>
       )}
+      
+      <ShareModal readOnly={readOnly} />
       
       {/* 显示快捷键状态指示器 - 根据设置控制显示 */}
       {headerButtons.showKeyboardStatus && (
@@ -202,7 +205,7 @@ function PageActionMenu({ readOnly }: PageActionMenuProps) {
   const [settingsOpened, { open: openSettings, close: closeSettings }] =
     useDisclosure(false);
   const [pageEditor] = useAtom(pageEditorAtom);
-  const pageUpdatedAt = useTimeAgo(page.updatedAt);
+  const pageUpdatedAt = useTimeAgo(page?.updatedAt);
   const [defaultOpenToc, setDefaultOpenToc] = useAtom(defaultOpenTocAtom);
   const [headerButtons] = useAtom(pageHeaderButtonsAtom);
 

@@ -7,7 +7,6 @@ import {
   UnstyledButton,
   Popover,
 } from "@mantine/core";
-import { spotlight } from "@mantine/spotlight";
 import {
   IconArrowDown,
   IconDots,
@@ -19,7 +18,6 @@ import {
   IconChevronUp,
   IconChevronDown,
 } from "@tabler/icons-react";
-
 import classes from "./space-sidebar.module.css";
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useAtom } from "jotai";
@@ -41,6 +39,9 @@ import PageImportModal from "@/features/page/components/page-import-modal.tsx";
 import { useTranslation } from "react-i18next";
 import { SwitchSpace } from "./switch-space";
 import ExportModal from "@/components/common/export-modal";
+import { mobileSidebarAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
+import { useToggleSidebar } from "@/components/layouts/global/hooks/hooks/use-toggle-sidebar.ts";
+import { searchSpotlight } from "@/features/search/constants";
 
 export function SpaceSidebar() {
   const { t } = useTranslation();
@@ -48,6 +49,9 @@ export function SpaceSidebar() {
   const location = useLocation();
   const [opened, { open: openSettings, close: closeSettings }] =
     useDisclosure(false);
+  const [mobileSidebarOpened] = useAtom(mobileSidebarAtom);
+  const toggleMobileSidebar = useToggleSidebar(mobileSidebarAtom);
+
   const { spaceSlug } = useParams();
   const { data: space, isLoading, isError } = useGetSpaceBySlugQuery(spaceSlug);
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
@@ -93,6 +97,10 @@ export function SpaceSidebar() {
   function handleCreatePage() {
     tree?.create({ parentId: null, type: "internal", index: 0 });
     setIsMenuOpen(false);
+    
+    if (mobileSidebarOpened) {
+      toggleMobileSidebar();
+    }
   }
 
   const handleContextMenu = (e: React.MouseEvent) => {
@@ -179,7 +187,7 @@ export function SpaceSidebar() {
                 </div>
               </UnstyledButton>
 
-              <UnstyledButton className={classes.menu} onClick={spotlight.open}>
+              <UnstyledButton className={classes.menu} onClick={searchSpotlight.open}>
                 <div className={classes.menuItemInner}>
                   <IconSearch
                     size={18}

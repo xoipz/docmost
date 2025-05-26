@@ -4,6 +4,7 @@ import { Node } from '@tiptap/pm/model';
 import { validate as isValidUUID } from 'uuid';
 import * as path from 'path';
 import { Page } from '@docmost/db/types/entity.types';
+import { isAttachmentNode } from '../../common/helpers/prosemirror/utils';
 
 export type PageExportTree = Record<string, Page[]>;
 
@@ -49,17 +50,6 @@ export function getAttachmentIds(prosemirrorJson: any) {
   });
 
   return attachmentIds;
-}
-
-export function isAttachmentNode(nodeType: string) {
-  const attachmentNodeTypes = [
-    'attachment',
-    'image',
-    'video',
-    'excalidraw',
-    'drawio',
-  ];
-  return attachmentNodeTypes.includes(nodeType);
 }
 
 export function updateAttachmentUrlsToLocalPaths(prosemirrorJson: any, exportUrl: string = '') {
