@@ -131,7 +131,11 @@ export default function PageEditor({
       onStatus: (status) => {
         if (status.status === "connected") {
           if (isMountedRef.current) {
-            setYjsConnectionStatus(status.status);
+            setTimeout(() => {
+              if (isMountedRef.current) {
+                setYjsConnectionStatus(status.status);
+              }
+            }, 0);
           }
         }
       },
@@ -145,7 +149,11 @@ export default function PageEditor({
 
     provider.on("disconnect", () => {
       if (isMountedRef.current) {
-        setYjsConnectionStatus(WebSocketStatus.Disconnected);
+        setTimeout(() => {
+          if (isMountedRef.current) {
+            setYjsConnectionStatus(WebSocketStatus.Disconnected);
+          }
+        }, 0);
       }
     });
 
