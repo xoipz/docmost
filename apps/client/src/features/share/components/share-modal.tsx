@@ -10,7 +10,12 @@ import {
   TextInput,
   Tooltip,
 } from "@mantine/core";
-import { IconExternalLink, IconWorld } from "@tabler/icons-react";
+import {
+  IconCheck,
+  IconCopy,
+  IconExternalLink,
+  IconWorld,
+} from "@tabler/icons-react";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   useCreateShareMutation,
@@ -25,6 +30,8 @@ import CopyTextButton from "@/components/common/copy.tsx";
 import { getAppUrl } from "@/lib/config.ts";
 import { buildPageUrl } from "@/features/page/page.utils.ts";
 import classes from "@/features/share/components/share.module.css";
+import { notifications } from "@mantine/notifications";
+import { useClipboard } from "@mantine/hooks";
 
 interface ShareModalProps {
   readOnly: boolean;
@@ -46,6 +53,8 @@ export default function ShareModal({ readOnly }: ShareModalProps) {
   const publicLink = `${getAppUrl()}/share/${share?.key}/p/${pageSlug}`;
 
   const [isPagePublic, setIsPagePublic] = useState<boolean>(false);
+  const clipboard = useClipboard({ timeout: 2000 });
+
   useEffect(() => {
     if (share) {
       setIsPagePublic(true);
@@ -92,13 +101,79 @@ export default function ShareModal({ readOnly }: ShareModalProps) {
     });
   };
 
+  // Fallback方法：通过创建临时textarea元素来复制文本
+  const fallbackCopyTextToClipboard = (text: string) => {
+    try {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+
+      // 避免滚动到底部
+      textArea.style.top = "0";
+      textArea.style.left = "0";
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
+
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      const successful = document.execCommand("copy");
+      document.body.removeChild(textArea);
+
+      if (successful) {
+        notifications.show({ message: t("Link copied") });
+        clipboard.copy(text); // To trigger copied state for icon
+      } else {
+        notifications.show({ message: t("Failed to copy link"), color: "red" });
+      }
+    } catch (err) {
+      console.error("回退复制方法失败:", err);
+      notifications.show({ message: t("Failed to copy link"), color: "red" });
+    }
+  };
+
+  const handleCopyShareLink = () => {
+    if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(publicLink)
+        .then(() => {
+          notifications.show({ message: t("Link copied") });
+          clipboard.copy(publicLink); // To trigger copied state for icon
+        })
+        .catch((error) => {
+          console.error("复制失败:", error);
+          fallbackCopyTextToClipboard(publicLink);
+        });
+    } else {
+      fallbackCopyTextToClipboard(publicLink);
+    }
+  };
+
   const shareLink = useMemo(() => (
     <Group my="sm" gap={4} wrap="nowrap">
       <TextInput
         variant="filled"
         value={publicLink}
         readOnly
-        rightSection={<CopyTextButton text={publicLink} />}
+        rightSection={
+          <Tooltip
+            label={clipboard.copied ? t("Copied") : t("Copy")}
+            withArrow
+            position="right"
+          >
+            <ActionIcon
+              color={clipboard.copied ? "teal" : "gray"}
+              variant="subtle"
+              onClick={handleCopyShareLink}
+            >
+              {clipboard.copied ? (
+                <IconCheck size={16} />
+              ) : (
+                <IconCopy size={16} />
+              )}
+            </ActionIcon>
+          </Tooltip>
+        }
         style={{ width: "100%" }}
       />
       <ActionIcon
@@ -111,15 +186,16 @@ export default function ShareModal({ readOnly }: ShareModalProps) {
         <IconExternalLink size={16} />
       </ActionIcon>
     </Group>
-  ), [publicLink]);
+  ), [publicLink, clipboard.copied, t, handleCopyShareLink]);
 
   return (
     <Popover width={350} position="bottom" withArrow shadow="md">
       <Popover.Target>
-        <Button
-          style={{ border: "none" }}
-          size="compact-sm"
-          leftSection={
+        <Tooltip label={t("Share")} openDelay={250} withArrow>
+          <ActionIcon
+            style={{ border: "none" }}
+            variant="default"
+          >
             <Indicator
               color="green"
               offset={5}
@@ -128,11 +204,8 @@ export default function ShareModal({ readOnly }: ShareModalProps) {
             >
               <IconWorld size={20} stroke={1.5} />
             </Indicator>
-          }
-          variant="default"
-        >
-          {t("Share")}
-        </Button>
+          </ActionIcon>
+        </Tooltip>
       </Popover.Target>
       <Popover.Dropdown style={{ userSelect: "none" }}>
         {isDescendantShared ? (
