@@ -157,14 +157,31 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
     // 合并文本并保留换行
     const text = nodes.join('');
     
-    navigator.clipboard.writeText(text).then(() => {
-      showNotification({
-        title: t("Success"),
-        message: t("Text copied to clipboard"),
-        color: "green",
-        autoClose: 2000,
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        showNotification({
+          title: t("Success"),
+          message: t("Text copied to clipboard"),
+          color: "green",
+          autoClose: 2000,
+        });
+      }).catch(err => {
+        console.error('Failed to copy text: ', err);
+        showNotification({
+          title: t("Error"),
+          message: t("Failed to copy text to clipboard"),
+          color: "red",
+          autoClose: 3000,
+        });
       });
-    });
+    } else {
+      showNotification({
+        title: t("Error"),
+        message: t("Copying to clipboard is not supported in this browser or context."),
+        color: "red",
+        autoClose: 3000,
+      });
+    }
   }, [props.editor, t]);
 
   // TAG:BubbleMenu
