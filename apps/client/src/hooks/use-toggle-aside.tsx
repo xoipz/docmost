@@ -6,6 +6,9 @@ const useToggleAside = () => {
   const [, setDefaultOpenToc] = useAtom(defaultOpenTocAtom);
 
   const toggleAside = (tab: string) => {
+    // 检查是否是移动设备
+    const isMobileDevice = window.innerWidth < 768;
+    
     let newIsAsideOpen;
     if (asideState.tab === tab) {
       newIsAsideOpen = !asideState.isAsideOpen;
@@ -15,11 +18,12 @@ const useToggleAside = () => {
       setAsideState({ tab, isAsideOpen: newIsAsideOpen });
     }
 
-    if (tab === "toc") {
+    // 只在非移动设备上保存TOC打开状态
+    if (tab === "toc" && !isMobileDevice) {
       setDefaultOpenToc(newIsAsideOpen);
     } else {
       // If another tab is opened, toc is no longer "default open"
-      if (newIsAsideOpen) { 
+      if (newIsAsideOpen && !isMobileDevice) { 
         setDefaultOpenToc(false);
       }
     }
