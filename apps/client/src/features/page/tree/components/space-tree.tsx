@@ -387,7 +387,9 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
         to={pageUrl}
         // @ts-ignore
         ref={dragHandle}
-        onClick={() => {
+        onClick={(e) => {
+          e.preventDefault();
+          handleClick();
           if (mobileSidebarOpened) {
             toggleMobileSidebar();
           }
