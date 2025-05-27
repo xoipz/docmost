@@ -103,7 +103,7 @@ export default function GlobalAppShell({
       if (isAsideOpen && window.innerWidth < 768) {
         const asideElement = document.querySelector(`.${classes.aside}`);
         if (asideElement && !asideElement.contains(event.target as Node) &&
-            !target.closest('.aside-toggle-button')) { // 确保不是点击的侧边栏切换按钮
+            !target.closest('.mantine-Group-root')) { // 确保不是点击的侧边栏切换按钮
           setAsideState(prev => ({ ...prev, isAsideOpen: false }));
         }
       }
