@@ -91,7 +91,7 @@ export default function PageEditor({
   const slugId = extractPageSlugId(pageSlug);
   const headerButtons = useAtomValue(pageHeaderButtonsAtom);
   const [keyboardShortcutsStatus, setKeyboardShortcutsStatus] = useAtom(keyboardShortcutsStatusAtom);
-  const isMountedRef = useRef(true);
+  const isMountedRef = useRef(false);
 
   useEffect(() => {
     isMountedRef.current = true;

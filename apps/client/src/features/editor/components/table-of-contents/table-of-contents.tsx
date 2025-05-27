@@ -22,8 +22,8 @@ export type HeadingLink = {
   parentId: string | null;
 };
 
-const recalculateLinks = (nodePos: NodePos[] | undefined) => {
-  if (!nodePos) {
+const recalculateLinks = (editor: ReturnType<typeof useEditor> | null, nodePos: NodePos[] | undefined) => {
+  if (!editor || !editor.view || !nodePos) {
     return { links: [], nodes: [] };
   }
 
@@ -33,6 +33,11 @@ const recalculateLinks = (nodePos: NodePos[] | undefined) => {
   const parentStack: { id: string; level: number }[] = [];
 
   Array.from(nodePos).forEach((item) => {
+    if (!editor || !editor.view) {
+      console.warn("Editor or view became invalid during recalculateLinks iteration");
+      return;
+    }
+
     const label = item.node.textContent;
     const level = Number(item.node.attrs.level);
     if (label.length && level <= 5) {
@@ -140,7 +145,7 @@ export const TableOfContents: FC<TableOfContentsProps> = (props) => {
       setHeadingDOMNodes([]);
       return;
     }
-    const result = recalculateLinks(props.editor.$nodes("heading"));
+    const result = recalculateLinks(props.editor, props.editor.$nodes("heading"));
     setLinks(result.links);
     setHeadingDOMNodes(result.nodes);
   };

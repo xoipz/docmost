@@ -12,7 +12,7 @@ import * as dotenv from 'dotenv';
 import { envPath } from '../common/helpers/utils';
 
 dotenv.config({ path: envPath });
-
+console.log(process.env.DATABASE_URL)
 const migrationFolder = path.join(__dirname, './migrations');
 
 const db = new Kysely<any>({
