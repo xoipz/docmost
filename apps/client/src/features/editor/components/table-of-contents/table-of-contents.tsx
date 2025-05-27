@@ -38,12 +38,16 @@ const recalculateLinks = (editor: ReturnType<typeof useEditor> | null, nodePos: 
       return;
     }
 
+    if (!item || !item.node || typeof item.pos !== 'number' || !item.element) {
+      console.warn("Invalid NodePos item or essential properties are missing", item);
+      return;
+    }
+
     const label = item.node.textContent;
     const level = Number(item.node.attrs.level);
     if (label.length && level <= 5) {
       const id = `heading-${idCounter++}`;
       
-      // 找到当前标题的父标题
       while (parentStack.length > 0 && parentStack[parentStack.length - 1].level >= level) {
         parentStack.pop();
       }
@@ -54,8 +58,7 @@ const recalculateLinks = (editor: ReturnType<typeof useEditor> | null, nodePos: 
         label,
         level,
         element: item.element,
-        //@ts-ignore
-        position: item.resolvedPos.pos,
+        position: item.pos,
         id,
         parentId,
       });

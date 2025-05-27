@@ -12,6 +12,8 @@ import {
   IconKeyboard,
   IconEyeOff,
   IconLayoutNavbar,
+  IconWorld,
+  IconShare,
 } from "@tabler/icons-react";
 
 interface PageHeaderSettingsModalProps {
@@ -137,6 +139,20 @@ export default function PageHeaderSettingsModal({
             checked={headerButtons.showHideHeaderButton}
             onChange={(e) => {
               setHeaderButtons({ ...headerButtons, showHideHeaderButton: e.currentTarget.checked });
+            }}
+            size="sm"
+          />
+        </Group>
+
+        <Group wrap="nowrap" justify="space-between" w="100%">
+          <Group gap="xs">
+            <IconShare size={16} />
+            <Text>{t("Directly display Share button in header")}</Text>
+          </Group>
+          <Switch
+            checked={!headerButtons.showShareButtonInMenu}
+            onChange={(e) => {
+              setHeaderButtons({ ...headerButtons, showShareButtonInMenu: !e.currentTarget.checked });
             }}
             size="sm"
           />

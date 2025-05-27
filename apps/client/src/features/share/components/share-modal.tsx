@@ -15,6 +15,7 @@ import {
   IconCopy,
   IconExternalLink,
   IconWorld,
+  IconShare,
 } from "@tabler/icons-react";
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -35,8 +36,11 @@ import { useClipboard } from "@mantine/hooks";
 
 interface ShareModalProps {
   readOnly: boolean;
+  opened?: boolean;
+  onClose?: () => void;
+  usedInMenu?: boolean;
 }
-export default function ShareModal({ readOnly }: ShareModalProps) {
+export default function ShareModal({ readOnly, opened, onClose, usedInMenu = false }: ShareModalProps) {
   const { t } = useTranslation();
   const { pageSlug } = useParams();
   const pageId = extractPageSlugId(pageSlug);
@@ -189,24 +193,19 @@ export default function ShareModal({ readOnly }: ShareModalProps) {
   ), [publicLink, clipboard.copied, t, handleCopyShareLink]);
 
   return (
-    <Popover width={350} position="bottom" withArrow shadow="md">
-      <Popover.Target>
-        <Tooltip label={t("Share")} openDelay={250} withArrow>
-          <ActionIcon
-            style={{ border: "none" }}
-            variant="default"
-          >
-            <Indicator
-              color="green"
-              offset={5}
-              disabled={!isPagePublic}
-              withBorder
+    <Popover width={350} position="bottom" withArrow shadow="md" opened={opened} onClose={onClose}>
+      {!usedInMenu && (
+        <Popover.Target>
+          <Tooltip label={t("Share")} openDelay={250} withArrow>
+            <ActionIcon
+              style={{ border: "none" }}
+              variant="default"
             >
-              <IconWorld size={20} stroke={1.5} />
-            </Indicator>
-          </ActionIcon>
-        </Tooltip>
-      </Popover.Target>
+              <IconShare size={20} stroke={1.5} color={isPagePublic ? "#0ca46a" : "currentColor"} />
+            </ActionIcon>
+          </Tooltip>
+        </Popover.Target>
+      )}
       <Popover.Dropdown style={{ userSelect: "none" }}>
         {isDescendantShared ? (
           <>

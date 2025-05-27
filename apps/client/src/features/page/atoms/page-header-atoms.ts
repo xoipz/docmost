@@ -10,6 +10,7 @@ const defaultSettings = {
   showQuickInputBar: false,
   showHideHeaderButton: true,
   showKeyboardStatus: true,
+  showShareButtonInMenu: true,
 };
 
 export const pageHeaderButtonsAtom = atomWithStorage(

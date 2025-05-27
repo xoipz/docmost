@@ -135,7 +135,7 @@ export default function PageEditor({
               if (isMountedRef.current) {
                 setYjsConnectionStatus(status.status);
               }
-            }, 0);
+            }, 50);
           }
         }
       },
@@ -153,7 +153,7 @@ export default function PageEditor({
           if (isMountedRef.current) {
             setYjsConnectionStatus(WebSocketStatus.Disconnected);
           }
-        }, 0);
+        }, 50);
       }
     });
 
