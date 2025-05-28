@@ -150,9 +150,9 @@ export default function PageHeaderSettingsModal({
             <Text>{t("Directly display Share button in header")}</Text>
           </Group>
           <Switch
-            checked={!headerButtons.showShareButtonInMenu}
+            checked={!headerButtons.showShareButton}
             onChange={(e) => {
-              setHeaderButtons({ ...headerButtons, showShareButtonInMenu: !e.currentTarget.checked });
+              setHeaderButtons({ ...headerButtons, showShareButton: !e.currentTarget.checked });
             }}
             size="sm"
           />

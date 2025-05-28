@@ -44,6 +44,7 @@
   "Are you sure you want to delete this page? This will delete its children and page history. This action is irreversible.": "您确定要删除这个页面吗？这将删除其子页面和页面历史记录。此操作不可逆。",
   "Description": "描述",
   "Details": "详情",
+  "Directly display Share button in header": "在顶栏直接显示分享按钮",
   "e.g ACME": "例如：ACME",
   "e.g ACME Inc": "例如：ACME Inc",
   "e.g Developers": "例如：开发人员",
@@ -145,6 +146,7 @@
   "Role": "角色",
   "Save": "保存",
   "Search": "搜索",
+  "Search engine indexing": "搜索引擎索引",
   "Search for groups": "搜索群组",
   "Search for users": "搜索用户",
   "Search for users and groups": "搜索用户和群组",
@@ -401,5 +403,13 @@
   "Publicly shared pages from spaces you are a member of will appear here": "您所在空间的公开共享页面会显示在此处",
   "Share deleted successfully": "分享已成功删除",
   "Share not found": "未找到分享",
-  "Failed to share page": "页面分享失败"
+  "Failed to share page": "页面分享失败",
+  "Copy page": "复制页面",
+  "Copy page to a different space.": "将页面复制到不同的空间。",
+  "Page copied successfully": "页面复制成功",
+  "Failed to copy link": "复制链接失败",
+  "Text copied to clipboard": "文本已复制到剪贴板",
+  "Failed to copy text to clipboard": "复制文本到剪贴板失败",
+  "Copying to clipboard is not supported in this browser or context.": "当前浏览器或环境不支持复制到剪贴板。",
+  "No table of contents.": "没有目录。"
 }

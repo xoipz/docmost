@@ -88,7 +88,9 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
         </Tooltip>
       )}
       
-      <ShareModal readOnly={readOnly} />
+      {!headerButtons.showShareButton && (
+        <ShareModal readOnly={readOnly} />
+      )}
       
       {/* 显示快捷键状态指示器 - 根据设置控制显示 */}
       {headerButtons.showKeyboardStatus && (
