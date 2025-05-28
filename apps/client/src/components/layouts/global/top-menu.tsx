@@ -39,7 +39,7 @@ export default function TopMenu() {
               variant="filled"
               size="sm"
             />
-            <Text fw={500} size="sm" lh={1} mr={3} lineClamp={1}>
+            <Text fw={500} size="sm" mr={3} lineClamp={1}>
               {user?.name}
             </Text>
             <IconChevronDown size={16} />
