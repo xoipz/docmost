@@ -9,6 +9,10 @@
     inset-inline-start: var(--app-shell-navbar-offset, 0rem);
     inset-inline-end: var(--app-shell-aside-offset, 0rem);
 
+    @media (max-width: 768px) {
+        z-index: 99;
+    }
+
     @media print {
         display: none;
     }

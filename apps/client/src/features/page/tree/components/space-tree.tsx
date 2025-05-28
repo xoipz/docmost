@@ -390,9 +390,9 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
         onClick={(e) => {
           e.preventDefault();
           handleClick();
-          if (mobileSidebarOpened) {
-            toggleMobileSidebar();
-          }
+          // if (mobileSidebarOpened) {
+          //   toggleMobileSidebar();
+          // }
         }}
         onMouseEnter={prefetchPage}
         onMouseLeave={cancelPagePrefetch}
