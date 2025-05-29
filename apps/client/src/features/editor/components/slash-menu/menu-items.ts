@@ -40,6 +40,7 @@ import {
   TypeformIcon,
   VimeoIcon,
   YoutubeIcon,
+  BilibiliIcon,
 } from "@/components/icons";
 
 const CommandGroups: SlashMenuGroupedItemsType = {
@@ -438,6 +439,20 @@ const CommandGroups: SlashMenuGroupedItemsType = {
           .focus()
           .deleteRange(range)
           .setEmbed({ provider: "youtube" })
+          .run();
+      },
+    },
+    {
+      title: "Bilibili",
+      description: "Embed Bilibili video",
+      searchTerms: ["bilibili", "b站"],
+      icon: BilibiliIcon,
+      command: ({ editor, range }: CommandProps) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .setEmbed({ provider: "bilibili" })
           .run();
       },
     },

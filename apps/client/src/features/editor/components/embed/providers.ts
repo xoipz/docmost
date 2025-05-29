@@ -68,6 +68,37 @@ export const embedProviders: IEmbedProvider[] = [
     }
   },
   {
+    id: 'bilibili',
+    name: 'Bilibili',
+    regex: /^https?:\/\/(?:(?:www|m)\.bilibili\.com\/video\/(BV[0-9a-zA-Z]+|av[0-9]+)|player\.bilibili\.com\/player\.html\?(?:aid=(av[0-9]+)|bvid=(BV[0-9a-zA-Z]+)))/,
+    getEmbedUrl: (match, url) => {
+      let videoId = '';
+      let isAid = false;
+
+      if (url.includes("player.bilibili.com")) {
+        if (match[3]) {
+          videoId = match[3];
+          isAid = true;
+        } else if (match[4]) {
+          videoId = match[4];
+        }
+      } else {
+        videoId = match[1];
+      }
+
+      if (videoId.startsWith('av')) {
+        isAid = true;
+        videoId = videoId.substring(2);
+      }
+
+      const queryParams = 'page=1&as_wide=1&high_quality=1&danmaku=1';
+      if (isAid) {
+        return `//player.bilibili.com/player.html?aid=${videoId}&${queryParams}`;
+      }
+      return `//player.bilibili.com/player.html?bvid=${videoId}&${queryParams}`;
+    }
+  },
+  {
     id: 'vimeo',
     name: 'Vimeo',
     regex: /^(https:)?\/\/(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/([^/]*)\/videos\/|album\/(\d+)\/video\/|video\/|)(\d+)/,
