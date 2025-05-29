@@ -41,6 +41,7 @@ import {
   VimeoIcon,
   YoutubeIcon,
   BilibiliIcon,
+  NeteaseMusicIcon,
 } from "@/components/icons";
 
 const CommandGroups: SlashMenuGroupedItemsType = {
@@ -453,6 +454,20 @@ const CommandGroups: SlashMenuGroupedItemsType = {
           .focus()
           .deleteRange(range)
           .setEmbed({ provider: "bilibili" })
+          .run();
+      },
+    },
+    {
+      title: "网易云音乐",
+      description: "Embed Netease Cloud Music",
+      searchTerms: ["wyy","music", "netease", "网易云"],
+      icon: NeteaseMusicIcon,
+      command: ({ editor, range }: CommandProps) => {
+        editor
+          .chain()
+          .focus()
+          .deleteRange(range)
+          .setEmbed({ provider: "netease-music" })
           .run();
       },
     },

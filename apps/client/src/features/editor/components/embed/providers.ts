@@ -70,32 +70,41 @@ export const embedProviders: IEmbedProvider[] = [
   {
     id: 'bilibili',
     name: 'Bilibili',
-    regex: /^https?:\/\/(?:(?:www|m)\.bilibili\.com\/video\/(BV[0-9a-zA-Z]+|av[0-9]+)|player\.bilibili\.com\/player\.html\?(?:aid=(av[0-9]+)|bvid=(BV[0-9a-zA-Z]+)))/,
+    regex: /^https?:\/\/(?:(?:www|m)\.bilibili\.com\/video\/(BV[0-9a-zA-Z]+|av[0-9]+)|player\.bilibili\.com\/player\.html\?(?:aid=([0-9]+)|bvid=([0-9a-zA-Z]+)))/,
     getEmbedUrl: (match, url) => {
-      let videoId = '';
-      let isAid = false;
+      let aid = '';
+      let bvid = '';
 
       if (url.includes("player.bilibili.com")) {
-        if (match[3]) {
-          videoId = match[3];
-          isAid = true;
-        } else if (match[4]) {
-          videoId = match[4];
-        }
+        aid = match[2]; 
+        bvid = match[3];
       } else {
-        videoId = match[1];
+        const pathParts = new URL(url).pathname.split('/');
+        const idPart = pathParts[pathParts.length -1] || pathParts[pathParts.length -2]; 
+        if (idPart.startsWith('BV')) {
+          bvid = idPart;
+        } else if (idPart.startsWith('av')) {
+          aid = idPart.substring(2);
+        }
       }
 
-      if (videoId.startsWith('av')) {
-        isAid = true;
-        videoId = videoId.substring(2);
+      const queryParams = 'page=1&as_wide=1&high_quality=1&danmaku=1&autoplay=0';
+      if (aid) {
+        return `//player.bilibili.com/player.html?aid=${aid}&${queryParams}`;
       }
-
-      const queryParams = 'page=1&as_wide=1&high_quality=1&danmaku=1';
-      if (isAid) {
-        return `//player.bilibili.com/player.html?aid=${videoId}&${queryParams}`;
+      if (bvid){
+        return `//player.bilibili.com/player.html?bvid=${bvid}&${queryParams}`;
       }
-      return `//player.bilibili.com/player.html?bvid=${videoId}&${queryParams}`;
+      return url; 
+    }
+  },
+  {
+    id: 'netease-music',
+    name: '网易云音乐',
+    regex: /^https?:\/\/(?:music\.163\.com|y\.music\.163\.com)\/(?:#\/)?(?:song|m\/song)\?id=(\d+)/,
+    getEmbedUrl: (match) => {
+      const songId = match[1];
+      return `//music.163.com/outchain/player?type=2&id=${songId}&auto=0&height=66`;
     }
   },
   {
