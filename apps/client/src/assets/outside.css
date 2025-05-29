@@ -6,6 +6,8 @@
   position: relative;
 }
 
+
+/* Title 标题css */
 .mantine-Container-root > div:first-of-type .tiptap.ProseMirror h1::before {
   content: none !important;
 }
@@ -77,9 +79,13 @@
 }
 
 [data-mantine-color-scheme="dark"] .ProseMirror [contenteditable="false"] {
-  background: #1a1a1a;
+  /* 定义暗黑模式下的背景色变量 */
+  --prosemirror-readonly-bg-dark: #1a1a1a;
+  background: var(--prosemirror-readonly-bg-dark);
 }
 
 [data-mantine-color-scheme="light"] .ProseMirror [contenteditable="false"] {
-  background: #dee2e6;
+  /* 定义亮色模式下的背景色变量 */
+  --prosemirror-readonly-bg-light: #dee2e6;
+  background: var(--prosemirror-readonly-bg-light);
 }

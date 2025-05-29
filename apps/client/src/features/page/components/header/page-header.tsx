@@ -27,7 +27,7 @@ export default function PageHeader({ readOnly }: Props) {
 
   // TAG:Page-Header
   return (
-    <div className={classes.header}>
+    <div className={`${classes.header} docmost-page-header-sticky-ref`}>
       <Group justify="space-between" h="100%" px="md" wrap="nowrap">
         <Group wrap="nowrap">
           {!headerVisible && (

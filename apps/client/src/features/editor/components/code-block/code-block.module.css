@@ -22,3 +22,16 @@
         display: none;
     }
 }
+
+.copyButtonContainer {
+    /* background-color: var(--mantine-color-body); */
+    align-self: flex-start;
+    margin-right: 4px;
+}
+
+.copyButtonContainer.stickyActive {
+    position: fixed;
+    /* background-color: var(--mantine-color-body); */
+    z-index: 104;
+    margin-right: 4px;
+}
