@@ -27,7 +27,6 @@ export default function InviteActionMenu({ invitationId }: Props) {
     try {
       const link = await getInviteLink({ invitationId });
       // TAG:邀请链接位置
-      console.log(link.inviteLink)
       
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(link.inviteLink);

@@ -83,6 +83,7 @@ export default function ShareShell({
       }}
       padding="md"
     >
+      {/* TAG: AppShell.Header*/}
       <AppShell.Header>
         <Group wrap="nowrap" justify="space-between" py="sm" px="xl">
           <Group wrap="nowrap">
@@ -109,7 +110,9 @@ export default function ShareShell({
                 </Tooltip>
               </>
             )}
+            Docmost
           </Group>
+          
 
           {shareId && (
             <Group visibleFrom="sm">
