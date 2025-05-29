@@ -259,8 +259,6 @@ export class PageService {
   }
 
   async copyPageToSpace(rootPage: Page, spaceId: string, authUser: User) {
-    //TODO:
-    // i. maintain internal links within copied pages
 
     const nextPosition = await this.nextPagePosition(spaceId);
 
@@ -350,7 +348,6 @@ export class PageService {
 
     await this.db.insertInto('pages').values(insertablePages).execute();
 
-    //TODO: best to handle this in a queue
     const attachmentsIds = Array.from(attachmentMap.keys());
     if (attachmentsIds.length > 0) {
       const attachments = await this.db
@@ -512,7 +509,6 @@ export class PageService {
 }
 
 /*
-  // TODO: page deletion and restoration
   async delete(pageId: string): Promise<void> {
     await this.dataSource.transaction(async (manager: EntityManager) => {
       const page = await manager

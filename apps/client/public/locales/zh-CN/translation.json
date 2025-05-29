@@ -411,5 +411,7 @@
   "Text copied to clipboard": "文本已复制到剪贴板",
   "Failed to copy text to clipboard": "复制文本到剪贴板失败",
   "Copying to clipboard is not supported in this browser or context.": "当前浏览器或环境不支持复制到剪贴板。",
-  "No table of contents.": "没有目录。"
+  "No table of contents.": "没有目录。",
+  "Update image URL ": "更新图像 URL"
+
 }

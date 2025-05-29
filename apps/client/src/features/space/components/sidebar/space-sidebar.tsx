@@ -282,7 +282,8 @@ export function SpaceSidebar() {
           transform:"translateX(-50%)",
           color: "var(--mantine-color-dimmed)",
           whiteSpace:"nowrap",
-          fontSize: "0.75rem"
+          fontSize: "0.75rem",
+          fontWeight:"bold"
           }}>
             Powered By Docmost
         </div> */}

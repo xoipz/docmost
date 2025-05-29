@@ -586,7 +586,7 @@ function NodeMenu({ node, treeApi, opened, onClose, position, onMenuButtonClick,
       >
         {t("新建文件")}
       </Menu.Item>
-
+      <Menu.Divider />
       <Menu.Item
         leftSection={<IconLink size={16} />}
         onClick={(e) => {
@@ -702,66 +702,7 @@ function NodeMenu({ node, treeApi, opened, onClose, position, onMenuButtonClick,
         </Menu.Target>
 
         <Menu.Dropdown>
-          <Menu.Item
-            leftSection={<IconLink size={16} />}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              handleCopyLink();
-            }}
-          >
-            {t("Copy link")}
-          </Menu.Item>
-
-          <Menu.Item
-            leftSection={<IconFileExport size={16} />}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              openExportModal();
-            }}
-          >
-            {t("Export page")}
-          </Menu.Item>
-
-          {!(treeApi.props.disableEdit as boolean) && (
-            <>
-              <Menu.Item
-                leftSection={<IconArrowRight size={16} />}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  openMovePageModal();
-                }}
-              >
-                {t("Move")}
-              </Menu.Item>
-
-              <Menu.Item
-                leftSection={<IconCopy size={16} />}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  openCopyPageModal();
-                }}
-              >
-                {t("Copy")}
-              </Menu.Item>
-
-              <Menu.Divider />
-              <Menu.Item
-                c="red"
-                leftSection={<IconTrash size={16} />}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  openDeleteModal({ onConfirm: () => treeApi?.delete(node) });
-                }}
-              >
-                {t("Delete")}
-              </Menu.Item>
-            </>
-          )}
+          {menuItems}
         </Menu.Dropdown>
       </Menu>
 
