@@ -657,6 +657,7 @@ function NodeMenu({ node, treeApi, opened, onClose, position, onMenuButtonClick,
 
   return (
     <>
+    {/* TAG:右键菜单高度控制 */}
       <Menu 
         shadow="md" 
         width={200}
@@ -679,7 +680,7 @@ function NodeMenu({ node, treeApi, opened, onClose, position, onMenuButtonClick,
             left: position.x,
             top: Math.min(
               position.y,
-              window.innerHeight - 240 // 确保至少有300px的空间显示菜单
+              window.innerHeight - 280 // 确保至少有300px的空间显示菜单
             ),
           }
         }}

@@ -72,10 +72,15 @@
 }
 
 /* 代码块 */
-.ProseMirror [contenteditable="false"] {
+.codeBlock [contenteditable="false"] {
   margin: -4px;
   padding: 4px 2px;
   border-radius: 4px 4px 0 0;
+}
+
+/* 暗黑模式的hr */
+[data-mantine-color-scheme="dark"] .ProseMirror hr{
+  border-top:2px solid #616467;
 }
 
 [data-mantine-color-scheme="dark"] .ProseMirror [contenteditable="false"] {
