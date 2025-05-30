@@ -99,12 +99,16 @@ export function QuickInputBar() {
           <ActionIcon
             key={index}
             variant="light"
+            onMouseDown={(event) => {
+              event.preventDefault();
+            }}
             onClick={() => {
               handleInsert(button);
               // 如果点击的是评论按钮，打开评论侧边栏
               if (button.command === 'toggleComment') {
                 setAsideState({ tab: 'comments', isAsideOpen: true });
               }
+              editor?.chain().focus().run();
             }}
             title={t(button.label)}
             className={classes.actionButton}
