@@ -1,4 +1,4 @@
-import { AppShell, Container } from "@mantine/core";
+import { AppShell, Container, Box, Tooltip, ActionIcon } from "@mantine/core";
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import SettingsSidebar from "@/components/settings/settings-sidebar.tsx";
@@ -16,6 +16,9 @@ import Aside from "@/components/layouts/global/aside.tsx";
 import classes from "./app-shell.module.css";
 import { useTrialEndAction } from "@/ee/hooks/use-trial-end-action.tsx";
 import { useToggleSidebar } from "@/components/layouts/global/hooks/hooks/use-toggle-sidebar.ts";
+import { pageHeaderButtonsAtom } from "@/features/page/atoms/page-header-atoms.ts";
+import { IconEye } from "@tabler/icons-react";
+import { useTranslation } from "react-i18next";
 
 export default function GlobalAppShell({
   children,
@@ -23,12 +26,14 @@ export default function GlobalAppShell({
   children: React.ReactNode;
 }) {
   useTrialEndAction();
+  const { t } = useTranslation();
   const [mobileOpened, setMobileOpened] = useAtom(mobileSidebarAtom);
   const toggleMobile = useToggleSidebar(mobileSidebarAtom);
   const [desktopOpened] = useAtom(desktopSidebarAtom);
   const [{ isAsideOpen }, setAsideState] = useAtom(asideStateAtom);
   const [sidebarWidth, setSidebarWidth] = useAtom(sidebarWidthAtom);
-  const [headerVisible] = useAtom(headerVisibleAtom);
+  const [headerVisible, setHeaderVisible] = useAtom(headerVisibleAtom);
+  const [{ isPageHeaderVisible }] = useAtom(pageHeaderButtonsAtom);
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLElement | null>(null);
 
@@ -123,6 +128,10 @@ export default function GlobalAppShell({
   
   // 只在页面编辑器路由中考虑headerVisible状态，其他路由始终显示header
   const shouldShowHeader = isPageRoute ? headerVisible : true;
+
+  const toggleHeaderVisibility = () => {
+    setHeaderVisible(!headerVisible);
+  };
 
   return (
     <AppShell

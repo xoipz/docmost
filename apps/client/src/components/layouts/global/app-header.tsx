@@ -1,4 +1,4 @@
-import { Badge, Group, Text, Tooltip, Box } from "@mantine/core";
+import { Badge, Group, Text, Tooltip, Box, ActionIcon } from "@mantine/core";
 import classes from "./app-header.module.css";
 import React from "react";
 import TopMenu from "@/components/layouts/global/top-menu.tsx";
@@ -7,6 +7,7 @@ import APP_ROUTE from "@/lib/app-route.ts";
 import { useAtom } from "jotai";
 import {
   desktopSidebarAtom,
+  headerVisibleAtom,
   mobileSidebarAtom,
 } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
 import { useToggleSidebar } from "@/components/layouts/global/hooks/hooks/use-toggle-sidebar.ts";
@@ -19,6 +20,8 @@ import { currentUserAtom } from "@/features/user/atoms/current-user-atom";
 import { getHostnameUrl } from "@/ee/utils.ts";
 import { useGetSpacesQuery } from "@/features/space/queries/space-query.ts";
 import { getSpaceUrl } from "@/lib/config.ts";
+import { pageHeaderButtonsAtom } from "@/features/page/atoms/page-header-atoms.ts";
+import { IconEyeOff } from "@tabler/icons-react";
 
 const links = [{ link: APP_ROUTE.HOME, label: "Home" }];
 
@@ -36,6 +39,12 @@ export function AppHeader() {
   const { data: spaces, isLoading } = useGetSpacesQuery({ page: 1 });
   const [currentUser] = useAtom(currentUserAtom);
   const currentWorkspace = currentUser?.workspace;
+  const [{ isPageHeaderVisible }] = useAtom(pageHeaderButtonsAtom);
+  const [headerVisible, setHeaderVisible] = useAtom(headerVisibleAtom);
+
+  const toggleHeaderVisibility = () => {
+    setHeaderVisible(!headerVisible);
+  };
 
   const isHomeRoute = location.pathname.startsWith("/home");
 
@@ -120,6 +129,21 @@ export function AppHeader() {
                 ? "1 day left"
                 : `${trialDaysLeft} days left`}
             </Badge>
+          )}
+          {isPageHeaderVisible && headerVisible && (
+            <Tooltip
+              label={t("Toggle header visibility")}
+              openDelay={250}
+              withArrow
+            >
+              <ActionIcon
+                variant="default"
+                style={{ border: "none" }}
+                onClick={toggleHeaderVisibility}
+              >
+                <IconEyeOff size={20} stroke={2} />
+              </ActionIcon>
+            </Tooltip>
           )}
           <TopMenu />
         </Group>

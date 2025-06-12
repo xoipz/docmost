@@ -19,8 +19,9 @@ import {
   IconKeyboard,
   IconKeyboardOff,
   IconShare,
+  IconEye,
 } from "@tabler/icons-react";
-import React from "react";
+import React, { useEffect } from "react";
 import useToggleAside from "@/hooks/use-toggle-aside.tsx";
 import { useAtom, useAtomValue } from "jotai";
 import { historyAtoms } from "@/features/page-history/atoms/history-atoms.ts";
@@ -44,7 +45,10 @@ import {
 import { formattedDate, timeAgo } from "@/lib/time.ts";
 import MovePageModal from "@/features/page/components/move-page-modal.tsx";
 import { useTimeAgo } from "@/hooks/use-time-ago.tsx";
-import { defaultOpenTocAtom, headerVisibleAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
+import {
+  defaultOpenTocAtom,
+  headerVisibleAtom,
+} from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
 import { pageHeaderButtonsAtom } from "@/features/page/atoms/page-header-atoms.ts";
 import PageHeaderSettingsModal from "./page-header-settings-modal.tsx";
 import ShareModal from "@/features/share/components/share-modal.tsx";
@@ -60,6 +64,13 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
   const [headerButtons, setHeaderButtons] = useAtom(pageHeaderButtonsAtom);
   const [headerVisible, setHeaderVisible] = useAtom(headerVisibleAtom);
   const keyboardStatus = useAtomValue(keyboardShortcutsStatusAtom);
+
+  useEffect(() => {
+    setHeaderButtons((prev) => ({ ...prev, isPageHeaderVisible: true }));
+    return () => {
+      setHeaderButtons((prev) => ({ ...prev, isPageHeaderVisible: false }));
+    };
+  }, [setHeaderButtons]);
 
   const handleUndo = () => {
     pageEditor?.commands.undo();
@@ -87,21 +98,35 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
           </ActionIcon>
         </Tooltip>
       )}
-      
-      {!headerButtons.showShareButton && (
-        <ShareModal readOnly={readOnly} />
+
+      {!headerVisible && (
+        <Tooltip label={t("Show header")} openDelay={250} withArrow>
+          <ActionIcon
+            variant="default"
+            style={{ border: "none" }}
+            onClick={toggleHeaderVisibility}
+          >
+            <IconEye size={20} stroke={2} />
+          </ActionIcon>
+        </Tooltip>
       )}
-      
+
+      {!headerButtons.showShareButton && <ShareModal readOnly={readOnly} />}
+
       {/* 显示快捷键状态指示器 - 根据设置控制显示 */}
       {headerButtons.showKeyboardStatus && (
         <Tooltip
-          label={keyboardStatus.enabled ? t("Keyboard shortcuts are working") : t("Keyboard shortcuts may not be working correctly")}
+          label={
+            keyboardStatus.enabled
+              ? t("Keyboard shortcuts are working")
+              : t("Keyboard shortcuts may not be working correctly")
+          }
           openDelay={250}
           withArrow
         >
-          <ActionIcon 
-            variant="default" 
-            c={keyboardStatus.enabled ? "green" : "red"} 
+          <ActionIcon
+            variant="default"
+            c={keyboardStatus.enabled ? "green" : "red"}
             style={{ border: "none" }}
             onClick={() => {
               if (!keyboardStatus.enabled) {
@@ -169,18 +194,6 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
         </Tooltip>
       )}
 
-      {headerButtons.showHideHeaderButton && (
-        <Tooltip label={t("Toggle header visibility")} openDelay={250} withArrow>
-          <ActionIcon
-            variant="default"
-            style={{ border: "none" }}
-            onClick={toggleHeaderVisibility}
-          >
-            <IconEyeOff size={20} stroke={2} />
-          </ActionIcon>
-        </Tooltip>
-      )}
-
       <PageActionMenu readOnly={readOnly} />
     </>
   );
@@ -218,7 +231,8 @@ function PageActionMenu({ readOnly }: PageActionMenuProps) {
 
     // 检查clipboard API是否可用
     if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(pageUrl)
+      navigator.clipboard
+        .writeText(pageUrl)
         .then(() => {
           notifications.show({ message: t("Link copied") });
         })
@@ -237,20 +251,20 @@ function PageActionMenu({ readOnly }: PageActionMenuProps) {
     try {
       const textArea = document.createElement("textarea");
       textArea.value = text;
-      
+
       // 避免滚动到底部
       textArea.style.top = "0";
       textArea.style.left = "0";
       textArea.style.position = "fixed";
       textArea.style.opacity = "0";
-      
+
       document.body.appendChild(textArea);
       textArea.focus();
       textArea.select();
-      
+
       const successful = document.execCommand("copy");
       document.body.removeChild(textArea);
-      
+
       if (successful) {
         notifications.show({ message: t("Link copied") });
       } else {
