@@ -21,7 +21,7 @@ import { getHostnameUrl } from "@/ee/utils.ts";
 import { useGetSpacesQuery } from "@/features/space/queries/space-query.ts";
 import { getSpaceUrl } from "@/lib/config.ts";
 import { pageHeaderButtonsAtom } from "@/features/page/atoms/page-header-atoms.ts";
-import { IconEyeOff } from "@tabler/icons-react";
+import { IconLayoutNavbar } from "@tabler/icons-react";
 
 const links = [{ link: APP_ROUTE.HOME, label: "Home" }];
 
@@ -140,8 +140,9 @@ export function AppHeader() {
                 variant="default"
                 style={{ border: "none" }}
                 onClick={toggleHeaderVisibility}
+                className={classes['icon-strike-through']}
               >
-                <IconEyeOff size={20} stroke={2} />
+                <IconLayoutNavbar size={20} stroke={2} />
               </ActionIcon>
             </Tooltip>
           )}

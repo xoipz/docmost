@@ -19,7 +19,7 @@ import {
   IconKeyboard,
   IconKeyboardOff,
   IconShare,
-  IconEye,
+  IconLayoutNavbar,
 } from "@tabler/icons-react";
 import React, { useEffect } from "react";
 import useToggleAside from "@/hooks/use-toggle-aside.tsx";
@@ -106,7 +106,7 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
             style={{ border: "none" }}
             onClick={toggleHeaderVisibility}
           >
-            <IconEye size={20} stroke={2} />
+            <IconLayoutNavbar size={20} stroke={2} />
           </ActionIcon>
         </Tooltip>
       )}
