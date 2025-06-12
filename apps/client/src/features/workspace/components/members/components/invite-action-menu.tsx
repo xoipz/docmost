@@ -11,7 +11,7 @@ import { notifications } from "@mantine/notifications";
 import { useClipboard } from "@mantine/hooks";
 import { getInviteLink } from "@/features/workspace/services/workspace-service.ts";
 import useUserRole from "@/hooks/use-user-role.tsx";
-import { isCloud } from "@/lib/config.ts";
+import { getExportUrl, isCloud } from "@/lib/config.ts";
 
 interface Props {
   invitationId: string;
@@ -27,13 +27,18 @@ export default function InviteActionMenu({ invitationId }: Props) {
     try {
       const link = await getInviteLink({ invitationId });
       // TAG:邀请链接位置
+      const inviteUrl = new URL(link.inviteLink);
+      const exportUrl = new URL(getExportUrl());
+      
+      // 替换域名部分，保留路径和查询参数
+      const modifiedInviteLink = `${exportUrl.origin}${inviteUrl.pathname}${inviteUrl.search}`;
       
       if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(link.inviteLink);
+        await navigator.clipboard.writeText(modifiedInviteLink);
       } else {
         // Fallback for older browsers
         const textArea = document.createElement('textarea');
-        textArea.value = link.inviteLink;
+        textArea.value = modifiedInviteLink;
         textArea.style.position = 'fixed';
         textArea.style.left = '-999999px';
         textArea.style.top = '-999999px';

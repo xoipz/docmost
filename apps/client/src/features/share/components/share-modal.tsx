@@ -28,7 +28,7 @@ import { Link, useParams } from "react-router-dom";
 import { extractPageSlugId, getPageIcon } from "@/lib";
 import { useTranslation } from "react-i18next";
 import CopyTextButton from "@/components/common/copy.tsx";
-import { getAppUrl } from "@/lib/config.ts";
+import { getAppUrl, getExportUrl } from "@/lib/config.ts";
 import { buildPageUrl } from "@/features/page/page.utils.ts";
 import classes from "@/features/share/components/share.module.css";
 import { notifications } from "@mantine/notifications";
@@ -54,7 +54,7 @@ export default function ShareModal({ readOnly, opened, onClose, usedInMenu = fal
   // if level is greater than zero, then it is a descendant page from a shared page
   const isDescendantShared = share && share.level > 0;
 
-  const publicLink = `${getAppUrl()}/share/${share?.key}/p/${pageSlug}`;
+  const publicLink = `${getExportUrl()}/share/${share?.key}/p/${pageSlug}`;
 
   const [isPagePublic, setIsPagePublic] = useState<boolean>(false);
   const clipboard = useClipboard({ timeout: 2000 });

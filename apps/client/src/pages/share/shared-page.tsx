@@ -8,6 +8,7 @@ import ReadonlyPageEditor from "@/features/editor/readonly-page-editor.tsx";
 import { extractPageSlugId } from "@/lib";
 import { Error404 } from "@/components/ui/error-404.tsx";
 import ShareBranding from "@/features/share/components/share-branding.tsx";
+import { buildSharedPageUrl } from "@/features/page/page.utils.ts";
 
 export default function SharedPage() {
   const { t } = useTranslation();
@@ -22,7 +23,14 @@ export default function SharedPage() {
   useEffect(() => {
     if (shareId && data) {
       if (data.share.key !== shareId) {
-        navigate(`/share/${data.share.key}/p/${pageSlug}`, { replace: true });
+        navigate(
+          buildSharedPageUrl({
+            shareId: data.share.key,
+            pageSlugId: extractPageSlugId(pageSlug),
+            pageTitle: data.page.title
+          }),
+          { replace: true }
+        );
       }
     }
   }, [shareId, data]);

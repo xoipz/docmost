@@ -1,4 +1,5 @@
 import slugify from "@sindresorhus/slugify";
+import { getExportUrl } from "@/lib/config.ts";
 
 const buildPageSlug = (pageSlugId: string, pageTitle?: string): string => {
   const titleSlug = slugify(pageTitle?.substring(0, 70) || "untitled", {
@@ -29,8 +30,9 @@ export const buildSharedPageUrl = (opts: {
 }): string => {
   const { shareId, pageSlugId, pageTitle } = opts;
   if (!shareId) {
-    return `/share/p/${buildPageSlug(pageSlugId, pageTitle)}`;
+    console.log(`${getExportUrl()}/share/p/${buildPageSlug(pageSlugId, pageTitle)}`)
+    return `${getExportUrl()}/share/p/${buildPageSlug(pageSlugId, pageTitle)}`;
   }
 
-  return `/share/${shareId}/p/${buildPageSlug(pageSlugId, pageTitle)}`;
+  return `${getExportUrl()}/share/${shareId}/p/${buildPageSlug(pageSlugId, pageTitle)}`;
 };

@@ -23,6 +23,10 @@ export function getBackendUrl(): string {
   return getAppUrl() + "/api";
 }
 
+export function getExportUrl(): string {
+  return getConfigValue("EXPORT_URL", getAppUrl());
+}
+
 export function getCollaborationUrl(): string {
   const baseUrl =
     getConfigValue("COLLAB_URL") ||
