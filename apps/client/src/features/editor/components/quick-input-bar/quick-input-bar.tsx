@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import classes from "./quick-input-bar.module.css";
 import { atomWithStorage } from "jotai/utils";
 import { sidebarWidthsAtom, asideStateAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom";
-import { useEffect } from "react";
+import { useEffect, useCallback, useMemo } from "react";
 import { 
   IconFilter, 
   IconTable, 
@@ -19,6 +19,7 @@ import {
   IconH4,
   IconH5,
 } from "@tabler/icons-react";
+import React from "react";
 
 // 定义所有按钮
 const buttons = [
@@ -57,6 +58,7 @@ export function QuickInputBar() {
   const [filters, setFilters] = useAtom(quickInputFilterAtom);
   const sidebarWidths = useAtomValue(sidebarWidthsAtom);
   const [, setAsideState] = useAtom(asideStateAtom);
+  const contentRef = React.useRef<HTMLDivElement>(null);
 
   // 更新 CSS 变量
   useEffect(() => {
@@ -64,7 +66,7 @@ export function QuickInputBar() {
     document.documentElement.style.setProperty('--aside-right-width', `${sidebarWidths.rightWidth}px`);
   }, [sidebarWidths]);
 
-  const handleInsert = (button: typeof buttons[0]) => {
+  const handleInsert = useCallback((button: typeof buttons[0]) => {
     if (!editor) return;
     
     if (button.command) {
@@ -88,28 +90,33 @@ export function QuickInputBar() {
       // 处理单符号
       editor.commands.insertContent(button.content);
     }
-  };
 
-  const filteredButtons = buttons.filter(button => filters[button.category]);
+    // 如果点击的是评论按钮，打开评论侧边栏
+    if (button.command === 'toggleComment') {
+      setAsideState({ tab: 'comments', isAsideOpen: true });
+    }
+    
+    editor?.chain().focus().run();
+  }, [editor, setAsideState]);
+
+  const filteredButtons = useMemo(() => 
+    buttons.filter(button => filters[button.category])
+  , [filters]);
+
+  // 防止默认行为，避免编辑器失焦
+  const handleMouseDown = useCallback((event: React.MouseEvent) => {
+    event.preventDefault();
+  }, []);
 
   return (
     <div className={classes.quickInputBar}>
-      <div className={classes.quickInputBarContent}>
+      <div className={classes.quickInputBarContent} ref={contentRef}>
         {filteredButtons.map((button, index) => (
           <ActionIcon
             key={index}
             variant="light"
-            onMouseDown={(event) => {
-              event.preventDefault();
-            }}
-            onClick={() => {
-              handleInsert(button);
-              // 如果点击的是评论按钮，打开评论侧边栏
-              if (button.command === 'toggleComment') {
-                setAsideState({ tab: 'comments', isAsideOpen: true });
-              }
-              editor?.chain().focus().run();
-            }}
+            onMouseDown={handleMouseDown}
+            onClick={() => handleInsert(button)}
             title={t(button.label)}
             className={classes.actionButton}
           >
@@ -117,36 +124,35 @@ export function QuickInputBar() {
           </ActionIcon>
         ))}
       </div>
-      <div className={classes.filterSection}>
-        <Menu position="top-end" width={200}>
-          <Menu.Target>
-            <ActionIcon variant="light" className={classes.actionButton} title={t("筛选")}>
-              <IconFilter size={16} />
-            </ActionIcon>
-          </Menu.Target>
-          <Menu.Dropdown>
-            <Menu.Label>{t("显示分类")}</Menu.Label>
-            <Menu.Item
-              onClick={() => setFilters(prev => ({ ...prev, headings: !prev.headings }))}
-              rightSection={filters.headings ? "✓" : ""}
-            >
-              {t("标题")}
-            </Menu.Item>
-            <Menu.Item
-              onClick={() => setFilters(prev => ({ ...prev, blocks: !prev.blocks }))}
-              rightSection={filters.blocks ? "✓" : ""}
-            >
-              {t("块元素")}
-            </Menu.Item>
-            <Menu.Item
-              onClick={() => setFilters(prev => ({ ...prev, symbols: !prev.symbols }))}
-              rightSection={filters.symbols ? "✓" : ""}
-            >
-              {t("符号")}
-            </Menu.Item>
-          </Menu.Dropdown>
-        </Menu>
-      </div>
+      
+      <Menu position="top-end" width={200}>
+        <Menu.Target>
+          <ActionIcon variant="light" className={classes.actionButton} title={t("筛选")}>
+            <IconFilter size={16} />
+          </ActionIcon>
+        </Menu.Target>
+        <Menu.Dropdown>
+          <Menu.Label>{t("显示分类")}</Menu.Label>
+          <Menu.Item
+            onClick={() => setFilters(prev => ({ ...prev, headings: !prev.headings }))}
+            rightSection={filters.headings ? "✓" : ""}
+          >
+            {t("标题")}
+          </Menu.Item>
+          <Menu.Item
+            onClick={() => setFilters(prev => ({ ...prev, blocks: !prev.blocks }))}
+            rightSection={filters.blocks ? "✓" : ""}
+          >
+            {t("块元素")}
+          </Menu.Item>
+          <Menu.Item
+            onClick={() => setFilters(prev => ({ ...prev, symbols: !prev.symbols }))}
+            rightSection={filters.symbols ? "✓" : ""}
+          >
+            {t("符号")}
+          </Menu.Item>
+        </Menu.Dropdown>
+      </Menu>
     </div>
   );
 } 

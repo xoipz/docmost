@@ -38,15 +38,15 @@
   overflow-x: auto;
   gap: 8px;
   padding: 0 8px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--mantine-color-gray-4) transparent;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   align-items: center;
   flex: 1;
   margin-right: 8px;
 }
 
 .quickInputBarContent::-webkit-scrollbar {
-  height: 4px;
+  display: none;
 }
 
 .quickInputBarContent::-webkit-scrollbar-track {
