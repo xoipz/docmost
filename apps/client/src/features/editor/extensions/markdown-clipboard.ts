@@ -91,8 +91,9 @@ export const MarkdownClipboard = Extension.create({
             const text = event.clipboardData.getData("text/plain");
             const vscode = event.clipboardData.getData("vscode-editor-data");
             const vscodeData = vscode ? JSON.parse(vscode) : undefined;
+            const language = vscodeData?.mode;
 
-            if (vscodeData && vscodeData.mode !== "markdown") {
+            if (language !== "markdown") {
               return false;
             }
 
