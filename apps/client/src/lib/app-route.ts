@@ -15,7 +15,7 @@ const APP_ROUTE = {
       PREFERENCES: "/settings/account/preferences",
     },
     WORKSPACE: {
-      GENERAL: "/settings/workspace/general",
+      GENERAL: "/settings/workspace",
       MEMBERS: "/settings/members",
       GROUPS: "/settings/groups",
       SPACES: "/settings/spaces",
