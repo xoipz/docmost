@@ -18,8 +18,8 @@ export const CodeBlockShortcuts = Extension.create({
             const node = $from.node()
             
             if (node && node.type.name === 'codeBlock') {
-              // 检查是否是 Ctrl+A
-              if (event.key === 'a' && (event.ctrlKey || event.metaKey)) {
+              // 检查是否是 Ctrl+A（包括大写键盘状态）
+              if ((event.key === 'a' || event.key === 'A') && (event.ctrlKey || event.metaKey)) {
                 event.preventDefault()
                 
                 // 获取代码块的起始和结束位置

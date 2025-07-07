@@ -1,7 +1,7 @@
 import { Modal, Group, Text, Switch, Stack, Divider } from "@mantine/core";
 import { useAtom } from "jotai";
 import { pageHeaderButtonsAtom } from "@/features/page/atoms/page-header-atoms.ts";
-import { defaultOpenTocAtom, headerVisibleAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
+import { headerVisibleAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
 import { useTranslation } from "react-i18next";
 import {
   IconArrowBackUp,
@@ -10,9 +10,7 @@ import {
   IconList,
   IconArrowsHorizontal,
   IconKeyboard,
-  IconEyeOff,
   IconLayoutNavbar,
-  IconWorld,
   IconShare,
 } from "@tabler/icons-react";
 
@@ -27,7 +25,6 @@ export default function PageHeaderSettingsModal({
 }: PageHeaderSettingsModalProps) {
   const { t } = useTranslation();
   const [headerButtons, setHeaderButtons] = useAtom(pageHeaderButtonsAtom);
-  const [defaultOpenToc, setDefaultOpenToc] = useAtom(defaultOpenTocAtom);
   const [headerVisible, setHeaderVisible] = useAtom(headerVisibleAtom);
 
   return (
@@ -130,19 +127,6 @@ export default function PageHeaderSettingsModal({
           />
         </Group>
 
-        <Group wrap="nowrap" justify="space-between" w="100%">
-          <Group gap="xs">
-            <IconEyeOff size={16} />
-            <Text>{t("Show hide header button")}</Text>
-          </Group>
-          <Switch
-            checked={headerButtons.showHideHeaderButton}
-            onChange={(e) => {
-              setHeaderButtons({ ...headerButtons, showHideHeaderButton: e.currentTarget.checked });
-            }}
-            size="sm"
-          />
-        </Group>
 
         <Group wrap="nowrap" justify="space-between" w="100%">
           <Group gap="xs">
@@ -177,19 +161,6 @@ export default function PageHeaderSettingsModal({
           />
         </Group>
 
-        <Group wrap="nowrap" justify="space-between" w="100%">
-          <Group gap="xs">
-            <IconKeyboard size={16} />
-            <Text>{t("Show keyboard shortcuts status")}</Text>
-          </Group>
-          <Switch
-            checked={headerButtons.showKeyboardStatus}
-            onChange={(e) => {
-              setHeaderButtons({ ...headerButtons, showKeyboardStatus: e.currentTarget.checked });
-            }}
-            size="sm"
-          />
-        </Group>
       </Stack>
     </Modal>
   );

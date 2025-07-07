@@ -8,8 +8,6 @@ const defaultSettings = {
   showToc: true,
   fullWidth: false,
   showQuickInputBar: false,
-  showHideHeaderButton: true,
-  showKeyboardStatus: false,
   showShareButton: false,
   isPageHeaderVisible: false,
 };

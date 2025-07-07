@@ -27,8 +27,11 @@ export const HeadingShortcuts = Extension.create({
       'Mod-4': () => this.editor.commands.toggleHeading({ level: 4 }),
       'Mod-5': () => this.editor.commands.toggleHeading({ level: 5 }),
       'Mod-6': () => this.editor.commands.toggleHeading({ level: 6 }),
+      'Mod-Shift-k': () => this.editor.chain().focus().toggleCodeBlock().run(),
       'Mod-Shift-K': () => this.editor.chain().focus().toggleCodeBlock().run(),
+      'Mod-Shift-m': () => this.editor.chain().focus().setMathBlock().run(),
       'Mod-Shift-M': () => this.editor.chain().focus().setMathBlock().run(),
+      'Mod-Alt-t': () => this.editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
       'Mod-Alt-T': () => this.editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
     }
   },

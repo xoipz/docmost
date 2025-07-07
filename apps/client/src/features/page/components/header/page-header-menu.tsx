@@ -125,37 +125,6 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
 
       {!headerButtons.showShareButton && <ShareModal readOnly={readOnly} />}
 
-      {/* 显示快捷键状态指示器 - 根据设置控制显示 */}
-      {headerButtons.showKeyboardStatus && (
-        <Tooltip
-          label={
-            keyboardStatus.enabled
-              ? t("Keyboard shortcuts are working")
-              : t("Keyboard shortcuts may not be working correctly")
-          }
-          openDelay={250}
-          withArrow
-        >
-          <ActionIcon
-            variant="default"
-            c={keyboardStatus.enabled ? "green" : "red"}
-            style={{ border: "none", flexShrink: 0 }}
-            onClick={() => {
-              if (!keyboardStatus.enabled) {
-                // 尝试重新激活快捷键
-                window.location.reload();
-              }
-            }}
-          >
-            {keyboardStatus.enabled ? (
-              <IconKeyboard size={20} stroke={2} />
-            ) : (
-              <IconKeyboardOff size={20} stroke={2} />
-            )}
-          </ActionIcon>
-        </Tooltip>
-      )}
-
       {headerButtons.showUndo && (
         <Tooltip label={t("Undo")} openDelay={250} withArrow>
           <ActionIcon
