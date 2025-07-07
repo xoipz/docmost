@@ -74,7 +74,7 @@ export function QuickInputBar() {
     
     if (button.command === "paste") {
       // 处理粘贴功能
-      if (navigator.clipboard && navigator.clipboard.readText) {
+      if (navigator?.clipboard?.readText) {
         navigator.clipboard.readText().then(text => {
           if (text) {
             editor.commands.insertContent(text);
