@@ -1,11 +1,11 @@
-import { ActionIcon, Menu } from "@mantine/core";
-import { useAtom, useAtomValue } from "jotai";
+import { ActionIcon } from "@mantine/core";
+import { useAtom } from "jotai";
 import { pageEditorAtom } from "@/features/editor/atoms/editor-atoms";
 import { useTranslation } from "react-i18next";
 import classes from "./quick-input-bar.module.css";
 import { atomWithStorage } from "jotai/utils";
-import { sidebarWidthsAtom, asideStateAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom";
-import { useEffect, useCallback, useMemo } from "react";
+import { asideStateAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom";
+import { useCallback, useMemo } from "react";
 import { 
   IconFilter, 
   IconTable, 
@@ -18,13 +18,19 @@ import {
   IconH3,
   IconH4,
   IconH5,
+  IconClipboard,
+  IconBulb,
 } from "@tabler/icons-react";
 import React from "react";
 
+// TAG:底部快速输入栏
 // 定义所有按钮
 const buttons = [
+  // 基础功能区 - 始终显示
+  { label: "/", content: "/", category: "base", priority: 1 },
+  { label: "粘贴", icon: IconClipboard, command: "paste", category: "base", priority: 2 },
+  { label: "智能选词", icon: IconBulb, command: "smartSelection", category: "base", priority: 3 },
   // 标题
-  { label: "/", content: "/", category: "symbols" }, // 这个置顶
   { label: "H1", icon: IconH1, command: "toggleHeading", args: { level: 1 }, category: "headings" },
   { label: "H2", icon: IconH2, command: "toggleHeading", args: { level: 2 }, category: "headings" },
   { label: "H3", icon: IconH3, command: "toggleHeading", args: { level: 3 }, category: "headings" },
@@ -45,31 +51,95 @@ const buttons = [
   { label: '""', content: ['"', '"'], category: "symbols" },
 ];
 
-// 创建存储筛选状态的 atom
-const quickInputFilterAtom = atomWithStorage("quickInputFilter", {
-  headings: true,
-  blocks: true,
-  symbols: true,
-});
+// 定义筛选模式
+const filterModes = [
+  { name: "全部", key: "all", icon: IconFilter },
+  { name: "标题", key: "headings", icon: IconH1 },
+  { name: "块元素", key: "blocks", icon: IconTable },
+  { name: "符号", key: "symbols", icon: IconCode },
+];
+
+// 筛选模式状态
+const filterModeAtom = atomWithStorage("quickInputFilterMode", 0);
 
 export function QuickInputBar() {
   const { t } = useTranslation();
   const [editor] = useAtom(pageEditorAtom);
-  const [filters, setFilters] = useAtom(quickInputFilterAtom);
-  const sidebarWidths = useAtomValue(sidebarWidthsAtom);
+  const [filterMode, setFilterMode] = useAtom(filterModeAtom);
   const [, setAsideState] = useAtom(asideStateAtom);
   const contentRef = React.useRef<HTMLDivElement>(null);
-
-  // 更新 CSS 变量
-  useEffect(() => {
-    document.documentElement.style.setProperty('--aside-left-width', `${sidebarWidths.leftWidth}px`);
-    document.documentElement.style.setProperty('--aside-right-width', `${sidebarWidths.rightWidth}px`);
-  }, [sidebarWidths]);
 
   const handleInsert = useCallback((button: typeof buttons[0]) => {
     if (!editor) return;
     
-    if (button.command) {
+    if (button.command === "paste") {
+      // 处理粘贴功能
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        navigator.clipboard.readText().then(text => {
+          if (text) {
+            editor.commands.insertContent(text);
+          }
+        }).catch(() => {
+          // 如果剪贴板访问失败，使用 execCommand 作为后备
+          try {
+            document.execCommand('paste');
+          } catch (e) {
+            console.warn('粘贴失败:', e);
+          }
+        });
+      } else {
+        // 如果不支持 clipboard API，直接使用 execCommand
+        try {
+          document.execCommand('paste');
+        } catch (e) {
+          console.warn('粘贴失败，浏览器不支持:', e);
+        }
+      }
+    } else if (button.command === "smartSelection") {
+      // 智能选词功能
+      const { state } = editor;
+      const { selection } = state;
+      const { from, to } = selection;
+      
+      if (from === to) {
+        // 如果没有选择文本，选择当前单词
+        const doc = state.doc;
+        const $pos = doc.resolve(from);
+        const text = $pos.parent.textContent;
+        const start = $pos.parentOffset;
+        
+        // 找到单词边界
+        let wordStart = start;
+        let wordEnd = start;
+        
+        // 向前找单词开始
+        while (wordStart > 0 && /\w/.test(text[wordStart - 1])) {
+          wordStart--;
+        }
+        
+        // 向后找单词结束
+        while (wordEnd < text.length && /\w/.test(text[wordEnd])) {
+          wordEnd++;
+        }
+        
+        // 如果找到了单词，选择它
+        if (wordStart < wordEnd) {
+          const startPos = from - start + wordStart;
+          const endPos = from - start + wordEnd;
+          editor.commands.setTextSelection({ from: startPos, to: endPos });
+        }
+      } else {
+        // 如果已经选择了文本，扩展选择到整行
+        const doc = state.doc;
+        const $from = doc.resolve(from);
+        const $to = doc.resolve(to);
+        
+        // 选择整行
+        const lineStart = $from.start($from.depth);
+        const lineEnd = $to.end($to.depth);
+        editor.commands.setTextSelection({ from: lineStart, to: lineEnd });
+      }
+    } else if (button.command) {
       // 使用命令直接插入
       editor.commands[button.command](button.args);
     } else if (Array.isArray(button.content)) {
@@ -99,14 +169,32 @@ export function QuickInputBar() {
     editor?.chain().focus().run();
   }, [editor, setAsideState]);
 
-  const filteredButtons = useMemo(() => 
-    buttons.filter(button => filters[button.category])
-  , [filters]);
+  const filteredButtons = useMemo(() => {
+    const currentMode = filterModes[filterMode];
+    
+    // 基础功能始终显示
+    const baseButtons = buttons.filter(button => button.category === 'base');
+    
+    if (currentMode.key === 'all') {
+      return buttons;
+    } else {
+      return [...baseButtons, ...buttons.filter(button => button.category === currentMode.key)];
+    }
+  }, [filterMode]);
+
+  // 轮换筛选模式
+  const handleFilterToggle = useCallback((event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setFilterMode(prev => (prev + 1) % filterModes.length);
+  }, [setFilterMode]);
 
   // 防止默认行为，避免编辑器失焦
   const handleMouseDown = useCallback((event: React.MouseEvent) => {
     event.preventDefault();
   }, []);
+
+  const currentFilterMode = filterModes[filterMode];
 
   return (
     <div className={classes.quickInputBar}>
@@ -125,34 +213,15 @@ export function QuickInputBar() {
         ))}
       </div>
       
-      <Menu position="top-end" width={200}>
-        <Menu.Target>
-          <ActionIcon variant="light" className={classes.actionButton} title={t("筛选")}>
-            <IconFilter size={16} />
-          </ActionIcon>
-        </Menu.Target>
-        <Menu.Dropdown>
-          <Menu.Label>{t("显示分类")}</Menu.Label>
-          <Menu.Item
-            onClick={() => setFilters(prev => ({ ...prev, headings: !prev.headings }))}
-            rightSection={filters.headings ? "✓" : ""}
-          >
-            {t("标题")}
-          </Menu.Item>
-          <Menu.Item
-            onClick={() => setFilters(prev => ({ ...prev, blocks: !prev.blocks }))}
-            rightSection={filters.blocks ? "✓" : ""}
-          >
-            {t("块元素")}
-          </Menu.Item>
-          <Menu.Item
-            onClick={() => setFilters(prev => ({ ...prev, symbols: !prev.symbols }))}
-            rightSection={filters.symbols ? "✓" : ""}
-          >
-            {t("符号")}
-          </Menu.Item>
-        </Menu.Dropdown>
-      </Menu>
+      <ActionIcon 
+        variant="light" 
+        className={classes.actionButton} 
+        title={`${t("筛选")}: ${currentFilterMode.name}`}
+        onMouseDown={handleMouseDown}
+        onClick={handleFilterToggle}
+      >
+        <currentFilterMode.icon size={16} />
+      </ActionIcon>
     </div>
   );
 } 

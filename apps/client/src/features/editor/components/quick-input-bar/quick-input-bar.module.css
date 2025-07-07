@@ -8,6 +8,14 @@
   box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
+  padding-inline-start: calc(var(--app-shell-navbar-offset, 0rem) + var(--app-shell-padding));
+  padding-inline-end: calc(var(--app-shell-aside-offset, 0rem) + var(--app-shell-padding));
+  /* padding-top: calc(var(--app-shell-header-offset, 0rem) + var(--app-shell-padding));
+    padding-bottom: calc(var(--app-shell-footer-offset, 0rem) + var(--app-shell-padding)); */
+  --app-shell-transition-duration: 200ms;
+  --app-shell-transition-timing-function: ease;
+  transition-duration: var(--app-shell-transition-duration);
+  transition-timing-function: var(--app-shell-transition-timing-function);
 }
 
 /* 桌面端响应式布局 */
@@ -145,4 +153,4 @@
 [data-mantine-color-scheme='dark'] .actionButton:hover {
   background-color: var(--mantine-color-dark-5) !important;
   border-color: var(--mantine-color-dark-3) !important;
-} 
+}
