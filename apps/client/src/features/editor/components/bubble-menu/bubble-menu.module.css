@@ -1,9 +1,22 @@
 .bubbleMenu {
   display: flex;
   width: fit-content;
+  max-width: calc(100vw - 32px);
   border-radius: 2px;
   border: 1px solid
     light-dark(var(--mantine-color-gray-3), var(--mantine-color-gray-8));
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (max-width: 768px) {
+    max-width: calc(100vw - 16px);
+    gap: 2px;
+  }
 
   .active {
     color: light-dark(var(--mantine-color-blue-8), var(--mantine-color-gray-5));
