@@ -17,3 +17,14 @@
         display: none;
     }
 }
+
+/* 快捷方式按钮组滚动样式 */
+:global(.page-header-menu-scrollable) {
+    scroll-behavior: smooth;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+:global(.page-header-menu-scrollable::-webkit-scrollbar) {
+    display: none; /* Chrome, Safari and Opera */
+}

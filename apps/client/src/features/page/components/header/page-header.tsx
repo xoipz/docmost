@@ -57,7 +57,7 @@ export default function PageHeader({ readOnly }: Props) {
           <Breadcrumb />
         </Group>
 
-        <Group justify="flex-end" h="100%" px="md" wrap="nowrap">
+        <Group justify="flex-end" h="100%" px="md" wrap="nowrap" style={{ minWidth: 0, overflow: "hidden" }}>
           <PageHeaderMenu readOnly={readOnly} />
         </Group>
       </Group>

@@ -86,14 +86,26 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
 
   // TAG:右上角快捷方式小方块
   return (
-    <>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        overflowX: "auto",
+        minWidth: 0,
+        flex: 1,
+        scrollbarWidth: "none",
+        msOverflowStyle: "none"
+      } as React.CSSProperties}
+      className="page-header-menu-scrollable"
+    >
       {yjsConnectionStatus === "disconnected" && (
         <Tooltip
           label={t("Real-time editor connection lost. Retrying...")}
           openDelay={250}
           withArrow
         >
-          <ActionIcon variant="default" c="red" style={{ border: "none" }}>
+          <ActionIcon variant="default" c="red" style={{ border: "none", flexShrink: 0 }}>
             <IconWifiOff size={20} stroke={2} />
           </ActionIcon>
         </Tooltip>
@@ -103,7 +115,7 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
         <Tooltip label={t("Show header")} openDelay={250} withArrow>
           <ActionIcon
             variant="default"
-            style={{ border: "none" }}
+            style={{ border: "none", flexShrink: 0 }}
             onClick={toggleHeaderVisibility}
           >
             <IconLayoutNavbar size={20} stroke={2} />
@@ -127,7 +139,7 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
           <ActionIcon
             variant="default"
             c={keyboardStatus.enabled ? "green" : "red"}
-            style={{ border: "none" }}
+            style={{ border: "none", flexShrink: 0 }}
             onClick={() => {
               if (!keyboardStatus.enabled) {
                 // 尝试重新激活快捷键
@@ -148,7 +160,7 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
         <Tooltip label={t("Undo")} openDelay={250} withArrow>
           <ActionIcon
             variant="default"
-            style={{ border: "none" }}
+            style={{ border: "none", flexShrink: 0 }}
             onClick={handleUndo}
             disabled={!pageEditor || readOnly}
           >
@@ -161,7 +173,7 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
         <Tooltip label={t("Redo")} openDelay={250} withArrow>
           <ActionIcon
             variant="default"
-            style={{ border: "none" }}
+            style={{ border: "none", flexShrink: 0 }}
             onClick={handleRedo}
             disabled={!pageEditor || readOnly}
           >
@@ -174,7 +186,7 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
         <Tooltip label={t("Comments")} openDelay={250} withArrow>
           <ActionIcon
             variant="default"
-            style={{ border: "none" }}
+            style={{ border: "none", flexShrink: 0 }}
             onClick={() => toggleAside("comments")}
           >
             <IconMessage size={20} stroke={2} />
@@ -186,7 +198,7 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
         <Tooltip label={t("Table of contents")} openDelay={250} withArrow>
           <ActionIcon
             variant="default"
-            style={{ border: "none" }}
+            style={{ border: "none", flexShrink: 0 }}
             onClick={() => toggleAside("toc")}
           >
             <IconList size={20} stroke={2} />
@@ -194,8 +206,10 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
         </Tooltip>
       )}
 
-      <PageActionMenu readOnly={readOnly} />
-    </>
+      <div style={{ flexShrink: 0 }}>
+        <PageActionMenu readOnly={readOnly} />
+      </div>
+    </div>
   );
 }
 
