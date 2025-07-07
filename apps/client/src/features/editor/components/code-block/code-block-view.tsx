@@ -16,6 +16,7 @@ const MermaidView = React.lazy(
 // 我们现在假设你给 PageHeader 添加了 'docmost-page-header-sticky-ref' 这个唯一的类名
 const PAGE_HEADER_SELECTOR = '.docmost-page-header-sticky-ref'; 
 const STICKY_OFFSET_FROM_HEADER_BOTTOM = 4; // 10px
+const STICKY_HYSTERESIS = 8; // 滞后缓冲区，防止抖动
 
 export default function CodeBlockView(props: NodeViewProps) {
   const { t } = useTranslation();
@@ -28,6 +29,7 @@ export default function CodeBlockView(props: NodeViewProps) {
 
   const copyButtonContainerRef = useRef<HTMLDivElement>(null);
   const nodeViewWrapperRef = useRef<HTMLDivElement>(null); // Ref for the NodeViewWrapper
+  const stickyStateRef = useRef<boolean>(false); // 跟踪当前吸顶状态
 
   useEffect(() => {
     const updateSelection = () => {
@@ -60,7 +62,8 @@ export default function CodeBlockView(props: NodeViewProps) {
       const pageHeaderEl = document.querySelector(PAGE_HEADER_SELECTOR);
       if (!pageHeaderEl) {
         // PageHeader 不存在，取消吸顶
-        if (copyButtonEl.classList.contains(classes.stickyActive)) {
+        if (stickyStateRef.current) {
+          stickyStateRef.current = false;
           copyButtonEl.classList.remove(classes.stickyActive);
           copyButtonEl.style.position = '';
           copyButtonEl.style.top = '';
@@ -74,31 +77,34 @@ export default function CodeBlockView(props: NodeViewProps) {
       const codeBlockRect = codeBlockEl.getBoundingClientRect();
       // 获取按钮当前的实际渲染宽度，如果它还未fixed，则为原始宽度
       const currentButtonWidth = copyButtonEl.offsetWidth || lastKnownButtonWidth;
-      if(currentButtonWidth > 0 && !copyButtonEl.classList.contains(classes.stickyActive)) {
+      if(currentButtonWidth > 0 && !stickyStateRef.current) {
         lastKnownButtonWidth = currentButtonWidth;
       }
 
-
       const stickTriggerY = pageHeaderRect.bottom + STICKY_OFFSET_FROM_HEADER_BOTTOM;
 
-      // 吸顶条件：
-      // 1. 代码块的顶部已经滚动到或超过了吸顶触发点。
-      // 2. 代码块的底部仍然在吸顶触发点（加上按钮高度）的下方，以确保按钮仍然有意义地附着于代码块内容。
-      const shouldBeSticky =
-        codeBlockRect.top < stickTriggerY &&
-        codeBlockRect.bottom > stickTriggerY + copyButtonEl.offsetHeight;
+      // 改进的吸顶条件判断，使用滞后机制防止抖动
+      let shouldBeSticky;
+      if (stickyStateRef.current) {
+        // 如果已经是吸顶状态，使用更宽松的条件来保持吸顶
+        shouldBeSticky = 
+          codeBlockRect.top < stickTriggerY + STICKY_HYSTERESIS &&
+          codeBlockRect.bottom > stickTriggerY + copyButtonEl.offsetHeight - STICKY_HYSTERESIS;
+      } else {
+        // 如果还不是吸顶状态，使用标准条件来触发吸顶
+        shouldBeSticky = 
+          codeBlockRect.top < stickTriggerY &&
+          codeBlockRect.bottom > stickTriggerY + copyButtonEl.offsetHeight;
+      }
 
-      if (shouldBeSticky) {
-        if (!copyButtonEl.classList.contains(classes.stickyActive)) {
-          copyButtonEl.classList.add(classes.stickyActive);
-          copyButtonEl.style.width = `${lastKnownButtonWidth}px`; // 保持宽度
-        }
+      if (shouldBeSticky && !stickyStateRef.current) {
+        stickyStateRef.current = true;
+        copyButtonEl.classList.add(classes.stickyActive);
+        copyButtonEl.style.width = `${lastKnownButtonWidth}px`; // 保持宽度
         copyButtonEl.style.position = 'fixed';
         copyButtonEl.style.top = `${stickTriggerY}px`;
 
         // 水平定位：尝试将按钮定位在代码块的右侧
-        // 这是相对于视口的 left 值
-        // 假设按钮在 .menuGroup 内，并且 .menuGroup 与代码块右对齐
         const menuGroupEl = copyButtonEl.parentElement; // .menuGroup
         if (menuGroupEl) {
             // 将按钮的右边缘（包括 margin）与代码块的右边缘对齐
@@ -107,15 +113,13 @@ export default function CodeBlockView(props: NodeViewProps) {
             // 如果没有 menuGroup，则默认行为或需要其他定位策略
             copyButtonEl.style.left = `${codeBlockRect.left}px`; // 应急定位
         }
-
-      } else {
-        if (copyButtonEl.classList.contains(classes.stickyActive)) {
-          copyButtonEl.classList.remove(classes.stickyActive);
-          copyButtonEl.style.position = '';
-          copyButtonEl.style.top = '';
-          copyButtonEl.style.left = '';
-          copyButtonEl.style.width = '';
-        }
+      } else if (!shouldBeSticky && stickyStateRef.current) {
+        stickyStateRef.current = false;
+        copyButtonEl.classList.remove(classes.stickyActive);
+        copyButtonEl.style.position = '';
+        copyButtonEl.style.top = '';
+        copyButtonEl.style.left = '';
+        copyButtonEl.style.width = '';
       }
     };
 
@@ -141,8 +145,9 @@ export default function CodeBlockView(props: NodeViewProps) {
       if (resizeObserver) {
         resizeObserver.disconnect();
       }
-      // 清理样式
-      if (copyButtonEl && copyButtonEl.classList.contains(classes.stickyActive)) {
+      // 清理样式和状态
+      if (copyButtonEl && stickyStateRef.current) {
+        stickyStateRef.current = false;
         copyButtonEl.classList.remove(classes.stickyActive);
         copyButtonEl.style.position = '';
         copyButtonEl.style.top = '';
