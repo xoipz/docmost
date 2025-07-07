@@ -17,6 +17,7 @@ import {
   IconSettings,
   IconChevronUp,
   IconChevronDown,
+  IconLayoutSidebarLeftCollapse,
 } from "@tabler/icons-react";
 import classes from "./space-sidebar.module.css";
 import React, { useMemo, useState, useEffect, useRef } from "react";
@@ -39,7 +40,11 @@ import PageImportModal from "@/features/page/components/page-import-modal.tsx";
 import { useTranslation } from "react-i18next";
 import { SwitchSpace } from "./switch-space";
 import ExportModal from "@/components/common/export-modal";
-import { mobileSidebarAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
+import { 
+  mobileSidebarAtom, 
+  desktopSidebarAtom,
+  headerVisibleAtom
+} from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
 import { useToggleSidebar } from "@/components/layouts/global/hooks/hooks/use-toggle-sidebar.ts";
 import { searchSpotlight } from "@/features/search/constants";
 
@@ -51,6 +56,9 @@ export function SpaceSidebar() {
     useDisclosure(false);
   const [mobileSidebarOpened] = useAtom(mobileSidebarAtom);
   const toggleMobileSidebar = useToggleSidebar(mobileSidebarAtom);
+  const [desktopSidebarOpened] = useAtom(desktopSidebarAtom);
+  const toggleDesktopSidebar = useToggleSidebar(desktopSidebarAtom);
+  const [headerVisible] = useAtom(headerVisibleAtom);
 
   const { spaceSlug } = useParams();
   const { data: space, isLoading, isError } = useGetSpaceBySlugQuery(spaceSlug);
@@ -88,6 +96,17 @@ export function SpaceSidebar() {
     const newState = !menuCollapsed;
     setMenuCollapsed(newState);
     localStorage.setItem('docmost-menu-collapsed', JSON.stringify(newState));
+  };
+
+  // 处理侧边栏收起
+  const handleSidebarCollapse = () => {
+    if (window.innerWidth < 768) {
+      // 移动端收起移动侧边栏
+      toggleMobileSidebar();
+    } else {
+      // 桌面端收起桌面侧边栏
+      toggleDesktopSidebar();
+    }
   };
 
   if (!space) {
@@ -145,7 +164,27 @@ export function SpaceSidebar() {
             marginBottom: 3,
           }}
         >
-          <SwitchSpace spaceName={space?.name} spaceSlug={space?.slug} />
+          {!headerVisible ? (
+            <Group gap={8} align="center" wrap="nowrap">
+              <Tooltip label={t("收起侧边栏")} withArrow position="right">
+                <ActionIcon
+                  variant="subtle"
+                  size={36}
+                  onClick={handleSidebarCollapse}
+                  aria-label={t("收起侧边栏")}
+                  color="gray"
+                  style={{ flexShrink: 0 }}
+                >
+                  <IconLayoutSidebarLeftCollapse size={20} />
+                </ActionIcon>
+              </Tooltip>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <SwitchSpace spaceName={space?.name} spaceSlug={space?.slug} />
+              </div>
+            </Group>
+          ) : (
+            <SwitchSpace spaceName={space?.name} spaceSlug={space?.slug} />
+          )}
         </div>
 
         <div className={classes.section}>
