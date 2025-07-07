@@ -54,7 +54,7 @@ export function AppHeader() {
     </Link>
   );
 
-  // TAG:AppHeader
+  // TAG:App-Header
   return (
     <>
       <Group h="100%" justify="space-between" wrap={"nowrap"}>

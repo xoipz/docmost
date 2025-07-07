@@ -23,7 +23,7 @@ import {
 } from "@tabler/icons-react";
 import React from "react";
 
-// TAG:底部快速输入栏
+
 // 定义所有按钮
 const buttons = [
   // 基础功能区 - 始终显示
@@ -62,6 +62,7 @@ const filterModes = [
 // 筛选模式状态
 const filterModeAtom = atomWithStorage("quickInputFilterMode", 0);
 
+// TAG:App - 底部快速输入栏
 export function QuickInputBar() {
   const { t } = useTranslation();
   const [editor] = useAtom(pageEditorAtom);

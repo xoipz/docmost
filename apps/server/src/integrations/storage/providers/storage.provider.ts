@@ -42,7 +42,6 @@ export const storageDriverConfigProvider = {
 
       case StorageOption.S3:
         { 
-          // TAG:修复阿里云oss无法使用的bug
           const s3Config = {
           driver,
           config: {

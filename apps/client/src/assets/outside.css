@@ -7,7 +7,6 @@
 }
 
 
-/* TODO:Title 标题css */
 .mantine-Container-root > div:first-of-type .tiptap.ProseMirror h1::before {
   content: none !important;
 }

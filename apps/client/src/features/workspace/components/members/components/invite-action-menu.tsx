@@ -26,7 +26,7 @@ export default function InviteActionMenu({ invitationId }: Props) {
   const handleCopyLink = async (invitationId: string) => {
     try {
       const link = await getInviteLink({ invitationId });
-      // TAG:邀请链接位置
+      // TAG:InviteActionMenu:邀请链接位置
       const inviteUrl = new URL(link.inviteLink);
       const exportUrl = new URL(getExportUrl());
       

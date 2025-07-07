@@ -455,7 +455,7 @@ export default function PageEditor({
     };
   }, [editor, keyboardShortcutsStatus]);
 
-  // TAG:page-editor
+  // TAG:Page-editor
   return isCollabReady ? (
     <div>
       <div ref={menuContainerRef}>

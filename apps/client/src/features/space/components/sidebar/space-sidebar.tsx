@@ -323,20 +323,7 @@ export function SpaceSidebar() {
           style={{ flex: 1,zIndex: 9,marginTop: -30 }} 
           onContextMenu={handleContextMenu}
         />
-        {/* ,minHeight: '26px' */}
-        {/* TODO:待定 */}
-        {/* <div style={{
-          position:"absolute",
-          bottom:"8px",
-          left:"50%",
-          transform:"translateX(-50%)",
-          color: "var(--mantine-color-dimmed)",
-          whiteSpace:"nowrap",
-          fontSize: "0.75rem",
-          fontWeight:"bold"
-          }}>
-            Powered By Docmost
-        </div> */}
+        
         <Menu
           opened={isMenuOpen}
           onClose={() => setIsMenuOpen(false)}
