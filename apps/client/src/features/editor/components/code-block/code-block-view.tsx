@@ -198,6 +198,21 @@ export default function CodeBlockView(props: NodeViewProps) {
     }
   };
 
+  // 处理代码块内部复制事件，强制使用纯文本复制
+  const handleInternalCopy = (event: React.ClipboardEvent<HTMLPreElement>) => {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const selectedText = selection.toString();
+      if (selectedText && event.clipboardData) {
+        event.preventDefault();
+        // 只设置纯文本到剪贴板
+        event.clipboardData.setData('text/plain', selectedText);
+        // 清除HTML格式数据
+        event.clipboardData.setData('text/html', '');
+      }
+    }
+  };
+
   return (
     <NodeViewWrapper className="codeBlock" ref={nodeViewWrapperRef}>
       <Group
@@ -232,6 +247,7 @@ export default function CodeBlockView(props: NodeViewProps) {
 
       <pre
         spellCheck="false"
+        onCopy={handleInternalCopy}
         hidden={
           ((language === "mermaid" && !editor.isEditable) ||
             (language === "mermaid" && !isSelected)) &&
