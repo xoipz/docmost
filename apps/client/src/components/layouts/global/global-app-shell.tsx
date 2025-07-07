@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import SettingsSidebar from "@/components/settings/settings-sidebar.tsx";
 import { useAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import {
   asideStateAtom,
   desktopSidebarAtom,
@@ -16,7 +17,6 @@ import Aside from "@/components/layouts/global/aside.tsx";
 import classes from "./app-shell.module.css";
 import { useTrialEndAction } from "@/ee/hooks/use-trial-end-action.tsx";
 import { useToggleSidebar } from "@/components/layouts/global/hooks/hooks/use-toggle-sidebar.ts";
-import { pageHeaderButtonsAtom } from "@/features/page/atoms/page-header-atoms.ts";
 import { IconEye } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 
@@ -33,7 +33,6 @@ export default function GlobalAppShell({
   const [{ isAsideOpen }, setAsideState] = useAtom(asideStateAtom);
   const [sidebarWidth, setSidebarWidth] = useAtom(sidebarWidthAtom);
   const [headerVisible, setHeaderVisible] = useAtom(headerVisibleAtom);
-  const [{ isPageHeaderVisible }] = useAtom(pageHeaderButtonsAtom);
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLElement | null>(null);
 
@@ -188,6 +187,8 @@ export default function GlobalAppShell({
           <Aside />
         </AppShell.Aside>
       )}
+      
+      {/* 底部工具栏移回页面编辑器中 */}
     </AppShell>
   );
 }

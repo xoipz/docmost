@@ -27,6 +27,7 @@ import {
   keyboardShortcutsStatusAtom,
 } from "@/features/editor/atoms/editor-atoms";
 import { asideStateAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom";
+import { tabActionsAtom, multiWindowTabsAtom } from "@/features/editor/atoms/multi-window-atoms";
 import {
   activeCommentIdAtom,
   showCommentPopupAtom,
@@ -57,6 +58,8 @@ import { jwtDecode } from "jwt-decode";
 import { TextSelection } from "@tiptap/pm/state";
 import { pageHeaderButtonsAtom } from "@/features/page/atoms/page-header-atoms";
 import { QuickInputBar } from "./components/quick-input-bar/quick-input-bar";
+import { MultiWindowTabs } from "./components/multi-window-tabs/multi-window-tabs";
+import { globalBottomToolbarAtom, syncBottomToolbarAtom } from "./atoms/bottom-toolbar-atoms";
 
 interface PageEditorProps {
   pageId: string;
@@ -90,7 +93,11 @@ export default function PageEditor({
   const { pageSlug } = useParams();
   const slugId = extractPageSlugId(pageSlug);
   const headerButtons = useAtomValue(pageHeaderButtonsAtom);
+  const bottomToolbar = useAtomValue(globalBottomToolbarAtom);
+  const [, syncBottomToolbar] = useAtom(syncBottomToolbarAtom);
   const [keyboardShortcutsStatus, setKeyboardShortcutsStatus] = useAtom(keyboardShortcutsStatusAtom);
+  const [, dispatchTabAction] = useAtom(tabActionsAtom);
+  const tabs = useAtomValue(multiWindowTabsAtom);
   const isMountedRef = useRef(false);
 
   useEffect(() => {
@@ -99,6 +106,47 @@ export default function PageEditor({
       isMountedRef.current = false;
     };
   }, []);
+
+  // 同步页面设置到全局底部工具栏状态
+  useEffect(() => {
+    syncBottomToolbar({
+      showMultiWindow: headerButtons.showMultiWindow,
+      showQuickInputBar: headerButtons.showQuickInputBar,
+    });
+  }, [headerButtons.showMultiWindow, headerButtons.showQuickInputBar, syncBottomToolbar]);
+
+  // 管理多窗口标签 - 移除自动添加逻辑
+  // 现在只有用户点击"+"按钮才会添加当前页面到标签栏
+
+  // 监听滚动位置变化，自动保存当前激活标签的滚动位置
+  useEffect(() => {
+    let scrollTimeout: NodeJS.Timeout;
+    
+    const handleScroll = () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        const currentPageId = slugId || pageSlug;
+        if (currentPageId) {
+          // 只有当前页面是激活标签时才保存滚动位置
+          const currentTab = tabs.find(tab => tab.id === currentPageId);
+          if (currentTab && currentTab.isActive) {
+            const scrollY = window.scrollY;
+            dispatchTabAction({
+              type: "UPDATE_SCROLL_POSITION",
+              payload: { tabId: currentPageId, scrollPosition: scrollY }
+            });
+          }
+        }
+      }, 100); // 防抖，避免过于频繁的更新
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(scrollTimeout);
+    };
+  }, [slugId, pageSlug, dispatchTabAction, tabs]);
 
   const localProvider = useMemo(() => {
     const provider = new IndexeddbPersistence(documentName, ydoc);
@@ -430,7 +478,11 @@ export default function PageEditor({
         {showCommentPopup && <CommentDialog editor={editor} pageId={pageId} />}
       </div>
 
-      {headerButtons.showQuickInputBar && <QuickInputBar />}
+      {/* 底部工具栏 - 使用全局状态 */}
+      <div>
+        {bottomToolbar.showMultiWindow && <MultiWindowTabs />}
+        {bottomToolbar.showQuickInputBar && <QuickInputBar />}
+      </div>
 
       <div
         onClick={() => {

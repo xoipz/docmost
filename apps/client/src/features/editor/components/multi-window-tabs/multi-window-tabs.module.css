@@ -1,0 +1,178 @@
+.multiWindowContainer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: var(--quick-input-bar-height, 0px);
+  background: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8));
+  border-top: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  padding: 4px 8px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  z-index: 100;
+  transition: bottom 0.2s ease;
+  padding-inline-start: calc(var(--app-shell-navbar-offset, 0rem) + var(--app-shell-padding));
+  padding-inline-end: calc(var(--app-shell-aside-offset, 0rem) + var(--app-shell-padding));
+  margin-bottom: -4px;
+}
+
+.tabsContainer {
+  width: 100%;
+  align-items: center;
+  display: flex;
+}
+
+.scrollArea {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.tabsGroup {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-6));
+  border: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 80px;
+  max-width: 200px;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.tab:hover {
+  background: light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-5));
+  border-color: light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-3));
+}
+
+.activeTab {
+  background: light-dark(var(--mantine-color-blue-1), var(--mantine-color-blue-9)) !important;
+  border-color: light-dark(var(--mantine-color-blue-3), var(--mantine-color-blue-7)) !important;
+  color: light-dark(var(--mantine-color-blue-9), white);
+}
+
+.activeTab:hover {
+  background: light-dark(var(--mantine-color-blue-2), var(--mantine-color-blue-8)) !important;
+}
+
+.tabText {
+  flex: 1;
+  min-width: 0;
+  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-gray-2));
+  font-weight: 500;
+}
+
+.activeTab .tabText {
+  color: light-dark(var(--mantine-color-blue-9), white);
+}
+
+.tabButtons {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.tabButton {
+  opacity: 1;
+  transition: background-color 0.2s ease;
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
+  color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-gray-4));
+}
+
+.tabButton:hover {
+  background: light-dark(rgba(0, 0, 0, 0.05), rgba(255, 255, 255, 0.1)) !important;
+}
+
+.tabButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.closeButton {
+  opacity: 1;
+  transition: background-color 0.2s ease;
+  width: 16px !important;
+  height: 16px !important;
+  min-width: 16px !important;
+  min-height: 16px !important;
+  color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-gray-4));
+}
+
+.closeButton:hover {
+  background: light-dark(rgba(255, 0, 0, 0.1), rgba(255, 255, 255, 0.1)) !important;
+}
+
+.scrollButton {
+  background: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-6));
+  border: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-gray-4));
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+}
+
+.scrollButton:hover {
+  background: light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-5));
+  color: light-dark(var(--mantine-color-gray-8), var(--mantine-color-gray-2));
+}
+
+.newTabButton {
+  background: light-dark(var(--mantine-color-blue-1), var(--mantine-color-blue-9));
+  border: 1px solid light-dark(var(--mantine-color-blue-3), var(--mantine-color-blue-7));
+  color: light-dark(var(--mantine-color-blue-9), white);
+  width: 24px !important;
+  height: 24px !important;
+  min-width: 24px !important;
+  min-height: 24px !important;
+}
+
+.newTabButton:hover {
+  background: light-dark(var(--mantine-color-blue-2), var(--mantine-color-blue-8));
+}
+
+/* 手机端适配 */
+@media (max-width: 768px) {
+  .multiWindowContainer {
+    padding: 2px 4px;
+    min-height: 32px;
+  }
+  
+  .tab {
+    padding: 2px 6px;
+    min-width: 60px;
+    max-width: 120px;
+  }
+  
+  .tabText {
+    font-size: 11px;
+  }
+  
+  .scrollButton, .newTabButton {
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    min-height: 20px !important;
+  }
+  
+  .tabButton, .closeButton {
+    width: 14px !important;
+    height: 14px !important;
+    min-width: 14px !important;
+    min-height: 14px !important;
+  }
+}

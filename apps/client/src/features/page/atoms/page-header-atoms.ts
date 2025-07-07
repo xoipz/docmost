@@ -10,6 +10,7 @@ const defaultSettings = {
   showQuickInputBar: false,
   showShareButton: false,
   isPageHeaderVisible: false,
+  showMultiWindow: false,
 };
 
 export const pageHeaderButtonsAtom = atomWithStorage(

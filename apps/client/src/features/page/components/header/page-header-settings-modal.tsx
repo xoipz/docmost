@@ -12,6 +12,7 @@ import {
   IconKeyboard,
   IconLayoutNavbar,
   IconShare,
+  IconLayout,
 } from "@tabler/icons-react";
 
 interface PageHeaderSettingsModalProps {
@@ -156,6 +157,20 @@ export default function PageHeaderSettingsModal({
             checked={headerButtons.showQuickInputBar}
             onChange={(e) => {
               setHeaderButtons({ ...headerButtons, showQuickInputBar: e.currentTarget.checked });
+            }}
+            size="sm"
+          />
+        </Group>
+
+        <Group wrap="nowrap" justify="space-between" w="100%">
+          <Group gap="xs">
+            <IconLayout size={16} />
+            <Text>{t("Show multi-window tabs")}</Text>
+          </Group>
+          <Switch
+            checked={headerButtons.showMultiWindow}
+            onChange={(e) => {
+              setHeaderButtons({ ...headerButtons, showMultiWindow: e.currentTarget.checked });
             }}
             size="sm"
           />
