@@ -101,6 +101,5 @@
   gap: 8px;
   overflow-x: auto;
   min-width: 0;
-  flex: 1;
   scrollbar-width: none;
 }
