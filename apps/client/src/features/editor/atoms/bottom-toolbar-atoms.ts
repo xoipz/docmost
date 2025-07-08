@@ -12,6 +12,14 @@ export const syncBottomToolbarAtom = atom(
   (get) => get(globalBottomToolbarAtom),
   (get, set, update: { showMultiWindow?: boolean; showQuickInputBar?: boolean }) => {
     const current = get(globalBottomToolbarAtom);
-    set(globalBottomToolbarAtom, { ...current, ...update });
+    const newState = { ...current, ...update };
+    
+    // 只有在状态真正改变时才更新，避免不必要的重新渲染
+    if (
+      current.showMultiWindow !== newState.showMultiWindow || 
+      current.showQuickInputBar !== newState.showQuickInputBar
+    ) {
+      set(globalBottomToolbarAtom, newState);
+    }
   }
 );

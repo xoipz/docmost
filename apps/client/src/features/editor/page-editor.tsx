@@ -60,6 +60,7 @@ import { pageHeaderButtonsAtom } from "@/features/page/atoms/page-header-atoms";
 import { QuickInputBar } from "./components/quick-input-bar/quick-input-bar";
 import { MultiWindowTabs } from "./components/multi-window-tabs/multi-window-tabs";
 import { globalBottomToolbarAtom, syncBottomToolbarAtom } from "./atoms/bottom-toolbar-atoms";
+import { Loader, Center, Box } from "@mantine/core";
 
 interface PageEditorProps {
   pageId: string;
@@ -90,6 +91,7 @@ export default function PageEditor({
   const { isIdle, resetIdle } = useIdle(FIVE_MINUTES, { initialState: false });
   const documentState = useDocumentVisibility();
   const [isCollabReady, setIsCollabReady] = useState(false);
+  const [showLoadingState, setShowLoadingState] = useState(true);
   const { pageSlug } = useParams();
   const slugId = extractPageSlugId(pageSlug);
   const headerButtons = useAtomValue(pageHeaderButtonsAtom);
@@ -102,17 +104,35 @@ export default function PageEditor({
 
   useEffect(() => {
     isMountedRef.current = true;
+    
+    // 页面切换时显示加载状态
+    setShowLoadingState(true);
+    setIsCollabReady(false);
+    
+    // 设置最大加载时间，防止loading一直显示
+    const maxLoadingTimeout = setTimeout(() => {
+      if (isMountedRef.current) {
+        setShowLoadingState(false);
+      }
+    }, 3000); // 最多3秒后强制隐藏loading
+    
     return () => {
       isMountedRef.current = false;
+      clearTimeout(maxLoadingTimeout);
     };
-  }, []);
+  }, [pageId]); // 当 pageId 变化时重置加载状态
 
-  // 同步页面设置到全局底部工具栏状态
+  // 同步页面设置到全局底部工具栏状态 - 避免频繁更新导致闪烁
   useEffect(() => {
-    syncBottomToolbar({
-      showMultiWindow: headerButtons.showMultiWindow,
-      showQuickInputBar: headerButtons.showQuickInputBar,
-    });
+    // 使用 setTimeout 延迟同步，避免在页面切换时的闪烁
+    const syncTimeout = setTimeout(() => {
+      syncBottomToolbar({
+        showMultiWindow: headerButtons.showMultiWindow,
+        showQuickInputBar: headerButtons.showQuickInputBar,
+      });
+    }, 0);
+
+    return () => clearTimeout(syncTimeout);
   }, [headerButtons.showMultiWindow, headerButtons.showQuickInputBar, syncBottomToolbar]);
 
   // 管理多窗口标签 - 移除自动添加逻辑
@@ -298,7 +318,8 @@ export default function PageEditor({
   useEffect(() => {
     setActiveCommentId(null);
     setShowCommentPopup(false);
-    setAsideState({ tab: "", isAsideOpen: false });
+    // 只在需要时重置侧边栏，避免影响底部工具栏状态
+    setAsideState(prev => ({ ...prev, tab: "", isAsideOpen: false }));
   }, [pageId]);
 
   useEffect(() => {
@@ -348,11 +369,40 @@ export default function PageEditor({
       ) {
         if (isMountedRef.current) {
           setIsCollabReady(true);
+          // loading关闭由上面的统一逻辑处理
         }
       }
     }, 500);
     return () => clearTimeout(collabReadyTimeout);
-  }, [isRemoteSynced, isLocalSynced, remoteProvider?.status]);
+  }, [isRemoteSynced, isLocalSynced, remoteProvider?.status, isCollabReady, isSynced]);
+
+  // 简化的loading关闭逻辑 - 多个条件任意一个满足就关闭
+  useEffect(() => {
+    if (!showLoadingState) return;
+
+    const shouldCloseLoading = 
+      isCollabReady || // 协作准备就绪
+      (editor && isLocalSynced) || // 编辑器创建且本地同步完成
+      (isLocalSynced && isRemoteSynced); // 本地和远程都同步完成
+
+    if (shouldCloseLoading) {
+      console.log('Loading关闭条件满足:', {
+        isCollabReady,
+        hasEditor: !!editor,
+        isLocalSynced,
+        isRemoteSynced
+      });
+      
+      const closeTimeout = setTimeout(() => {
+        if (isMountedRef.current) {
+          setShowLoadingState(false);
+          console.log('Loading已关闭');
+        }
+      }, 200); // 短暂延迟确保渲染稳定
+      
+      return () => clearTimeout(closeTimeout);
+    }
+  }, [showLoadingState, isCollabReady, editor, isLocalSynced, isRemoteSynced]);
 
   useEffect(() => {
     if (!editor) return;
@@ -456,52 +506,64 @@ export default function PageEditor({
   }, [editor, keyboardShortcutsStatus]);
 
   // TAG:Page-editor
-  return isCollabReady ? (
+  return (
     <div>
-      <div ref={menuContainerRef}>
-        <EditorContent editor={editor} />
+      {showLoadingState && (
+        <Center py="xl" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1000 }}>
+          <Loader size="md" />
+        </Center>
+      )}
+      
+      {isCollabReady ? (
+        <div style={{ opacity: showLoadingState ? 0.3 : 1, transition: 'opacity 0.2s ease-in-out' }}>
+          <div ref={menuContainerRef}>
+            <EditorContent editor={editor} />
 
-        {editor && editor.isEditable && (
-          <div>
-            <EditorBubbleMenu editor={editor} />
-            <TableMenu editor={editor} />
-            <TableCellMenu editor={editor} appendTo={menuContainerRef} />
-            <ImageMenu editor={editor} />
-            <VideoMenu editor={editor} />
-            <CalloutMenu editor={editor} />
-            <ExcalidrawMenu editor={editor} />
-            <DrawioMenu editor={editor} />
-            <LinkMenu editor={editor} appendTo={menuContainerRef} />
+            {editor && editor.isEditable && (
+              <div>
+                <EditorBubbleMenu editor={editor} />
+                <TableMenu editor={editor} />
+                <TableCellMenu editor={editor} appendTo={menuContainerRef} />
+                <ImageMenu editor={editor} />
+                <VideoMenu editor={editor} />
+                <CalloutMenu editor={editor} />
+                <ExcalidrawMenu editor={editor} />
+                <DrawioMenu editor={editor} />
+                <LinkMenu editor={editor} appendTo={menuContainerRef} />
+              </div>
+            )}
+
+            {showCommentPopup && <CommentDialog editor={editor} pageId={pageId} />}
           </div>
-        )}
 
-        {showCommentPopup && <CommentDialog editor={editor} pageId={pageId} />}
-      </div>
+          <div
+            onClick={() => {
+              editor.commands.focus("end");
+              // 确保光标在最后一个节点之后
+              const { state } = editor.view;
+              const { tr } = state;
+              tr.setSelection(TextSelection.create(state.doc, state.doc.content.size));
+              editor.view.dispatch(tr);
+            }}
+            style={{ paddingBottom: "20vh" }}
+          ></div>
+        </div>
+      ) : (
+        <Box style={{ opacity: showLoadingState ? 0.3 : 0.6, transition: 'opacity 0.2s ease-in-out' }}>
+          <EditorProvider
+            editable={false}
+            immediatelyRender={true}
+            extensions={mainExtensions}
+            content={content}
+          ></EditorProvider>
+        </Box>
+      )}
 
-      {/* 底部工具栏 - 使用全局状态 */}
+      {/* 底部工具栏始终显示，保持一致性 */}
       <div>
         {bottomToolbar.showMultiWindow && <MultiWindowTabs />}
         {bottomToolbar.showQuickInputBar && <QuickInputBar />}
       </div>
-
-      <div
-        onClick={() => {
-          editor.commands.focus("end");
-          // 确保光标在最后一个节点之后
-          const { state } = editor.view;
-          const { tr } = state;
-          tr.setSelection(TextSelection.create(state.doc, state.doc.content.size));
-          editor.view.dispatch(tr);
-        }}
-        style={{ paddingBottom: "20vh" }}
-      ></div>
     </div>
-  ) : (
-    <EditorProvider
-      editable={false}
-      immediatelyRender={true}
-      extensions={mainExtensions}
-      content={content}
-    ></EditorProvider>
   );
 }

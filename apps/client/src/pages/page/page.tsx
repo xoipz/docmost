@@ -57,7 +57,6 @@ export default function Page() {
         />
 
         <FullEditor
-          key={page.id}
           pageId={page.id}
           title={page.title}
           content={page.content}
