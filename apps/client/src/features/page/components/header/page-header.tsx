@@ -28,7 +28,7 @@ export default function PageHeader({ readOnly }: Props) {
   // TAG:Page-Header
   return (
     <div className={`${classes.header} docmost-page-header-sticky-ref`}>
-      <Group justify="space-between" h="100%" px="md" wrap="nowrap">
+      <Group justify="space-between" h="100%"  wrap="nowrap">
         <Group wrap="nowrap">
           {!headerVisible && (
             <Tooltip label={t("Sidebar toggle")}>
@@ -57,7 +57,7 @@ export default function PageHeader({ readOnly }: Props) {
           <Breadcrumb />
         </Group>
 
-        <Group justify="flex-end" h="100%" px="md" wrap="nowrap" style={{ minWidth: 0, overflow: "hidden" }}>
+        <Group justify="flex-end" h="100%" wrap="nowrap" style={{ minWidth: 0, overflow: "hidden"}}>
           <PageHeaderMenu readOnly={readOnly} />
         </Group>
       </Group>

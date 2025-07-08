@@ -67,8 +67,8 @@ export function AppHeader() {
                   opened={mobileOpened}
                   onClick={toggleMobile}
                   hiddenFrom="sm"
-                  size="sm"
-                  ml={30}
+                  size="md"
+                  ml={20}
                 />
               </Tooltip>
 
@@ -78,12 +78,13 @@ export function AppHeader() {
                   opened={desktopOpened}
                   onClick={toggleDesktop}
                   visibleFrom="sm"
-                  size="sm"
-                  ml={30}
+                  size="md"
+                  ml={20}
                 />
               </Tooltip>
             </>
           )}
+          {isHomeRoute && <div style={{ width: '10px'}}></div>}
 
           {/* <Text
             size="lg"

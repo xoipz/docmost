@@ -165,7 +165,7 @@ export function SpaceSidebar() {
           }}
         >
           {!headerVisible ? (
-            <Group gap={8} align="center" wrap="nowrap">
+            <Group gap={0} ml={0} align="center" wrap="nowrap">
               <Tooltip label={t("收起侧边栏")} withArrow position="right">
                 <ActionIcon
                   variant="subtle"
@@ -173,7 +173,7 @@ export function SpaceSidebar() {
                   onClick={handleSidebarCollapse}
                   aria-label={t("收起侧边栏")}
                   color="gray"
-                  style={{ flexShrink: 0 }}
+                  style={{ flexShrink: 0, width: 48 }}
                 >
                   <IconLayoutSidebarLeftCollapse size={20} />
                 </ActionIcon>

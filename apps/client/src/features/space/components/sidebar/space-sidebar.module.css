@@ -32,7 +32,7 @@
 .menuItems {
     padding-left: calc(var(--mantine-spacing-md) - var(--mantine-spacing-xs));
     padding-right: calc(var(--mantine-spacing-md) - var(--mantine-spacing-xs));
-    padding-bottom: var(--mantine-spacing-md);
+    padding-bottom: calc(var(--mantine-spacing-md) - var(--mantine-spacing-xs));
 }
 
 .menu {

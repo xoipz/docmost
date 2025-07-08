@@ -146,10 +146,13 @@
 
 .actionButton:hover {
   background-color: var(--mantine-color-gray-0) !important;
-  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  scale: 1.05;
 }
 
 [data-mantine-color-scheme='dark'] .actionButton:hover {
   background-color: var(--mantine-color-dark-5) !important;
   border-color: var(--mantine-color-dark-3) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  scale: 1.05;
 }
