@@ -17,6 +17,7 @@ import { queryClient } from "@/main.tsx";
 import { IPage } from "@/features/page/types/page.types.ts";
 import { globalBottomToolbarAtom } from "@/features/editor/atoms/bottom-toolbar-atoms";
 
+// TAG:Bottom - 底部多窗口栏
 export function MultiWindowTabs() {
   const { t } = useTranslation();
   const navigate = useNavigate();

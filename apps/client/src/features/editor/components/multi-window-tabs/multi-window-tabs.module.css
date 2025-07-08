@@ -5,8 +5,8 @@
   bottom: var(--quick-input-bar-height, 0px);
   background: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8));
   border-top: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
-  padding: 4px 8px;
-  min-height: 36px;
+  padding: 6px 12px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   z-index: 100;
@@ -38,63 +38,73 @@
 .tab {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  background: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-6));
-  border: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
-  border-radius: 6px;
+  gap: 8px;
+  padding: 6px 12px;
+  background: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
+  border: 1px solid light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-4));
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  min-width: 80px;
-  max-width: 200px;
+  min-width: 100px;
+  max-width: 240px;
+  height: 32px;
   position: relative;
   flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .tab:hover {
-  background: light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-5));
-  border-color: light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-3));
+  background: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
+  border-color: light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-3));
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .activeTab {
-  background: light-dark(var(--mantine-color-blue-1), var(--mantine-color-blue-9)) !important;
-  border-color: light-dark(var(--mantine-color-blue-3), var(--mantine-color-blue-7)) !important;
-  color: light-dark(var(--mantine-color-blue-9), white);
+  background: light-dark(var(--mantine-color-blue-0), var(--mantine-color-blue-9)) !important;
+  border-color: light-dark(var(--mantine-color-blue-4), var(--mantine-color-blue-6)) !important;
+  color: light-dark(var(--mantine-color-blue-8), var(--mantine-color-blue-1));
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
 }
 
 .activeTab:hover {
-  background: light-dark(var(--mantine-color-blue-2), var(--mantine-color-blue-8)) !important;
+  background: light-dark(var(--mantine-color-blue-1), var(--mantine-color-blue-8)) !important;
+  box-shadow: 0 3px 8px rgba(59, 130, 246, 0.3);
 }
 
 .tabText {
   flex: 1;
   min-width: 0;
-  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-gray-2));
+  color: light-dark(var(--mantine-color-gray-8), var(--mantine-color-gray-1));
   font-weight: 500;
+  font-size: 13px;
 }
 
 .activeTab .tabText {
-  color: light-dark(var(--mantine-color-blue-9), white);
+  color: light-dark(var(--mantine-color-blue-8), var(--mantine-color-blue-1));
+  font-weight: 600;
 }
 
 .tabButtons {
   display: flex;
-  gap: 2px;
+  gap: 3px;
   align-items: center;
 }
 
 .tabButton {
   opacity: 1;
-  transition: background-color 0.2s ease;
-  width: 16px !important;
-  height: 16px !important;
-  min-width: 16px !important;
-  min-height: 16px !important;
-  color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-gray-4));
+  transition: all 0.2s ease;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  border-radius: 3px;
+  color: light-dark(var(--mantine-color-gray-5), var(--mantine-color-gray-4));
 }
 
 .tabButton:hover {
-  background: light-dark(rgba(0, 0, 0, 0.05), rgba(255, 255, 255, 0.1)) !important;
+  background: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5)) !important;
+  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-gray-2));
+  transform: scale(1.1);
 }
 
 .tabButton:disabled {
@@ -104,16 +114,19 @@
 
 .closeButton {
   opacity: 1;
-  transition: background-color 0.2s ease;
-  width: 16px !important;
-  height: 16px !important;
-  min-width: 16px !important;
-  min-height: 16px !important;
-  color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-gray-4));
+  transition: all 0.2s ease;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  min-height: 18px !important;
+  border-radius: 3px;
+  color: light-dark(var(--mantine-color-gray-5), var(--mantine-color-gray-4));
 }
 
 .closeButton:hover {
-  background: light-dark(rgba(255, 0, 0, 0.1), rgba(255, 255, 255, 0.1)) !important;
+  background: light-dark(var(--mantine-color-red-1), var(--mantine-color-red-9)) !important;
+  color: light-dark(var(--mantine-color-red-6), var(--mantine-color-red-3));
+  transform: scale(1.1);
 }
 
 .scrollButton {
@@ -132,47 +145,55 @@
 }
 
 .newTabButton {
-  background: light-dark(var(--mantine-color-blue-1), var(--mantine-color-blue-9));
-  border: 1px solid light-dark(var(--mantine-color-blue-3), var(--mantine-color-blue-7));
-  color: light-dark(var(--mantine-color-blue-9), white);
-  width: 24px !important;
-  height: 24px !important;
-  min-width: 24px !important;
-  min-height: 24px !important;
+  background: light-dark(var(--mantine-color-blue-0), var(--mantine-color-blue-9));
+  border: 1px solid light-dark(var(--mantine-color-blue-3), var(--mantine-color-blue-6));
+  color: light-dark(var(--mantine-color-blue-7), var(--mantine-color-blue-2));
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .newTabButton:hover {
-  background: light-dark(var(--mantine-color-blue-2), var(--mantine-color-blue-8));
+  background: light-dark(var(--mantine-color-blue-1), var(--mantine-color-blue-8));
+  border-color: light-dark(var(--mantine-color-blue-4), var(--mantine-color-blue-5));
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
 }
 
 /* 手机端适配 */
 @media (max-width: 768px) {
   .multiWindowContainer {
-    padding: 2px 4px;
-    min-height: 32px;
+    padding: 6px 12px;
+    min-height: 44px;
   }
   
   .tab {
-    padding: 2px 6px;
-    min-width: 60px;
-    max-width: 120px;
+    padding: 4px 8px;
+    min-width: 80px;
+    max-width: 160px;
+    height: 28px;
+    gap: 6px;
   }
   
   .tabText {
-    font-size: 11px;
+    font-size: 12px;
   }
   
   .scrollButton, .newTabButton {
-    width: 20px !important;
-    height: 20px !important;
-    min-width: 20px !important;
-    min-height: 20px !important;
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
   }
   
   .tabButton, .closeButton {
-    width: 14px !important;
-    height: 14px !important;
-    min-width: 14px !important;
-    min-height: 14px !important;
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    min-height: 16px !important;
   }
 }
