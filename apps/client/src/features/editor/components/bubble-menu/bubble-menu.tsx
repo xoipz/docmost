@@ -127,8 +127,6 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
       moveTransition: "transform 0.15s ease-out",
       placement: "top",
       maxWidth: "calc(100vw - 32px)",
-      boundary: "viewport",
-      fallbackPlacements: ["bottom", "top-start", "top-end", "bottom-start", "bottom-end"],
       onHide: () => {
         setIsNodeSelectorOpen(false);
         setIsTextAlignmentOpen(false);
