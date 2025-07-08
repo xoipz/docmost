@@ -7,7 +7,7 @@
 }
 
 
-.mantine-Container-root > div:first-of-type .tiptap.ProseMirror h1::before {
+.mantine-Container-root>div:first-of-type .tiptap.ProseMirror h1::before {
   content: none !important;
 }
 
@@ -22,6 +22,7 @@
 }
 
 @media (max-width: 1000px) {
+
   .tiptap.ProseMirror h1::before,
   .tiptap.ProseMirror h2::before,
   .tiptap.ProseMirror h3::before,
@@ -78,8 +79,8 @@
 }
 
 /* 暗黑模式的hr */
-[data-mantine-color-scheme="dark"] .ProseMirror hr{
-  border-top:2px solid #616467;
+[data-mantine-color-scheme="dark"] .ProseMirror hr {
+  border-top: 2px solid #616467;
 }
 
 [data-mantine-color-scheme="dark"] .ProseMirror [contenteditable="false"] {
@@ -92,4 +93,14 @@
   /* 定义亮色模式下的背景色变量 */
   --prosemirror-readonly-bg-light: #dee2e6;
   background: var(--prosemirror-readonly-bg-light);
+}
+
+.shortcut-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  min-width: 0;
+  flex: 1;
+  scrollbar-width: none;
 }

@@ -78,10 +78,12 @@ export function QuickInputBar() {
       if (navigator?.clipboard?.readText) {
         navigator.clipboard.readText().then(text => {
           if (text) {
-            editor.commands.insertContent(text);
+            editor.chain().focus().insertContent(text).run();
           }
-        }).catch(() => {
-          // 如果剪贴板访问失败，使用 execCommand 作为后备
+        }).catch(err => {
+          console.warn('剪贴板读取失败:', err);
+          // 尝试使用浏览器原生粘贴
+          editor.chain().focus().run();
           try {
             document.execCommand('paste');
           } catch (e) {
@@ -89,7 +91,8 @@ export function QuickInputBar() {
           }
         });
       } else {
-        // 如果不支持 clipboard API，直接使用 execCommand
+        // 如果不支持 clipboard API，focus 编辑器后尝试原生粘贴
+        editor.chain().focus().run();
         try {
           document.execCommand('paste');
         } catch (e) {
@@ -106,28 +109,63 @@ export function QuickInputBar() {
         // 如果没有选择文本，选择当前单词
         const doc = state.doc;
         const $pos = doc.resolve(from);
-        const text = $pos.parent.textContent;
-        const start = $pos.parentOffset;
         
-        // 找到单词边界
-        let wordStart = start;
-        let wordEnd = start;
+        // 获取当前节点的文本内容
+        const node = $pos.parent;
+        const text = node.textContent;
+        const offsetInNode = $pos.parentOffset;
+        
+        // 如果光标在空白处，尝试选择最近的单词
+        let cursorPos = offsetInNode;
+        
+        // 如果光标在空白字符上，向前或向后找到最近的非空白字符
+        while (cursorPos < text.length && /\s/.test(text[cursorPos])) {
+          cursorPos++;
+        }
+        if (cursorPos >= text.length) {
+          cursorPos = offsetInNode;
+          while (cursorPos > 0 && /\s/.test(text[cursorPos - 1])) {
+            cursorPos--;
+          }
+        }
+        
+        // 找到单词边界 - 支持中文、英文、数字，遇到标点符号停止
+        let wordStart = cursorPos;
+        let wordEnd = cursorPos;
+        
+        // 定义单词字符的检测函数
+        const isWordChar = (char: string) => {
+          // 支持中文字符、英文字母、数字、下划线
+          // 简化版本，主要支持中文、英文、数字
+          return /[\u4e00-\u9fa5\u3400-\u4dbf\uf900-\ufaff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af\uff00-\uffefa-zA-Z0-9_]/.test(char);
+        };
         
         // 向前找单词开始
-        while (wordStart > 0 && /\w/.test(text[wordStart - 1])) {
-          wordStart--;
+        while (wordStart > 0) {
+          const char = text[wordStart - 1];
+          if (isWordChar(char)) {
+            wordStart--;
+          } else {
+            break;
+          }
         }
         
         // 向后找单词结束
-        while (wordEnd < text.length && /\w/.test(text[wordEnd])) {
-          wordEnd++;
+        while (wordEnd < text.length) {
+          const char = text[wordEnd];
+          if (isWordChar(char)) {
+            wordEnd++;
+          } else {
+            break;
+          }
         }
         
         // 如果找到了单词，选择它
         if (wordStart < wordEnd) {
-          const startPos = from - start + wordStart;
-          const endPos = from - start + wordEnd;
-          editor.commands.setTextSelection({ from: startPos, to: endPos });
+          const nodeStart = $pos.start();
+          const startPos = nodeStart + wordStart;
+          const endPos = nodeStart + wordEnd;
+          editor.chain().focus().setTextSelection({ from: startPos, to: endPos }).run();
         }
       } else {
         // 如果已经选择了文本，扩展选择到整行
@@ -138,7 +176,7 @@ export function QuickInputBar() {
         // 选择整行
         const lineStart = $from.start($from.depth);
         const lineEnd = $to.end($to.depth);
-        editor.commands.setTextSelection({ from: lineStart, to: lineEnd });
+        editor.chain().focus().setTextSelection({ from: lineStart, to: lineEnd }).run();
       }
     } else if (button.command) {
       // 使用命令直接插入

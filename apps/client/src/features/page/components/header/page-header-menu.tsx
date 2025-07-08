@@ -86,19 +86,7 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
 
   // TAG:Page:右上角快捷方式小方块
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "8px",
-        overflowX: "auto",
-        minWidth: 0,
-        flex: 1,
-        scrollbarWidth: "none",
-        msOverflowStyle: "none"
-      } as React.CSSProperties}
-      className="page-header-menu-scrollable"
-    >
+    <div className="shortcut-box page-header-menu-scrollable">
       {yjsConnectionStatus === "disconnected" && (
         <Tooltip
           label={t("Real-time editor connection lost. Retrying...")}

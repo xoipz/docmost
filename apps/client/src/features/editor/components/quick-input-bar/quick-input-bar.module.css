@@ -4,18 +4,17 @@
   background: var(--mantine-color-body);
   border-top: 1px solid var(--mantine-color-dark-4);
   z-index: 100;
-  padding: 8px;
-  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+  padding: 6px 12px;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   padding-inline-start: calc(var(--app-shell-navbar-offset, 0rem) + var(--app-shell-padding));
   padding-inline-end: calc(var(--app-shell-aside-offset, 0rem) + var(--app-shell-padding));
-  /* padding-top: calc(var(--app-shell-header-offset, 0rem) + var(--app-shell-padding));
-    padding-bottom: calc(var(--app-shell-footer-offset, 0rem) + var(--app-shell-padding)); */
   --app-shell-transition-duration: 200ms;
   --app-shell-transition-timing-function: ease;
   transition-duration: var(--app-shell-transition-duration);
   transition-timing-function: var(--app-shell-transition-timing-function);
+  height: 44px;
 }
 
 /* 桌面端响应式布局 */
@@ -44,13 +43,13 @@
 .quickInputBarContent {
   display: flex;
   overflow-x: auto;
-  gap: 8px;
-  padding: 0 8px;
+  gap: 6px;
+  padding: 0 4px;
   scrollbar-width: none;
   -ms-overflow-style: none;
   align-items: center;
   flex: 1;
-  margin-right: 8px;
+  margin-right: 6px;
 }
 
 .quickInputBarContent::-webkit-scrollbar {
@@ -115,10 +114,10 @@
 }
 
 .actionButton {
-  min-width: 32px !important;
-  height: 28px !important;
-  padding: 0 8px !important;
-  font-size: 13px !important;
+  min-width: 30px !important;
+  height: 30px !important;
+  padding: 0 6px !important;
+  font-size: 12px !important;
   border-radius: 4px !important;
   background-color: var(--mantine-color-default) !important;
   color: var(--mantine-color-text) !important;
@@ -132,10 +131,10 @@
 /* 移动端按钮样式调整 */
 @media (max-width: 767px) {
   .actionButton {
-    min-width: 36px !important;
-    height: 36px !important;
-    padding: 0 10px !important;
-    font-size: 14px !important;
+    min-width: 32px !important;
+    height: 32px !important;
+    padding: 0 8px !important;
+    font-size: 13px !important;
   }
 }
 
