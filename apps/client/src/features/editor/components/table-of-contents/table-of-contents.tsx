@@ -1,6 +1,6 @@
 import { NodePos, useEditor } from "@tiptap/react";
 import { TextSelection } from "@tiptap/pm/state";
-import React, { FC, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import classes from "./table-of-contents.module.css";
 import "../../../../assets/outside.css";
 import clsx from "clsx";
@@ -33,19 +33,34 @@ const recalculateLinks = (editor: ReturnType<typeof useEditor> | null, nodePos: 
   const parentStack: { id: string; level: number }[] = [];
 
   Array.from(nodePos).forEach((item) => {
-    if (!editor || !editor.view) {
-      console.warn("Editor or view became invalid during recalculateLinks iteration");
-      return;
-    }
+    try {
+      if (!editor || !editor.view) {
+        console.warn("Editor or view became invalid during recalculateLinks iteration");
+        return;
+      }
 
-    if (!item || !item.node || typeof item.pos !== 'number' || !item.element) {
-      console.warn("Invalid NodePos item or essential properties are missing", item);
-      return;
-    }
+      // 更完整的 null/undefined 检查
+      if (!item || 
+          !item.node || 
+          !item.node.attrs || 
+          typeof item.pos !== 'number' || 
+          !item.element ||
+          item.node.textContent === undefined ||
+          item.node.textContent === null) {
+        console.warn("Invalid NodePos item or essential properties are missing", item);
+        return;
+      }
 
-    const label = item.node.textContent;
-    const level = Number(item.node.attrs.level);
-    if (label.length && level <= 5) {
+      const label = item.node.textContent;
+      const level = Number(item.node.attrs.level);
+      
+      // 确保 label 是有效字符串且 level 是有效数字
+      if (!label || typeof label !== 'string' || label.length === 0 || 
+          isNaN(level) || level < 1 || level > 5) {
+        console.warn("Invalid heading label or level", { label, level, item });
+        return;
+      }
+
       const id = `heading-${idCounter++}`;
       
       while (parentStack.length > 0 && parentStack[parentStack.length - 1].level >= level) {
@@ -65,6 +80,8 @@ const recalculateLinks = (editor: ReturnType<typeof useEditor> | null, nodePos: 
       
       parentStack.push({ id, level });
       nodes.push(item.element);
+    } catch (error) {
+      console.error("Error processing NodePos item:", error, item);
     }
   });
 
@@ -143,14 +160,35 @@ export const TableOfContents: FC<TableOfContentsProps> = (props) => {
   };
 
   const handleUpdate = () => {
-    if (!props.editor) {
+    try {
+      if (!props.editor) {
+        setLinks([]);
+        setHeadingDOMNodes([]);
+        return;
+      }
+
+      // 确保编辑器处于可用状态
+      if (!props.editor.view || !props.editor.view.state || !props.editor.view.state.doc) {
+        console.warn("Editor view or state is not ready");
+        return;
+      }
+
+      const headingNodes = props.editor.$nodes("heading");
+      if (!headingNodes) {
+        setLinks([]);
+        setHeadingDOMNodes([]);
+        return;
+      }
+
+      const result = recalculateLinks(props.editor, headingNodes);
+      setLinks(result.links);
+      setHeadingDOMNodes(result.nodes);
+    } catch (error) {
+      console.error("Error in handleUpdate:", error);
+      // 在出错时重置状态，避免界面卡住
       setLinks([]);
       setHeadingDOMNodes([]);
-      return;
     }
-    const result = recalculateLinks(props.editor, props.editor.$nodes("heading"));
-    setLinks(result.links);
-    setHeadingDOMNodes(result.nodes);
   };
 
   useEffect(() => {
@@ -219,7 +257,7 @@ export const TableOfContents: FC<TableOfContentsProps> = (props) => {
     }
   }, [headingDOMNodes, props.editor]);
 
-  const renderHeading = (item: HeadingLink, index: number) => {
+  const renderHeading = (item: HeadingLink) => {
     const isExpanded = expandedHeadings.has(item.id);
     const children = links.filter(child => child.parentId === item.id);
     const hasChildren = children.length > 0;
@@ -272,7 +310,7 @@ export const TableOfContents: FC<TableOfContentsProps> = (props) => {
         </Box>
         {hasChildren && isExpanded && (
           <div style={{ marginLeft: 16 }}>
-            {children.map((child) => renderHeading(child, links.indexOf(child)))}
+            {children.map((child) => renderHeading(child))}
           </div>
         )}
       </div>
@@ -343,7 +381,7 @@ export const TableOfContents: FC<TableOfContentsProps> = (props) => {
       <div className={props.isShare ? classes.leftBorder : ""}>
         {links
           .filter(item => item.parentId === null)
-          .map((item) => renderHeading(item, links.indexOf(item)))}
+          .map((item) => renderHeading(item))}
       </div>
       <div ref={headerPaddingRef} className={classes.headerPadding} />
     </>
