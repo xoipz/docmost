@@ -11,6 +11,7 @@ const defaultSettings = {
   showShareButton: false,
   isPageHeaderVisible: false,
   showMultiWindow: false,
+  showLoading: false,
 };
 
 export const pageHeaderButtonsAtom = atomWithStorage(

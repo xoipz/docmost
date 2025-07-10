@@ -13,6 +13,7 @@ import {
   IconLayoutNavbar,
   IconShare,
   IconLayout,
+  IconLoader,
 } from "@tabler/icons-react";
 
 interface PageHeaderSettingsModalProps {
@@ -171,6 +172,20 @@ export default function PageHeaderSettingsModal({
             checked={headerButtons.showMultiWindow}
             onChange={(e) => {
               setHeaderButtons({ ...headerButtons, showMultiWindow: e.currentTarget.checked });
+            }}
+            size="sm"
+          />
+        </Group>
+
+        <Group wrap="nowrap" justify="space-between" w="100%">
+          <Group gap="xs">
+            <IconLoader size={16} />
+            <Text>{t("Show loading indicator")}</Text>
+          </Group>
+          <Switch
+            checked={headerButtons.showLoading}
+            onChange={(e) => {
+              setHeaderButtons({ ...headerButtons, showLoading: e.currentTarget.checked });
             }}
             size="sm"
           />

@@ -508,14 +508,14 @@ export default function PageEditor({
   // TAG:Page-editor
   return (
     <div>
-      {showLoadingState && (
+      {headerButtons.showLoading && showLoadingState && (
         <Center py="xl" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1000 }}>
           <Loader size="md" />
         </Center>
       )}
       
       {isCollabReady ? (
-        <div style={{ opacity: showLoadingState ? 0.3 : 1, transition: 'opacity 0.2s ease-in-out' }}>
+        <div style={{ opacity: (headerButtons.showLoading && showLoadingState) ? 0.3 : 1, transition: 'opacity 0.2s ease-in-out' }}>
           <div ref={menuContainerRef}>
             <EditorContent editor={editor} />
 
@@ -549,7 +549,7 @@ export default function PageEditor({
           ></div>
         </div>
       ) : (
-        <Box style={{ opacity: showLoadingState ? 0.3 : 0.6, transition: 'opacity 0.2s ease-in-out' }}>
+        <Box style={{ opacity: (headerButtons.showLoading && showLoadingState) ? 0.3 : 0.6, transition: 'opacity 0.2s ease-in-out' }}>
           <EditorProvider
             editable={false}
             immediatelyRender={true}
