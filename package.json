@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "cdev": "nx run client:dev --host",
+    "sdev": "nx run server:start:dev",
     "cbuild": "nx run client:build",
     "build": "nx run-many -t build",
     "start": "pnpm --filter ./apps/server run start:prod",
