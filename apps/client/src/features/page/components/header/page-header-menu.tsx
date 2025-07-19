@@ -9,6 +9,7 @@ import {
   IconList,
   IconMessage,
   IconPrinter,
+  IconSearch,
   IconTrash,
   IconWifiOff,
   IconCheck,
@@ -25,7 +26,12 @@ import React, { useEffect } from "react";
 import useToggleAside from "@/hooks/use-toggle-aside.tsx";
 import { useAtom, useAtomValue } from "jotai";
 import { historyAtoms } from "@/features/page-history/atoms/history-atoms.ts";
-import { useClipboard, useDisclosure } from "@mantine/hooks";
+import {
+  getHotkeyHandler,
+  useClipboard,
+  useDisclosure,
+  useHotkeys,
+} from "@mantine/hooks";
 import { useParams } from "react-router-dom";
 import { usePageQuery } from "@/features/page/queries/page-query.ts";
 import { buildPageUrl } from "@/features/page/page.utils.ts";
@@ -42,7 +48,9 @@ import {
   yjsConnectionStatusAtom,
   keyboardShortcutsStatusAtom,
 } from "@/features/editor/atoms/editor-atoms.ts";
+import { searchAndReplaceStateAtom } from "@/features/editor/components/search-and-replace/atoms/search-and-replace-state-atom.ts";
 import { formattedDate, timeAgo } from "@/lib/time.ts";
+import { PageStateSegmentedControl } from "@/features/user/components/page-state-pref.tsx";
 import MovePageModal from "@/features/page/components/move-page-modal.tsx";
 import { useTimeAgo } from "@/hooks/use-time-ago.tsx";
 import {
@@ -72,6 +80,26 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
     };
   }, [setHeaderButtons]);
 
+  useHotkeys(
+    [
+      [
+        "mod+F",
+        () => {
+          const event = new CustomEvent("openFindDialogFromEditor", {});
+          document.dispatchEvent(event);
+        },
+      ],
+      [
+        "Escape",
+        () => {
+          const event = new CustomEvent("closeFindDialogFromEditor", {});
+          document.dispatchEvent(event);
+        },
+      ],
+    ],
+    [],
+  );
+
   const handleUndo = () => {
     pageEditor?.commands.undo();
   };
@@ -83,8 +111,6 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
   const toggleHeaderVisibility = () => {
     setHeaderVisible(!headerVisible);
   };
-
-  // TAG:Page:右上角快捷方式小方块
   return (
     <div className="shortcut-box page-header-menu-scrollable">
       {yjsConnectionStatus === "disconnected" && (
@@ -110,6 +136,8 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
           </ActionIcon>
         </Tooltip>
       )}
+
+      {!readOnly && <PageStateSegmentedControl size="xs" />}
 
       {!headerButtons.showShareButton && <ShareModal readOnly={readOnly} />}
 

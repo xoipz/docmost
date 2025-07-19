@@ -11,7 +11,6 @@ import { Typography } from "@tiptap/extension-typography";
 import { TextStyle } from "@tiptap/extension-text-style";
 import { Color } from "@tiptap/extension-color";
 import Table from "@tiptap/extension-table";
-import TableHeader from "@tiptap/extension-table-header";
 import SlashCommand from "@/features/editor/extensions/slash-command";
 import { Collaboration } from "@tiptap/extension-collaboration";
 import { CollaborationCursor } from "@tiptap/extension-collaboration-cursor";
@@ -25,6 +24,7 @@ import {
   MathInline,
   TableCell,
   TableRow,
+  TableHeader,
   TrailingNode,
   TiptapImage,
   Callout,
@@ -36,6 +36,7 @@ import {
   Drawio,
   Excalidraw,
   Embed,
+  SearchAndReplace,
   Mention,
   HeadingShortcuts,
   CodeBlockShortcuts,
@@ -75,6 +76,7 @@ import i18n from "@/i18n.ts";
 import { MarkdownClipboard } from "@/features/editor/extensions/markdown-clipboard.ts";
 import EmojiCommand from "./emoji-command";
 import { CharacterCount } from "@tiptap/extension-character-count";
+import { countWords } from "alfaaz";
 
 const lowlight = createLowlight(common);
 lowlight.register("mermaid", plaintext);
@@ -218,7 +220,25 @@ export const mainExtensions = [
   MarkdownClipboard.configure({
     transformPastedText: true,
   }),
-  CharacterCount
+  CharacterCount.configure({
+    wordCounter: (text) => countWords(text),
+  }),
+  SearchAndReplace.extend({
+    addKeyboardShortcuts() {
+      return {
+        'Mod-f': () => {
+          const event = new CustomEvent("openFindDialogFromEditor", {});
+          document.dispatchEvent(event);
+          return true;
+        },
+        'Escape': () => {
+          const event = new CustomEvent("closeFindDialogFromEditor", {});
+          document.dispatchEvent(event);
+          return true;
+        },
+      }
+    },
+  }).configure(),
 ] as any;
 
 type CollabExtensions = (provider: HocuspocusProvider, user: IUser) => any[];

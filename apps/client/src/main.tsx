@@ -3,7 +3,7 @@ import "@mantine/spotlight/styles.css";
 import "@mantine/notifications/styles.css";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
-import { mantineCssResolver, theme } from '@/theme';
+import { mantineCssResolver, theme } from "@/theme";
 import { MantineProvider } from "@mantine/core";
 import { BrowserRouter, HashRouter } from "react-router-dom";
 import { ModalsProvider } from "@mantine/modals";
@@ -11,6 +11,14 @@ import { Notifications } from "@mantine/notifications";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HelmetProvider } from "react-helmet-async";
 import "./i18n";
+import { PostHogProvider } from "posthog-js/react";
+import {
+  getPostHogHost,
+  getPostHogKey,
+  isCloud,
+  isPostHogEnabled,
+} from "@/lib/config.ts";
+import posthog from "posthog-js";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,19 +31,34 @@ export const queryClient = new QueryClient({
   },
 });
 
+if (isCloud() && isPostHogEnabled) {
+  posthog.init(getPostHogKey(), {
+    api_host: getPostHogHost(),
+    defaults: "2025-05-24",
+    disable_session_recording: true,
+    capture_pageleave: false,
+  });
+}
+
 const Router = import.meta.env.VITE_ROUTER_MODE === 'hash' ? HashRouter : BrowserRouter;
 
-ReactDOM.createRoot(document.getElementById("root")!).render(
+const root = ReactDOM.createRoot(
+  document.getElementById("root") as HTMLElement,
+);
+
+root.render(
   <Router>
-    <QueryClientProvider client={queryClient}>
-      <HelmetProvider>
-        <MantineProvider theme={theme} cssVariablesResolver={mantineCssResolver}>
-          <ModalsProvider>
-            <Notifications />
-            <App />
-          </ModalsProvider>
-        </MantineProvider>
-      </HelmetProvider>
-    </QueryClientProvider>
-  </Router>
+    <MantineProvider theme={theme} cssVariablesResolver={mantineCssResolver}>
+      <ModalsProvider>
+        <QueryClientProvider client={queryClient}>
+          <Notifications position="bottom-center" limit={3} />
+          <HelmetProvider>
+            <PostHogProvider client={posthog}>
+              <App />
+            </PostHogProvider>
+          </HelmetProvider>
+        </QueryClientProvider>
+      </ModalsProvider>
+    </MantineProvider>
+  </Router>,
 );

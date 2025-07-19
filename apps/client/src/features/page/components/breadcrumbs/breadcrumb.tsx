@@ -173,7 +173,7 @@ export default function Breadcrumb() {
   };
 
   return (
-    <div style={{ overflow: "hidden" }}>
+    <div className={classes.breadcrumbDiv}>
       {breadcrumbNodes && (
         <Breadcrumbs className={classes.breadcrumbs}>
           {isMobile ? getMobileBreadcrumbItems() : getBreadcrumbItems()}

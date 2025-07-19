@@ -1,18 +1,18 @@
 .breadcrumbs {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  flex-wrap: nowrap;
+
+  a {
+    color: var(--mantine-color-default-color);
+    line-height: inherit;
+  }
+
+  .mantine-Breadcrumbs-breadcrumb {
+    min-width: 1px;
     overflow: hidden;
-    flex-wrap: nowrap;
-
-    a {
-        color: var(--mantine-color-default-color);
-        line-height: inherit;
-    }
-
-    .mantine-Breadcrumbs-breadcrumb {
-        min-width: 1px;
-        overflow: hidden;
-    }
+  }
 }
 
 .truncatedText {
@@ -33,3 +33,9 @@
     overflow: hidden;
 }
 
+.breadcrumbDiv {
+  overflow: hidden;
+  @media (max-width: $mantine-breakpoint-sm) {
+    overflow: visible;
+  }
+}

@@ -127,6 +127,12 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
       moveTransition: "transform 0.15s ease-out",
       placement: "top",
       maxWidth: "calc(100vw - 32px)",
+      onCreate: (instance) => {
+        instance.popper.firstChild?.addEventListener("blur", (event) => {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        });
+      },
       onHide: () => {
         setIsNodeSelectorOpen(false);
         setIsTextAlignmentOpen(false);

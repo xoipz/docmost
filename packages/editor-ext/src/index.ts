@@ -19,3 +19,5 @@ export * from "./lib/mention";
 export * from "./lib/markdown";
 export * from './lib/heading-shortcuts'
 export * from './lib/code-block-shortcuts'
+export * from "./lib/search-and-replace";
+export * from "./lib/embed-provider";
