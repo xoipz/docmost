@@ -64,6 +64,8 @@ import ShareModal from "@/features/share/components/share-modal.tsx";
 interface PageHeaderMenuProps {
   readOnly?: boolean;
 }
+
+// TAG:右上角快捷键
 export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
   const { t } = useTranslation();
   const toggleAside = useToggleAside();
@@ -137,7 +139,7 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
         </Tooltip>
       )}
 
-      {!readOnly && <PageStateSegmentedControl size="xs" />}
+      {!readOnly && headerButtons.showPageState && <PageStateSegmentedControl size="xs" />}
 
       {!headerButtons.showShareButton && <ShareModal readOnly={readOnly} />}
 

@@ -14,6 +14,7 @@ import {
   IconShare,
   IconLayout,
   IconLoader,
+  IconEdit,
 } from "@tabler/icons-react";
 
 interface PageHeaderSettingsModalProps {
@@ -129,6 +130,20 @@ export default function PageHeaderSettingsModal({
           />
         </Group>
 
+
+        <Group wrap="nowrap" justify="space-between" w="100%">
+          <Group gap="xs">
+            <IconEdit size={16} />
+            <Text>{t("Show page state control")}</Text>
+          </Group>
+          <Switch
+            checked={headerButtons.showPageState}
+            onChange={(e) => {
+              setHeaderButtons({ ...headerButtons, showPageState: e.currentTarget.checked });
+            }}
+            size="sm"
+          />
+        </Group>
 
         <Group wrap="nowrap" justify="space-between" w="100%">
           <Group gap="xs">
