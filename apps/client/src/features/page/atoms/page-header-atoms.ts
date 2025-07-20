@@ -14,6 +14,7 @@ const defaultSettings = {
   showLoading: false,
   loadingIndicatorType: "gray", // "gray" | "loader"
   showPageState: false,
+  showBubbleMenu: true,
 };
 
 export const pageHeaderButtonsAtom = atomWithStorage(

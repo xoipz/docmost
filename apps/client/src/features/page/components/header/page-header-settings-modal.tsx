@@ -15,7 +15,9 @@ import {
   IconLayout,
   IconLoader,
   IconEdit,
+  IconRectangle,
 } from "@tabler/icons-react";
+import { bubbleMenuVisibleAtom } from "@/features/editor/atoms/bubble-menu-atoms.ts";
 
 interface PageHeaderSettingsModalProps {
   opened: boolean;
@@ -30,6 +32,7 @@ export default function PageHeaderSettingsModal({
   const { t } = useTranslation();
   const [headerButtons, setHeaderButtons] = useAtom(pageHeaderButtonsAtom);
   const [headerVisible, setHeaderVisible] = useAtom(headerVisibleAtom);
+  const [bubbleMenuVisible, setBubbleMenuVisible] = useAtom(bubbleMenuVisibleAtom);
 
   return (
     <Modal
@@ -130,6 +133,33 @@ export default function PageHeaderSettingsModal({
             size="sm"
           />
         </Group>
+
+        <Group wrap="nowrap" justify="space-between" w="100%">
+          <Group gap="xs">
+            <IconRectangle size={16} />
+            <Text>{t("Show bubble menu button")}</Text>
+          </Group>
+          <Switch
+            checked={headerButtons.showBubbleMenu}
+            onChange={(e) => {
+              setHeaderButtons({ ...headerButtons, showBubbleMenu: e.currentTarget.checked });
+            }}
+            size="sm"
+          />
+        </Group>
+
+        {headerButtons.showBubbleMenu && (
+          <Group wrap="nowrap" justify="space-between" w="100%" pl="md">
+            <Text size="sm" c="dimmed">{t("Enable bubble menu")}</Text>
+            <Switch
+              checked={bubbleMenuVisible}
+              onChange={(e) => {
+                setBubbleMenuVisible(e.currentTarget.checked);
+              }}
+              size="sm"
+            />
+          </Group>
+        )}
 
 
         <Group wrap="nowrap" justify="space-between" w="100%">

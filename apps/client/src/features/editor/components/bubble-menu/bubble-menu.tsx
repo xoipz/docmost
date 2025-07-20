@@ -37,6 +37,7 @@ import { isCellSelection, isTextSelected } from "@docmost/editor-ext";
 import { LinkSelector } from "@/features/editor/components/bubble-menu/link-selector.tsx";
 import { useTranslation } from "react-i18next";
 import { EditorMenuProps } from "@/features/editor/components/table/types/types.ts";
+import { bubbleMenuVisibleAtom } from "@/features/editor/atoms/bubble-menu-atoms.ts";
 
 export interface BubbleMenuItem {
   name: string;
@@ -53,11 +54,61 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
   const { t } = useTranslation();
   const [showCommentPopup, setShowCommentPopup] = useAtom(showCommentPopupAtom);
   const [, setDraftCommentId] = useAtom(draftCommentIdAtom);
+  const [bubbleMenuVisible] = useAtom(bubbleMenuVisibleAtom);
   const showCommentPopupRef = useRef(showCommentPopup);
+  const [isNodeSelectorOpen, setIsNodeSelectorOpen] = useState(false);
+  const [isTextAlignmentSelectorOpen, setIsTextAlignmentOpen] = useState(false);
+  const [isColorSelectorOpen, setIsColorSelectorOpen] = useState(false);
+  const [isLinkSelectorOpen, setIsLinkSelectorOpen] = useState(false);
 
   useEffect(() => {
     showCommentPopupRef.current = showCommentPopup;
   }, [showCommentPopup]);
+
+  const handleCopy = useCallback(() => {
+    const { state, view } = props.editor;
+    const { from, to } = state.selection;
+    
+    // 获取选中范围内的所有节点
+    const nodes = [];
+    state.doc.nodesBetween(from, to, (node) => {
+      if (node.isText) {
+        nodes.push(node.text);
+      } else if (node.type.name === 'paragraph') {
+        nodes.push('\n');
+      }
+      return true;
+    });
+    
+    // 合并文本并保留换行
+    const text = nodes.join('');
+    
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        showNotification({
+          title: t("Success"),
+          message: t("Text copied to clipboard"),
+          color: "green",
+          autoClose: 2000,
+        });
+      }).catch(err => {
+        console.error('Failed to copy text: ', err);
+        showNotification({
+          title: t("Error"),
+          message: t("Failed to copy text to clipboard"),
+          color: "red",
+          autoClose: 3000,
+        });
+      });
+    } else {
+      showNotification({
+        title: t("Error"),
+        message: t("Copying to clipboard is not supported in this browser or context."),
+        color: "red",
+        autoClose: 3000,
+      });
+    }
+  }, [props.editor, t]);
 
   const items: BubbleMenuItem[] = [
     {
@@ -142,60 +193,13 @@ export const EditorBubbleMenu: FC<EditorBubbleMenuProps> = (props) => {
     },
   };
 
-  const [isNodeSelectorOpen, setIsNodeSelectorOpen] = useState(false);
-  const [isTextAlignmentSelectorOpen, setIsTextAlignmentOpen] = useState(false);
-  const [isColorSelectorOpen, setIsColorSelectorOpen] = useState(false);
-  const [isLinkSelectorOpen, setIsLinkSelectorOpen] = useState(false);
-
-  const handleCopy = useCallback(() => {
-    const { state, view } = props.editor;
-    const { from, to } = state.selection;
-    
-    // 获取选中范围内的所有节点
-    const nodes = [];
-    state.doc.nodesBetween(from, to, (node) => {
-      if (node.isText) {
-        nodes.push(node.text);
-      } else if (node.type.name === 'paragraph') {
-        nodes.push('\n');
-      }
-      return true;
-    });
-    
-    // 合并文本并保留换行
-    const text = nodes.join('');
-    
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(() => {
-        showNotification({
-          title: t("Success"),
-          message: t("Text copied to clipboard"),
-          color: "green",
-          autoClose: 2000,
-        });
-      }).catch(err => {
-        console.error('Failed to copy text: ', err);
-        showNotification({
-          title: t("Error"),
-          message: t("Failed to copy text to clipboard"),
-          color: "red",
-          autoClose: 3000,
-        });
-      });
-    } else {
-      showNotification({
-        title: t("Error"),
-        message: t("Copying to clipboard is not supported in this browser or context."),
-        color: "red",
-        autoClose: 3000,
-      });
-    }
-  }, [props.editor, t]);
-
   // TAG:BubbleMenu
   return (
     <BubbleMenu {...bubbleMenuProps}>
-      <div className={classes.bubbleMenu}>
+      <div 
+        className={classes.bubbleMenu}
+        style={{ display: bubbleMenuVisible ? 'block' : 'none' }}
+      >
         <ActionIcon.Group>
           <Tooltip label={t("Copy")} openDelay={250} withArrow>
             <ActionIcon

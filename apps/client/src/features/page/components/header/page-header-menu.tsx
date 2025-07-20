@@ -21,6 +21,7 @@ import {
   IconKeyboardOff,
   IconShare,
   IconLayoutNavbar,
+  IconRectangle,
 } from "@tabler/icons-react";
 import React, { useEffect } from "react";
 import useToggleAside from "@/hooks/use-toggle-aside.tsx";
@@ -60,6 +61,7 @@ import {
 import { pageHeaderButtonsAtom } from "@/features/page/atoms/page-header-atoms.ts";
 import PageHeaderSettingsModal from "./page-header-settings-modal.tsx";
 import ShareModal from "@/features/share/components/share-modal.tsx";
+import { bubbleMenuVisibleAtom } from "@/features/editor/atoms/bubble-menu-atoms.ts";
 
 interface PageHeaderMenuProps {
   readOnly?: boolean;
@@ -73,6 +75,7 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
   const [pageEditor] = useAtom(pageEditorAtom);
   const [headerButtons, setHeaderButtons] = useAtom(pageHeaderButtonsAtom);
   const [headerVisible, setHeaderVisible] = useAtom(headerVisibleAtom);
+  const [bubbleMenuVisible, setBubbleMenuVisible] = useAtom(bubbleMenuVisibleAtom);
   const keyboardStatus = useAtomValue(keyboardShortcutsStatusAtom);
 
   useEffect(() => {
@@ -112,6 +115,10 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
 
   const toggleHeaderVisibility = () => {
     setHeaderVisible(!headerVisible);
+  };
+
+  const toggleBubbleMenu = () => {
+    setBubbleMenuVisible(!bubbleMenuVisible);
   };
   return (
     <div className="shortcut-box page-header-menu-scrollable">
@@ -189,6 +196,22 @@ export default function PageHeaderMenu({ readOnly }: PageHeaderMenuProps) {
             onClick={() => toggleAside("toc")}
           >
             <IconList size={20} stroke={2} />
+          </ActionIcon>
+        </Tooltip>
+      )}
+
+      {headerButtons.showBubbleMenu && (
+        <Tooltip label={t("Toggle bubble menu")} openDelay={250} withArrow>
+          <ActionIcon
+            variant="default"
+            style={{ border: "none", flexShrink: 0 }}
+            onClick={toggleBubbleMenu}
+          >
+            <IconRectangle 
+              size={20} 
+              stroke={1.5} 
+              color={bubbleMenuVisible ? "currentColor" : "#fa5252"} 
+            />
           </ActionIcon>
         </Tooltip>
       )}
