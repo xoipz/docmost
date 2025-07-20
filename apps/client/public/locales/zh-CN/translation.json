@@ -415,5 +415,7 @@
   "Update image URL ": "更新图像 URL",
   "Show loading indicator": "显示加载指示器",
   "Show page state control": "显示页面状态控制",
-  "Show multi-window tabs": "显示多窗口标签页"
+  "Show multi-window tabs": "显示多窗口标签页",
+  "在新页面打开": "在新页面打开",
+  "新建文件": "新建文件"
 }

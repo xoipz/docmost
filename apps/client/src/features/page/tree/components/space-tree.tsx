@@ -293,15 +293,26 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
     }
   }
 
-  const handleClick = () => {
+  const handleClick = (e?: React.MouseEvent) => {
+    const pageUrl = buildPageUrl(spaceSlug, node.data.slugId, node.data.name);
+    
+    // 检查是否按住了Ctrl键（Windows/Linux）或Cmd键（Mac）
+    if (e && (e.ctrlKey || e.metaKey)) {
+      // 在新窗口打开页面并将焦点切换到新窗口
+      const newWindow = window.open(pageUrl, '_blank');
+      if (newWindow) {
+        newWindow.focus();
+      }
+      return; // 阻止继续执行，原窗口不跳转
+    }
+
     // 如果节点有子节点，且当前未展开，则展开子节点
     if ((node.children.length > 0 || node.data.hasChildren) && node.isClosed) {
       node.toggle();
       handleLoadChildren(node);
     }
     
-    // 导航到页面
-    const pageUrl = buildPageUrl(spaceSlug, node.data.slugId, node.data.name);
+    // 普通点击时才在当前窗口导航
     navigate(pageUrl);
   };
 
@@ -388,7 +399,7 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
         ref={dragHandle}
         onClick={(e) => {
           e.preventDefault();
-          handleClick();
+          handleClick(e);
           if (mobileSidebarOpened) {
             toggleMobileSidebar();
           }
