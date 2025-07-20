@@ -1,4 +1,4 @@
-import { Modal, Group, Text, Switch, Stack, Divider } from "@mantine/core";
+import { Modal, Group, Text, Switch, Stack, Divider, Select } from "@mantine/core";
 import { useAtom } from "jotai";
 import { pageHeaderButtonsAtom } from "@/features/page/atoms/page-header-atoms.ts";
 import { headerVisibleAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
@@ -22,6 +22,7 @@ interface PageHeaderSettingsModalProps {
   onClose: () => void;
 }
 
+// TAG:顶栏设置
 export default function PageHeaderSettingsModal({
   opened,
   onClose,
@@ -205,6 +206,27 @@ export default function PageHeaderSettingsModal({
             size="sm"
           />
         </Group>
+
+        {headerButtons.showLoading && (
+          <Group wrap="nowrap" justify="space-between" w="100%" pl="md">
+            <Text size="sm" c="dimmed">{t("Loading indicator type")}</Text>
+            <Select
+              value={headerButtons.loadingIndicatorType}
+              onChange={(value) => {
+                setHeaderButtons({ 
+                  ...headerButtons, 
+                  loadingIndicatorType: value as "gray" | "loader" 
+                });
+              }}
+              data={[
+                { value: "gray", label: t("Gray overlay") },
+                { value: "loader", label: t("Loading spinner") }
+              ]}
+              size="sm"
+              w={140}
+            />
+          </Group>
+        )}
 
       </Stack>
     </Modal>

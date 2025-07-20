@@ -481,7 +481,7 @@ export default function PageEditor({
 
   return (
     <div>
-      {headerButtons.showLoading && showLoadingState && (
+      {headerButtons.showLoading && showLoadingState && headerButtons.loadingIndicatorType === "loader" && (
         <Center
           py="xl"
           style={{
@@ -499,7 +499,7 @@ export default function PageEditor({
       {isCollabReady ? (
         <div
           style={{
-            opacity: headerButtons.showLoading && showLoadingState ? 0.3 : 1,
+            opacity: headerButtons.showLoading && showLoadingState && headerButtons.loadingIndicatorType === "gray" ? 0.3 : 1,
             transition: "opacity 0.2s ease-in-out",
           }}
         >
@@ -548,7 +548,7 @@ export default function PageEditor({
         <Box
           style={{
             opacity:
-              headerButtons.showLoading && showLoadingState ? 0.3 : 0.6,
+              headerButtons.showLoading && showLoadingState && headerButtons.loadingIndicatorType === "gray" ? 0.3 : 1,
             transition: "opacity 0.2s ease-in-out",
           }}
         >

@@ -12,6 +12,7 @@ const defaultSettings = {
   isPageHeaderVisible: false,
   showMultiWindow: false,
   showLoading: false,
+  loadingIndicatorType: "gray", // "gray" | "loader"
   showPageState: false,
 };
 
