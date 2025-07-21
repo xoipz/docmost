@@ -1,6 +1,7 @@
 import { NodeApi, NodeRendererProps, Tree, TreeApi } from "react-arborist";
 import { atom, useAtom } from "jotai";
 import { treeApiAtom } from "@/features/page/tree/atoms/tree-api-atom.ts";
+import { multiWindowTabsAtom, activeTabAtom } from "@/features/editor/atoms/multi-window-atoms";
 import {
   fetchAllAncestorChildren,
   useGetRootSidebarPagesQuery,
@@ -94,6 +95,8 @@ export default function SpaceTree({ spaceId, readOnly }: SpaceTreeProps) {
   const { ref: sizeRef, width, height } = useElementSize();
   const mergedRef = useMergedRef(rootElement, sizeRef);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [tabs] = useAtom(multiWindowTabsAtom);
+  const [activeTabId] = useAtom(activeTabAtom);
   const { data: currentPage } = usePageQuery({
     pageId: extractPageSlugId(pageSlug),
   });
@@ -191,10 +194,22 @@ export default function SpaceTree({ spaceId, readOnly }: SpaceTreeProps) {
 
   useEffect(() => {
     if (currentPage?.id) {
-      setTimeout(() => {
-        // focus on node and open all parents
-        treeApiRef.current?.select(currentPage.id, { align: "auto" });
-      }, 200);
+      // 使用更短的延迟并增加重试机制来确保选择状态正确设置
+      const selectNode = () => {
+        if (treeApiRef.current) {
+          treeApiRef.current.select(currentPage.id, { align: "auto" });
+        }
+      };
+      
+      // 立即尝试选择
+      selectNode();
+      
+      // 如果立即选择失败，使用延迟重试
+      const timeoutId = setTimeout(() => {
+        selectNode();
+      }, 100);
+      
+      return () => clearTimeout(timeoutId);
     } else {
       treeApiRef.current?.deselectAll();
     }
@@ -206,6 +221,26 @@ export default function SpaceTree({ spaceId, readOnly }: SpaceTreeProps) {
       setTreeApi(treeApiRef.current);
     }
   }, [treeApiRef.current]);
+
+  // 监听活跃标签页变化，同步树节点选择状态
+  useEffect(() => {
+    if (activeTabId && tabs.length > 0) {
+      const activeTab = tabs.find(tab => tab.id === activeTabId);
+      if (activeTab?.pageId && treeApiRef.current) {
+        // 当活跃标签页改变时，确保对应的树节点被选中
+        const selectActiveNode = () => {
+          treeApiRef.current?.select(activeTab.pageId!, { align: "auto" });
+        };
+        
+        // 立即尝试选择
+        selectActiveNode();
+        
+        // 如果立即选择失败，使用延迟重试
+        const timeoutId = setTimeout(selectActiveNode, 50);
+        return () => clearTimeout(timeoutId);
+      }
+    }
+  }, [activeTabId, tabs]);
 
   return (
     <div ref={mergedRef} className={classes.treeContainer}>
@@ -298,11 +333,13 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
     
     // 检查是否按住了Ctrl键（Windows/Linux）或Cmd键（Mac）
     if (e && (e.ctrlKey || e.metaKey)) {
-      // 在新窗口打开页面并将焦点切换到新窗口
-      const newWindow = window.open(pageUrl, '_blank');
-      if (newWindow) {
-        newWindow.focus();
-      }
+      // 阻止事件冒泡和默认行为，防止Tree组件处理选择逻辑
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // 直接调用右键菜单中的新页面打开功能
+      window.open(pageUrl, '_blank');
+      
       return; // 阻止继续执行，原窗口不跳转
     }
 
