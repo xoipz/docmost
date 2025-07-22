@@ -286,6 +286,8 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
   const [mobileSidebarOpened] = useAtom(mobileSidebarAtom);
   const toggleMobileSidebar = useToggleSidebar(mobileSidebarAtom);
+  const [lastClickedNodeId, setLastClickedNodeId] = useState<string | null>(null);
+  const [lastClickTime, setLastClickTime] = useState<number>(0);
 
   const prefetchPage = () => {
     timerRef.current = setTimeout(() => {
@@ -330,6 +332,8 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
 
   const handleClick = (e?: React.MouseEvent) => {
     const pageUrl = buildPageUrl(spaceSlug, node.data.slugId, node.data.name);
+    const currentTime = Date.now();
+    const isDoubleClick = lastClickedNodeId === node.data.id && currentTime - lastClickTime < 500;
     
     // 检查是否按住了Ctrl键（Windows/Linux）或Cmd键（Mac）
     if (e && (e.ctrlKey || e.metaKey)) {
@@ -351,6 +355,15 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
     
     // 普通点击时才在当前窗口导航
     navigate(pageUrl);
+    
+    // 更新最后点击的节点ID和时间
+    setLastClickedNodeId(node.data.id);
+    setLastClickTime(currentTime);
+    
+    // 处理移动端侧边栏：只有在双击同一个节点时才关闭侧边栏
+    if (mobileSidebarOpened && isDoubleClick) {
+      toggleMobileSidebar();
+    }
   };
 
   const handleUpdateNodeIcon = (nodeId: string, newIcon: string) => {
@@ -437,9 +450,6 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
         onClick={(e) => {
           e.preventDefault();
           handleClick(e);
-          if (mobileSidebarOpened) {
-            toggleMobileSidebar();
-          }
         }}
         onMouseEnter={prefetchPage}
         onMouseLeave={cancelPagePrefetch}
