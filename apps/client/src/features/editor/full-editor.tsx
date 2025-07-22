@@ -16,6 +16,7 @@ export interface FullEditorProps {
   content: string;
   spaceSlug: string;
   editable: boolean;
+  autoFocusTitle?: boolean;
 }
 
 export function FullEditor({
@@ -25,6 +26,7 @@ export function FullEditor({
   content,
   spaceSlug,
   editable,
+  autoFocusTitle = false,
 }: FullEditorProps) {
   const [user] = useAtom(userAtom);
   const fullPageWidth = user.settings?.preferences?.fullPageWidth;
@@ -41,6 +43,7 @@ export function FullEditor({
         title={title}
         spaceSlug={spaceSlug}
         editable={editable}
+        autoFocus={autoFocusTitle}
       />
       <MemoizedPageEditor
         pageId={pageId}

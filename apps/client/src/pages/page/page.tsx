@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import { usePageQuery } from "@/features/page/queries/page-query";
 import { FullEditor } from "@/features/editor/full-editor";
 import HistoryModal from "@/features/page-history/components/history-modal";
@@ -12,7 +12,10 @@ import {
   SpaceCaslSubject,
 } from "@/features/space/permissions/permissions.type.ts";
 import { useTranslation } from "react-i18next";
-import React from "react";
+import React, { useEffect } from "react";
+import { mobileSidebarAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
+import { useToggleSidebar } from "@/components/layouts/global/hooks/hooks/use-toggle-sidebar.ts";
+import { useAtom } from "jotai";
 
 const MemoizedFullEditor = React.memo(FullEditor);
 const MemoizedPageHeader = React.memo(PageHeader);
@@ -21,6 +24,10 @@ const MemoizedHistoryModal = React.memo(HistoryModal);
 export default function Page() {
   const { t } = useTranslation();
   const { pageSlug } = useParams();
+  const location = useLocation();
+  const [mobileSidebarOpened] = useAtom(mobileSidebarAtom);
+  const toggleMobileSidebar = useToggleSidebar(mobileSidebarAtom);
+  
   const {
     data: page,
     isLoading,
@@ -31,6 +38,20 @@ export default function Page() {
 
   const spaceRules = space?.membership?.permissions;
   const spaceAbility = useSpaceAbility(spaceRules);
+
+  // 检测是否是新创建的页面
+  const isNewPage = location.state?.isNewPage === true || (page?.title === null || page?.title === "");
+  
+  // 如果是新页面且在移动端，关闭侧边栏
+  useEffect(() => {
+    if (isNewPage && mobileSidebarOpened && window.innerWidth < 768) {
+      const timer = setTimeout(() => {
+        toggleMobileSidebar();
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isNewPage, mobileSidebarOpened, toggleMobileSidebar]);
 
   if (isLoading) {
     return <></>;
@@ -72,6 +93,7 @@ export default function Page() {
             SpaceCaslAction.Manage,
             SpaceCaslSubject.Page,
           )}
+          autoFocusTitle={isNewPage}
         />
         <MemoizedHistoryModal pageId={page.id} />
       </div>

@@ -116,10 +116,6 @@ export function SpaceSidebar() {
   function handleCreatePage() {
     tree?.create({ parentId: null, type: "internal", index: 0 });
     setIsMenuOpen(false);
-    
-    if (mobileSidebarOpened) {
-      toggleMobileSidebar();
-    }
   }
 
   const handleContextMenu = (e: React.MouseEvent) => {

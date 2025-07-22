@@ -89,7 +89,7 @@ export function useTreeMutation<T>(spaceId: string) {
       createdPage.slugId,
       createdPage.title
     );
-    navigate(pageUrl);
+    navigate(pageUrl, { state: { isNewPage: true } });
     return data;
   };
 

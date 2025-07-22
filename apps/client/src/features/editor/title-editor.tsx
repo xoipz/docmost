@@ -33,6 +33,7 @@ export interface TitleEditorProps {
   title: string;
   spaceSlug: string;
   editable: boolean;
+  autoFocus?: boolean;
 }
 
 export function TitleEditor({
@@ -41,6 +42,7 @@ export function TitleEditor({
   title,
   spaceSlug,
   editable,
+  autoFocus = false,
 }: TitleEditorProps) {
   const { t } = useTranslation();
   const { mutateAsync: updateTitlePageMutationAsync } =
@@ -143,6 +145,17 @@ export function TitleEditor({
   //     titleEditor?.commands.focus("end");
   //   }, 500);
   // }, [titleEditor]);
+
+  // 新页面创建后的自动聚焦
+  useEffect(() => {
+    if (autoFocus && titleEditor && editable) {
+      const timer = setTimeout(() => {
+        titleEditor?.commands.focus("end");
+      }, 300);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [autoFocus, titleEditor, editable]);
 
   useEffect(() => {
     return () => {
