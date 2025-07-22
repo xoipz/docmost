@@ -422,6 +422,8 @@
   "Loading spinner": "加载转圈",
   "Show page state control": "显示页面状态控制",
   "Show multi-window tabs": "显示多窗口标签页",
+  "Add current page to tabs": "添加当前页面到标签页",
+  "Close tab": "关闭标签页",
   "在新页面打开": "在新页面打开",
   "新建文件": "新建文件"
 }

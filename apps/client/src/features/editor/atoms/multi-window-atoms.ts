@@ -73,11 +73,21 @@ export const tabActionsAtom = atom(
       
       case "ACTIVATE_TAB": {
         const tabId = action.payload;
-        set(activeTabAtom, tabId);
-        set(multiWindowTabsAtom, tabs.map(tab => ({
-          ...tab,
-          isActive: tab.id === tabId
-        })));
+        if (tabId === null) {
+          // 取消所有标签页的激活状态
+          set(activeTabAtom, null);
+          set(multiWindowTabsAtom, tabs.map(tab => ({
+            ...tab,
+            isActive: false
+          })));
+        } else {
+          // 激活指定标签页
+          set(activeTabAtom, tabId);
+          set(multiWindowTabsAtom, tabs.map(tab => ({
+            ...tab,
+            isActive: tab.id === tabId
+          })));
+        }
         break;
       }
       

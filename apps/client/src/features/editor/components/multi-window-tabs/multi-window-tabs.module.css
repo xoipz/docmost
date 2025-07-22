@@ -51,6 +51,60 @@
   position: relative;
   flex-shrink: 0;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  user-select: none;
+}
+
+/* 拖拽状态 */
+.tab.dragging {
+  opacity: 0.8;
+  transform: rotate(1deg) scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  transition: none;
+  cursor: grabbing !important;
+}
+
+/* 拖拽目标悬停状态 */
+.tab.dragOver {
+  background: light-dark(var(--mantine-color-blue-0), var(--mantine-color-blue-9));
+  border-color: light-dark(var(--mantine-color-blue-4), var(--mantine-color-blue-5));
+  transform: scale(1.02);
+  transition: all 0.15s ease;
+}
+
+/* 拖拽插入指示器 */
+.dragIndicator {
+  width: 3px;
+  height: 32px;
+  background: light-dark(var(--mantine-color-blue-5), var(--mantine-color-blue-4));
+  border-radius: 2px;
+  flex-shrink: 0;
+  animation: indicatorPulse 1s ease-in-out infinite;
+  box-shadow: 0 0 8px light-dark(var(--mantine-color-blue-3), var(--mantine-color-blue-6));
+}
+
+@keyframes indicatorPulse {
+  0%, 100% { 
+    opacity: 0.6;
+    transform: scaleY(0.8);
+  }
+  50% { 
+    opacity: 1;
+    transform: scaleY(1.1);
+  }
+}
+
+/* 标签页位置变化动画 */
+.tab.shifting {
+  transition: transform 0.2s ease-out;
+}
+
+.tab.shiftLeft {
+  transform: translateX(-8px);
+}
+
+.tab.shiftRight {
+  transform: translateX(8px);
 }
 
 .tab:hover {
@@ -60,15 +114,15 @@
 }
 
 .activeTab {
-  background: light-dark(var(--mantine-color-blue-0), var(--mantine-color-blue-9)) !important;
-  border-color: light-dark(var(--mantine-color-blue-4), var(--mantine-color-blue-6)) !important;
-  color: light-dark(var(--mantine-color-blue-8), var(--mantine-color-blue-1));
-  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
+  background: light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-5)) !important;
+  border-color: light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-3)) !important;
+  color: light-dark(var(--mantine-color-gray-9), var(--mantine-color-gray-0));
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 .activeTab:hover {
-  background: light-dark(var(--mantine-color-blue-1), var(--mantine-color-blue-8)) !important;
-  box-shadow: 0 3px 8px rgba(59, 130, 246, 0.3);
+  background: light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4)) !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
 }
 
 .tabText {
@@ -80,7 +134,7 @@
 }
 
 .activeTab .tabText {
-  color: light-dark(var(--mantine-color-blue-8), var(--mantine-color-blue-1));
+  color: light-dark(var(--mantine-color-gray-9), var(--mantine-color-gray-0));
   font-weight: 600;
 }
 
@@ -145,9 +199,9 @@
 }
 
 .newTabButton {
-  background: light-dark(var(--mantine-color-blue-0), var(--mantine-color-blue-9));
-  border: 1px solid light-dark(var(--mantine-color-blue-3), var(--mantine-color-blue-6));
-  color: light-dark(var(--mantine-color-blue-7), var(--mantine-color-blue-2));
+  background: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-6));
+  border: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-gray-2));
   width: 28px !important;
   height: 28px !important;
   min-width: 28px !important;
@@ -158,10 +212,10 @@
 }
 
 .newTabButton:hover {
-  background: light-dark(var(--mantine-color-blue-1), var(--mantine-color-blue-8));
-  border-color: light-dark(var(--mantine-color-blue-4), var(--mantine-color-blue-5));
+  background: light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-5));
+  border-color: light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-3));
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 /* 手机端适配 */
@@ -177,6 +231,26 @@
     max-width: 160px;
     height: 28px;
     gap: 6px;
+    /* 优化触摸体验 */
+    touch-action: none; /* 阻止浏览器默认触摸行为 */
+    -webkit-tap-highlight-color: transparent; /* 移除点击高亮 */
+  }
+
+  /* 移动端拖拽状态 */
+  .tab.dragging {
+    opacity: 0.9;
+    transform: rotate(1deg) scale(1.03);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    z-index: 1000;
+    transition: none;
+    cursor: grabbing !important;
+  }
+
+  /* 移动端拖拽目标 */
+  .tab.dragOver {
+    transform: translateX(4px);
+    border-left: 2px solid light-dark(var(--mantine-color-blue-5), var(--mantine-color-blue-4));
+    transition: all 0.15s ease;
   }
   
   .tabText {
