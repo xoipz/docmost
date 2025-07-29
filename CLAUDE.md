@@ -7,3 +7,4 @@
 # 本项目规则
 1. 本项目在处理中，不用进行编译，运行（除非我进行特别指明需要编译，运行）
 2. 写完后，如果有用到国际化的语言，请在apps\client\public\locales\zh-CN\translation.json中添加对应的中文。
+3. 这个项目使用的是pnpm

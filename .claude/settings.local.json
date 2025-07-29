@@ -2,7 +2,17 @@
   "permissions": {
     "allow": [
       "Bash(mkdir:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(npx cap add:*)",
+      "Bash(npx cap run:*)",
+      "Bash(find:*)",
+      "Bash(./gradlew:*)",
+      "Bash(npx cap sync:*)",
+      "Bash(.gradlew assembleDebug)",
+      "Bash(gradlew.bat:*)",
+      "Bash(cmd //c:*)",
+      "Bash(java:*)",
+      "Bash(pnpm remove:*)"
     ],
     "deny": []
   }

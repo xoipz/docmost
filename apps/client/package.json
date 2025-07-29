@@ -10,6 +10,10 @@
     "format": "prettier --write \"src/**/*.tsx\" \"src/**/*.ts\""
   },
   "dependencies": {
+    "@capacitor/android": "^5.7.8",
+    "@capacitor/cli": "^5.7.8",
+    "@capacitor/core": "^5.7.8",
+    "@capacitor/ios": "^5.7.8",
     "@casl/ability": "^6.7.2",
     "@casl/react": "^4.0.0",
     "@docmost/editor-ext": "workspace:*",
