@@ -87,12 +87,31 @@ export function updatePageData(data: IPage) {
     queryClient.setQueryData(["pages", data.id], { ...pageById, ...data });
   }
 
-  invalidateOnUpdatePage(data.spaceId, data.parentPageId, data.id, data.title, data.icon);
+  // 如果是日记，也要直接更新日记缓存
+  if (data.isJournal) {
+    queryClient.setQueryData<IPage[]>(["journals", data.spaceId], (oldJournals = []) => {
+      return oldJournals.map(journal => 
+        journal.id === data.id 
+          ? { ...journal, ...data }
+          : journal
+      );
+    });
+    
+    // 失效最近更改查询
+    queryClient.invalidateQueries({ queryKey: ["recent-changes", data.spaceId] });
+  }
+
+  invalidateOnUpdatePage(data.spaceId, data.parentPageId, data.id, data.title, data.icon, data.isJournal);
 }
 
 export function useUpdateTitlePageMutation() {
   return useMutation<IPage, Error, Partial<IPageInput>>({
     mutationFn: (data) => updatePage(data),
+    onSuccess: (data) => {
+      updatePageData(data);
+      // 也需要调用invalidateOnUpdatePage来更新最近更改
+      invalidateOnUpdatePage(data.spaceId, data.parentPageId, data.id, data.title, data.icon, data.isJournal);
+    },
   });
 }
 
@@ -102,7 +121,7 @@ export function useUpdatePageMutation() {
     onSuccess: (data) => {
       updatePage(data);
 
-      invalidateOnUpdatePage(data.spaceId, data.parentPageId, data.id, data.title, data.icon);
+      invalidateOnUpdatePage(data.spaceId, data.parentPageId, data.id, data.title, data.icon, data.isJournal);
     },
   });
 }
@@ -189,6 +208,8 @@ export function useRecentChangesQuery(
 }
 
 export function invalidateOnCreatePage(data: Partial<IPage>) {
+  console.log('invalidateOnCreatePage: 开始处理，接收到的data:', data);
+  
   const newPage: Partial<IPage> = {
     creatorId: data.creatorId,
     hasChildren: data.hasChildren,
@@ -203,6 +224,10 @@ export function invalidateOnCreatePage(data: Partial<IPage>) {
     journalDate: data.journalDate,
   };
 
+  console.log('invalidateOnCreatePage: 构造的newPage:', newPage);
+  console.log('invalidateOnCreatePage: data.isJournal 值:', data.isJournal, '类型:', typeof data.isJournal);
+  console.log('invalidateOnCreatePage: 即将进行 if (data.isJournal) 判断');
+
   let queryKey: QueryKey = null;
   if (data.parentPageId===null) {
     queryKey = ['root-sidebar-pages', data.spaceId];
@@ -210,9 +235,48 @@ export function invalidateOnCreatePage(data: Partial<IPage>) {
     queryKey = ['sidebar-pages', {pageId: data.parentPageId, spaceId: data.spaceId}]
   }
 
-  // 如果是日记，也要失效日记相关的查询
+  console.log('invalidateOnCreatePage: 执行 if (data.isJournal) 判断，结果:', !!data.isJournal);
+  
+  // 如果是日记，直接更新日记缓存而不是失效
   if (data.isJournal) {
-    queryClient.invalidateQueries({ queryKey: ["journals", data.spaceId] });
+    console.log('invalidateOnCreatePage: 处理日记创建，data:', data);
+    
+    // 直接将新日记添加到缓存中
+    const queryKey = ["journals", data.spaceId];
+    console.log('invalidateOnCreatePage: 使用查询键:', queryKey);
+    
+    queryClient.setQueryData<IPage[]>(queryKey, (oldJournals = []) => {
+      console.log('invalidateOnCreatePage: 当前缓存的日记数量:', oldJournals.length);
+      console.log('invalidateOnCreatePage: 要添加的新日记:', newPage);
+      
+      // 确保不重复添加
+      const existingIndex = oldJournals.findIndex(j => j.id === data.id);
+      if (existingIndex >= 0) {
+        console.log('invalidateOnCreatePage: 更新现有日记');
+        // 如果已存在，更新它
+        const updatedJournals = [...oldJournals];
+        updatedJournals[existingIndex] = { ...updatedJournals[existingIndex], ...newPage };
+        return updatedJournals;
+      } else {
+        console.log('invalidateOnCreatePage: 添加新日记到缓存');
+        // 添加新日记，按日期排序（最新的在前面）
+        const updatedJournals = [newPage as IPage, ...oldJournals];
+        const sortedJournals = updatedJournals.sort((a, b) => {
+          if (!a.journalDate || !b.journalDate) return 0;
+          return new Date(b.journalDate).getTime() - new Date(a.journalDate).getTime();
+        });
+        console.log('invalidateOnCreatePage: 更新后的日记数量:', sortedJournals.length);
+        return sortedJournals;
+      }
+    });
+    
+    // 也更新特定日期的日记查询缓存
+    if (data.journalDate) {
+      queryClient.setQueryData(["journal", data.spaceId, data.journalDate], newPage);
+    }
+    
+    // 失效最近更改查询，让它重新获取以包含新日记
+    queryClient.invalidateQueries({ queryKey: ["recent-changes", data.spaceId] });
   }
 
   //update all sidebar pages
@@ -283,13 +347,29 @@ export function invalidateOnCreatePage(data: Partial<IPage>) {
   });
 }
 
-export function invalidateOnUpdatePage(spaceId: string, parentPageId: string, id: string, title: string, icon: string) {
+export function invalidateOnUpdatePage(spaceId: string, parentPageId: string, id: string, title: string, icon: string, isJournal?: boolean) {
   let queryKey: QueryKey = null;
   if(parentPageId===null){
     queryKey = ['root-sidebar-pages', spaceId];
   }else{
     queryKey = ['sidebar-pages', {pageId: parentPageId, spaceId: spaceId}]
   }
+
+  // 如果是日记，直接更新日记缓存而不是失效
+  if (isJournal) {
+    // 直接更新日记缓存中的数据
+    queryClient.setQueryData<IPage[]>(["journals", spaceId], (oldJournals = []) => {
+      return oldJournals.map(journal => 
+        journal.id === id 
+          ? { ...journal, title, icon, updatedAt: new Date().toISOString() }
+          : journal
+      );
+    });
+    
+    // 失效最近更改查询，让它重新获取以反映更新
+    queryClient.invalidateQueries({ queryKey: ["recent-changes", spaceId] });
+  }
+
   //update all sidebar pages
   queryClient.setQueryData<InfiniteData<IPagination<IPage>>>(queryKey, (old) => {
     if (!old) return old;
@@ -304,10 +384,12 @@ export function invalidateOnUpdatePage(spaceId: string, parentPageId: string, id
     };
   });
   
-  //update recent changes
-  queryClient.invalidateQueries({
-    queryKey: ["recent-changes", spaceId],
-  });
+  //update recent changes (only if not journal, as journal already handled above)
+  if (!isJournal) {
+    queryClient.invalidateQueries({
+      queryKey: ["recent-changes", spaceId],
+    });
+  }
 }
 
 export function invalidateOnMovePage() {

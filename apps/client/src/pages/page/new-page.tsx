@@ -6,12 +6,15 @@ import { useGetJournalsQuery } from '@/features/journal/queries/journal-query';
 import useCurrentUser from '@/features/user/hooks/use-current-user';
 import { showNotification } from '@mantine/notifications';
 import { useTranslation } from 'react-i18next';
+import { useQueryClient } from '@tanstack/react-query';
+import api from '@/lib/api-client.ts';
 
 export default function NewPage() {
   const { t } = useTranslation();
   const { spaceSlug } = useParams<{ spaceSlug: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: currentUser } = useCurrentUser();
   const { data: space } = useGetSpaceBySlugQuery(spaceSlug!);
   const { data: journals = [], isLoading: journalsLoading } = useGetJournalsQuery(space?.id);
@@ -61,8 +64,54 @@ export default function NewPage() {
           replace: true 
         });
       },
-      onError: (error) => {
+      onError: async (error: any) => {
         console.error('创建页面失败:', error);
+        
+        // 如果是因为该日期已有日记的错误，重新检查并导航
+        if (journalDate && error?.response?.data?.message?.includes('该日期已有日记')) {
+          console.log('检测到该日期已有日记，重新获取最新数据...');
+          
+          try {
+            // 强制重新获取日记列表
+            await queryClient.invalidateQueries({ queryKey: ["journals", space.id] });
+            const response = await api.post('/pages/journal/list', {
+              spaceId: space.id,
+              page: 1,
+              limit: 100,
+              includeContent: false,
+            });
+            
+            // 处理响应数据
+            let updatedJournals = [];
+            const data = response.data;
+            if (Array.isArray(data)) {
+              updatedJournals = data;
+            } else if (data && Array.isArray(data.items)) {
+              updatedJournals = data.items;
+            } else if (data && Array.isArray(data.data)) {
+              updatedJournals = data.data;
+            }
+            
+            // 查找对应日期的日记
+            const existingJournal = updatedJournals.find(
+              (journal: any) => journal.isJournal && journal.journalDate === journalDate
+            );
+            
+            if (existingJournal) {
+              // 找到了，导航到该日记
+              console.log('找到现有日记，导航到:', existingJournal.slugId);
+              navigate(`/s/${spaceSlug}/p/${existingJournal.slugId}`, { replace: true });
+              return;
+            } else {
+              console.log('重新检查后仍未找到日记，停止操作');
+              navigate(`/s/${spaceSlug}`, { replace: true });
+              return;
+            }
+          } catch (refreshError) {
+            console.error('重新获取日记数据失败:', refreshError);
+          }
+        }
+        
         showNotification({
           title: t('error'),
           message: journalDate ? '创建日记失败' : '创建页面失败',

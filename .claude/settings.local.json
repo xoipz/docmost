@@ -32,7 +32,9 @@
       "Bash(npx nx run-many:*)",
       "Bash(npm run build:*)",
       "Bash(rm:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npx nx run:*)",
+      "Bash(npm run start:dev:*)"
     ],
     "deny": []
   }

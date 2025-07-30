@@ -52,11 +52,13 @@ export class PageService {
     includeYdoc?: boolean,
     includeSpace?: boolean,
   ): Promise<Page> {
-    return this.pageRepo.findById(pageId, {
+    const page = await this.pageRepo.findById(pageId, {
       includeContent,
       includeYdoc,
       includeSpace,
     });
+
+    return page;
   }
 
   async create(
@@ -184,44 +186,6 @@ export class PageService {
       parentPageId = parentPage.id;
     }
 
-    // 为日记页面准备初始内容
-    let initialContent = null;
-    if (createPageDto.isJournal && createPageDto.journalDate) {
-      const date = new Date(createPageDto.journalDate);
-      const formattedDate = date.toLocaleDateString('zh-CN', {
-        year: 'numeric',
-        month: 'numeric', 
-        day: 'numeric'
-      }).replace(/\//g, '.');
-      
-      initialContent = {
-        type: 'doc',
-        content: [
-          {
-            type: 'paragraph',
-            attrs: {
-              'data-journal-date': createPageDto.journalDate
-            },
-            content: [
-              {
-                type: 'text',
-                text: `日期：${formattedDate}`,
-                marks: [
-                  {
-                    type: 'bold'
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            type: 'paragraph',
-            content: []
-          }
-        ]
-      };
-    }
-
     const createdPage = await this.pageRepo.insertPage({
       slugId: generateSlugId(),
       title: createPageDto.title,
@@ -237,7 +201,7 @@ export class PageService {
       lastUpdatedById: userId,
       isJournal: createPageDto.isJournal || false,
       journalDate: createPageDto.journalDate ? new Date(createPageDto.journalDate) : null,
-      content: initialContent,
+      content: null,
     });
 
     return createdPage;
@@ -688,6 +652,7 @@ export class PageService {
       creatorId,
       isJournal: true,
       journalDate,
+      content: null,
     };
 
     const createdPage = await this.pageRepo.insertPage(insertableData);

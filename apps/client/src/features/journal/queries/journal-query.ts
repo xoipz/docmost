@@ -59,9 +59,14 @@ export function useGetJournalsQuery(
 ): UseQueryResult<IPage[], Error> {
   return useQuery({
     queryKey: ["journals", spaceId],
-    queryFn: () => getJournalsBySpaceId(spaceId!),
+    queryFn: () => {
+      console.log('useGetJournalsQuery: 执行查询，spaceId:', spaceId);
+      return getJournalsBySpaceId(spaceId!);
+    },
     enabled: !!spaceId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000, // 进一步减少到30秒，让数据更及时
+    refetchOnMount: true, // 确保每次挂载时都会重新获取
+    refetchOnWindowFocus: true, // 窗口重新获得焦点时重新获取
   });
 }
 

@@ -2,8 +2,8 @@ import { Box, ScrollArea, Text, Group, Button } from "@mantine/core";
 import { IconX } from "@tabler/icons-react";
 import CommentList from "@/features/comment/components/comment-list.tsx";
 import { useAtom } from "jotai";
-import { asideStateAtom, defaultOpenTocAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
-import React, { ReactNode, useEffect, useState } from "react";
+import { asideStateAtom, defaultOpenTocAtom, userManuallyClosedTocAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
+import React, { ReactNode, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { TableOfContents } from "@/features/editor/components/table-of-contents/table-of-contents.tsx";
 import { useAtomValue } from "jotai";
@@ -12,12 +12,15 @@ import { pageEditorAtom } from "@/features/editor/atoms/editor-atoms.ts";
 export default function Aside() {
   const [{ tab, isAsideOpen }, setAsideState] = useAtom(asideStateAtom);
   const [defaultOpenToc] = useAtom(defaultOpenTocAtom);
+  const [userManuallyClosedToc, setUserManuallyClosedToc] = useAtom(userManuallyClosedTocAtom);
   const { t } = useTranslation();
   const pageEditor = useAtomValue(pageEditorAtom);
-  const [userManuallyClosed, setUserManuallyClosed] = useState(false);
 
   const closeSidebar = () => {
-    setUserManuallyClosed(true);
+    // 如果关闭的是TOC，记录用户手动关闭的状态
+    if (tab === "toc") {
+      setUserManuallyClosedToc(true);
+    }
     setAsideState({ tab: "", isAsideOpen: false });
   };
 
@@ -26,17 +29,10 @@ export default function Aside() {
     const isMobileDevice = window.innerWidth < 768;
     
     // 只在非移动设备上自动打开默认TOC，并且用户没有手动关闭过
-    if (defaultOpenToc && !tab && !isMobileDevice && !userManuallyClosed) {
+    if (defaultOpenToc && !tab && !isMobileDevice && !userManuallyClosedToc) {
       setAsideState({ tab: "toc", isAsideOpen: true });
     }
-  }, [defaultOpenToc, tab, setAsideState, userManuallyClosed]);
-
-  // 当侧边栏被重新打开时，重置手动关闭的状态
-  useEffect(() => {
-    if (isAsideOpen && tab) {
-      setUserManuallyClosed(false);
-    }
-  }, [isAsideOpen, tab]);
+  }, [defaultOpenToc, tab, setAsideState, userManuallyClosedToc]);
 
   // 添加窗口大小改变的监听，确保响应式处理
   useEffect(() => {

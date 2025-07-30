@@ -39,6 +39,8 @@ export class PageRepo {
     'updatedAt',
     'deletedAt',
     'contributorIds',
+    'isJournal',
+    'journalDate',
   ];
 
   async findById(

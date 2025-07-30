@@ -6,6 +6,7 @@ import {
   Tooltip,
   UnstyledButton,
   Divider,
+  Collapse,
 } from "@mantine/core";
 import {
   IconArrowDown,
@@ -16,6 +17,8 @@ import {
   IconSearch,
   IconSettings,
   IconLayoutSidebarLeftCollapse,
+  IconChevronDown,
+  IconChevronRight,
 } from "@tabler/icons-react";
 import classes from "./space-sidebar.module.css";
 import React from "react";
@@ -41,7 +44,8 @@ import ExportModal from "@/components/common/export-modal";
 import { 
   mobileSidebarAtom, 
   desktopSidebarAtom,
-  headerVisibleAtom
+  headerVisibleAtom,
+  navigationCollapsedAtom
 } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
 import { useToggleSidebar } from "@/components/layouts/global/hooks/hooks/use-toggle-sidebar.ts";
 import { searchSpotlight } from "@/features/search/constants";
@@ -59,6 +63,7 @@ export function SpaceSidebar() {
   const toggleDesktopSidebar = useToggleSidebar(desktopSidebarAtom);
   const [headerVisible] = useAtom(headerVisibleAtom);
   const [viewMode] = useAtom(spaceViewModeAtom);
+  const [navigationCollapsed, setNavigationCollapsed] = useAtom(navigationCollapsedAtom);
 
   const { spaceSlug } = useParams();
   const { data: space, isLoading, isError } = useGetSpaceBySlugQuery(spaceSlug);
@@ -75,6 +80,11 @@ export function SpaceSidebar() {
       // 桌面端收起桌面侧边栏
       toggleDesktopSidebar();
     }
+  };
+
+  // 处理导航栏收缩/展开
+  const toggleNavigation = () => {
+    setNavigationCollapsed(!navigationCollapsed);
   };
 
   if (!space) {
@@ -122,11 +132,35 @@ export function SpaceSidebar() {
 
         {/* 导航模块 */}
         <div className={classes.section}>
-          <Group className={classes.pagesHeader} justify="space-between">
-            <Text size="xs" fw={500} c="dimmed">
-              {t("导航")}
-            </Text>
-          </Group>
+          <UnstyledButton 
+            onClick={toggleNavigation}
+            style={{ 
+              width: '100%', 
+              padding: 0,
+              border: 'none',
+              background: 'transparent'
+            }}
+          >
+            <Group className={classes.pagesHeader} justify="space-between">
+              <Text size="xs" fw={500} c="dimmed">
+                {t("导航")}
+              </Text>
+              <Tooltip label={navigationCollapsed ? t("展开导航") : t("收起导航")} withArrow position="right">
+                <ActionIcon
+                  variant="transparent"
+                  size="xs"
+                  aria-label={navigationCollapsed ? t("展开导航") : t("收起导航")}
+                  style={{ 
+                    color: 'white',
+                    pointerEvents: 'none', // 防止阻止父级点击事件
+                    marginRight: '-2px'
+                  }}
+                >
+                  {navigationCollapsed ? <IconChevronRight size={14} /> : <IconChevronDown size={16} />}
+                </ActionIcon>
+              </Tooltip>
+            </Group>
+          </UnstyledButton>
           
           <div className={classes.menuItems}>
             {/* 搜索功能始终显示 */}
@@ -141,55 +175,58 @@ export function SpaceSidebar() {
               </div>
             </UnstyledButton>
 
-            <UnstyledButton
-              component={Link}
-              to={getSpaceUrl(spaceSlug)}
-              className={clsx(
-                classes.menu,
-                location.pathname.toLowerCase() === getSpaceUrl(spaceSlug)
-                  ? classes.activeButton
-                  : "",
-              )}
-            >
-              <div className={classes.menuItemInner}>
-                <IconHome
-                  size={18}
-                  className={classes.menuItemIcon}
-                  stroke={2}
-                />
-                <span>{t("Overview")}</span>
-              </div>
-            </UnstyledButton>
-
-            <UnstyledButton className={classes.menu} onClick={openSettings}>
-              <div className={classes.menuItemInner}>
-                <IconSettings
-                  size={18}
-                  className={classes.menuItemIcon}
-                  stroke={2}
-                />
-                <span>{t("Space settings")}</span>
-              </div>
-            </UnstyledButton>
-
-            {spaceAbility.can(
-              SpaceCaslAction.Manage,
-              SpaceCaslSubject.Page,
-            ) && (
+            {/* 其他导航项可以收缩 */}
+            <Collapse in={!navigationCollapsed}>
               <UnstyledButton
-                className={classes.menu}
-                onClick={handleCreatePage}
+                component={Link}
+                to={getSpaceUrl(spaceSlug)}
+                className={clsx(
+                  classes.menu,
+                  location.pathname.toLowerCase() === getSpaceUrl(spaceSlug)
+                    ? classes.activeButton
+                    : "",
+                )}
               >
                 <div className={classes.menuItemInner}>
-                  <IconPlus
+                  <IconHome
                     size={18}
                     className={classes.menuItemIcon}
                     stroke={2}
                   />
-                  <span>{t("New page")}</span>
+                  <span>{t("Overview")}</span>
                 </div>
               </UnstyledButton>
-            )}
+
+              <UnstyledButton className={classes.menu} onClick={openSettings}>
+                <div className={classes.menuItemInner}>
+                  <IconSettings
+                    size={18}
+                    className={classes.menuItemIcon}
+                    stroke={2}
+                  />
+                  <span>{t("Space settings")}</span>
+                </div>
+              </UnstyledButton>
+
+              {spaceAbility.can(
+                SpaceCaslAction.Manage,
+                SpaceCaslSubject.Page,
+              ) && (
+                <UnstyledButton
+                  className={classes.menu}
+                  onClick={handleCreatePage}
+                >
+                  <div className={classes.menuItemInner}>
+                    <IconPlus
+                      size={18}
+                      className={classes.menuItemIcon}
+                      stroke={2}
+                    />
+                    <span>{t("New page")}</span>
+                  </div>
+                </UnstyledButton>
+              )}
+            </Collapse>
           </div>
         </div>
 

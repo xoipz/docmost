@@ -1,3 +1,27 @@
+/* 日历动画效果 */
+.calendarContainer {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 月份/年份网格动画 */
+.monthsGridAnimated {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* 日期网格动画 */
+.daysGridAnimated {
+  animation: fadeIn 0.4s ease-out;
+}
+
 .weekdaysHeader {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -31,21 +55,27 @@
 .day {
   position: relative;
   aspect-ratio: 1;
-  border-radius: 50%;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
   cursor: pointer;
-  min-height: 28px;
+  min-height: 36px;
+  padding: 2px;
+  transform: scale(1);
 }
 
 .day:hover {
   background-color: var(--mantine-color-gray-1);
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 [data-mantine-color-scheme="dark"] .day:hover {
   background-color: var(--mantine-color-dark-6);
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .day[data-selected="true"] {
@@ -85,13 +115,58 @@
 
 .journalDot {
   position: absolute;
-  bottom: 6px;
+  top: 2px;
   left: 50%;
   transform: translateX(-50%);
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background-color: var(--mantine-color-green-6);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(46, 160, 67, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 4px rgba(46, 160, 67, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(46, 160, 67, 0);
+  }
+}
+
+/* 日期按钮入场动画 */
+.dayEnterAnimation {
+  animation: dayFadeIn 0.5s ease-out backwards;
+}
+
+@keyframes dayFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 月份按钮入场动画 */
+.monthEnterAnimation {
+  animation: monthSlideIn 0.6s ease-out backwards;
+}
+
+@keyframes monthSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .day[data-selected="true"] .journalDot {
@@ -105,8 +180,8 @@
 .monthsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  max-width: 400px;
+  gap: 12px;
+  max-width: 480px;
   margin: 0 auto;
 }
 
@@ -117,20 +192,35 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
   cursor: pointer;
   border: 1px solid var(--mantine-color-gray-3);
-  min-height: 28px;
+  min-height: 40px;
+  padding: 8px;
+  transform: scale(1);
+}
+
+.month:hover {
+  background-color: var(--mantine-color-gray-1);
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 [data-mantine-color-scheme="dark"] .month {
   border-color: var(--mantine-color-dark-4);
 }
 
-.month:hover {
-  background-color: var(--mantine-color-gray-1);
-}
-
 [data-mantine-color-scheme="dark"] .month:hover {
   background-color: var(--mantine-color-dark-6);
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.month[data-has-journal="true"] {
+  border-color: var(--mantine-color-green-6);
+  border-width: 2px;
+}
+
+[data-mantine-color-scheme="dark"] .month[data-has-journal="true"] {
+  border-color: var(--mantine-color-green-7);
 }

@@ -6,8 +6,9 @@
   "scripts": {
     "cdev": "nx run client:dev --host",
     "sdev": "nx run server:start:dev",
-    "eb": "nx run @docmost/editor-ext:build",
+    "ebuild": "nx run @docmost/editor-ext:build",
     "cbuild": "nx run client:build",
+    "sbuild": "nx run server:build",
     "build": "nx run-many -t build",
     "start": "pnpm --filter ./apps/server run start:prod",
     "collab": "pnpm --filter ./apps/server run collab:prod",

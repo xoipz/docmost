@@ -84,7 +84,14 @@ export class PageController {
       throw new ForbiddenException();
     }
 
-    return this.pageService.create(user.id, workspace.id, createPageDto);
+    const createdPage = await this.pageService.create(user.id, workspace.id, createPageDto);
+    
+    // 确保返回的数据包含isJournal字段
+    return {
+      ...createdPage,
+      isJournal: createPageDto.isJournal || false,
+      journalDate: createPageDto.journalDate || null,
+    };
   }
 
   @HttpCode(HttpStatus.OK)
