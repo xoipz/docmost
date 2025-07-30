@@ -24,7 +24,7 @@ export const journalSelectedDateAtom = atom<Date | null, [Date | null], void>(
   }
 );
 
-export const journalViewModeAtom = atomWithStorage<"month" | "year">(
+export const journalViewModeAtom = atomWithStorage<"month" | "year" | "decade">(
   "docmost-journal-view-mode", 
   "month"
 );

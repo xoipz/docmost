@@ -361,7 +361,7 @@ export function invalidateOnUpdatePage(spaceId: string, parentPageId: string, id
     queryClient.setQueryData<IPage[]>(["journals", spaceId], (oldJournals = []) => {
       return oldJournals.map(journal => 
         journal.id === id 
-          ? { ...journal, title, icon, updatedAt: new Date().toISOString() }
+          ? { ...journal, title, icon, updatedAt: new Date() }
           : journal
       );
     });
