@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsOptional, IsString, IsUUID, IsBoolean, IsDateString } from 'class-validator';
 
 export class CreatePageDto {
   @IsOptional()
@@ -15,4 +15,12 @@ export class CreatePageDto {
 
   @IsUUID()
   spaceId: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isJournal?: boolean;
+
+  @IsOptional()
+  @IsDateString()
+  journalDate?: string;
 }

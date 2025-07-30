@@ -18,6 +18,8 @@ export interface IPage {
   deletedAt: Date;
   position: string;
   hasChildren: boolean;
+  isJournal: boolean;
+  journalDate: string;
   creator: ICreator;
   lastUpdatedBy: ILastUpdatedBy;
   space: Partial<ISpace>;
@@ -66,6 +68,8 @@ export interface IPageInput {
   coverPhoto: string;
   position: string;
   isLocked: boolean;
+  isJournal?: boolean;
+  journalDate?: string;
 }
 
 export interface IExportPageParams {

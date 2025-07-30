@@ -3,6 +3,7 @@ import SetupWorkspace from "@/pages/auth/setup-workspace.tsx";
 import LoginPage from "@/pages/auth/login";
 import Home from "@/pages/dashboard/home";
 import Page from "@/pages/page/page";
+import NewPage from "@/pages/page/new-page";
 import AccountSettings from "@/pages/settings/account/account-settings";
 import WorkspaceMembers from "@/pages/settings/workspace/workspace-members";
 import WorkspaceSettings from "@/pages/settings/workspace/workspace-settings";
@@ -68,6 +69,7 @@ export default function App() {
         <Route element={<Layout />}>
           <Route path={"/home"} element={<Home />} />
           <Route path={"/s/:spaceSlug"} element={<SpaceHome />} />
+          <Route path={"/s/:spaceSlug/pages/new"} element={<NewPage />} />
           <Route
             path={"/s/:spaceSlug/p/:pageSlug"}
             element={

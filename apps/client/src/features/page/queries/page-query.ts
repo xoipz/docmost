@@ -199,6 +199,8 @@ export function invalidateOnCreatePage(data: Partial<IPage>) {
     slugId: data.slugId,
     spaceId: data.spaceId,
     title: data.title,
+    isJournal: data.isJournal,
+    journalDate: data.journalDate,
   };
 
   let queryKey: QueryKey = null;
@@ -206,6 +208,11 @@ export function invalidateOnCreatePage(data: Partial<IPage>) {
     queryKey = ['root-sidebar-pages', data.spaceId];
   }else{
     queryKey = ['sidebar-pages', {pageId: data.parentPageId, spaceId: data.spaceId}]
+  }
+
+  // 如果是日记，也要失效日记相关的查询
+  if (data.isJournal) {
+    queryClient.invalidateQueries({ queryKey: ["journals", data.spaceId] });
   }
 
   //update all sidebar pages

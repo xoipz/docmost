@@ -66,8 +66,113 @@ export class PageService {
   ): Promise<Page> {
     let parentPageId = undefined;
 
-    // check if parent page exists
-    if (createPageDto.parentPageId) {
+    // 如果是日记，处理日记文件夹逻辑
+    if (createPageDto.isJournal && createPageDto.journalDate) {
+      // 检查该日期是否已有日记
+      const existingJournal = await this.db
+        .selectFrom('pages')
+        .select('id')
+        .where('spaceId', '=', createPageDto.spaceId)
+        .where('isJournal', '=', true)
+        .where('journalDate', '=', new Date(createPageDto.journalDate))
+        .where('deletedAt', 'is', null)
+        .executeTakeFirst();
+
+      if (existingJournal) {
+        throw new BadRequestException('该日期已有日记');
+      }
+
+      const date = new Date(createPageDto.journalDate);
+      const year = date.getFullYear().toString();
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+
+      // 查找或创建日记根文件夹
+      let journalRootFolder = await this.db
+        .selectFrom('pages')
+        .select('id')
+        .where('spaceId', '=', createPageDto.spaceId)
+        .where('title', '=', '日记')
+        .where('parentPageId', 'is', null)
+        .where('deletedAt', 'is', null)
+        .executeTakeFirst();
+
+      if (!journalRootFolder) {
+        // 创建日记根文件夹
+        const createdRootFolder = await this.pageRepo.insertPage({
+          slugId: generateSlugId(),
+          title: '日记',
+          position: await this.nextPagePosition(createPageDto.spaceId),
+          icon: '📔',
+          parentPageId: null,
+          spaceId: createPageDto.spaceId,
+          creatorId: userId,
+          workspaceId: workspaceId,
+          lastUpdatedById: userId,
+          isJournal: false,
+          journalDate: null,
+        });
+        journalRootFolder = { id: createdRootFolder.id };
+      }
+
+      // 查找或创建年份文件夹
+      let yearFolder = await this.db
+        .selectFrom('pages')
+        .select('id')
+        .where('spaceId', '=', createPageDto.spaceId)
+        .where('title', '=', `${year}年`)
+        .where('parentPageId', '=', journalRootFolder.id)
+        .where('deletedAt', 'is', null)
+        .executeTakeFirst();
+
+      if (!yearFolder) {
+        // 创建年份文件夹
+        const createdYearFolder = await this.pageRepo.insertPage({
+          slugId: generateSlugId(),
+          title: `${year}年`,
+          position: await this.nextPagePosition(createPageDto.spaceId, journalRootFolder.id),
+          icon: '📅',
+          parentPageId: journalRootFolder.id,
+          spaceId: createPageDto.spaceId,
+          creatorId: userId,
+          workspaceId: workspaceId,
+          lastUpdatedById: userId,
+          isJournal: false,
+          journalDate: null,
+        });
+        yearFolder = { id: createdYearFolder.id };
+      }
+
+      // 查找或创建月份文件夹
+      let monthFolder = await this.db
+        .selectFrom('pages')
+        .select('id')
+        .where('spaceId', '=', createPageDto.spaceId)
+        .where('title', '=', `${month}月`)
+        .where('parentPageId', '=', yearFolder.id)
+        .where('deletedAt', 'is', null)
+        .executeTakeFirst();
+
+      if (!monthFolder) {
+        // 创建月份文件夹
+        const createdMonthFolder = await this.pageRepo.insertPage({
+          slugId: generateSlugId(),
+          title: `${month}月`,
+          position: await this.nextPagePosition(createPageDto.spaceId, yearFolder.id),
+          icon: '📆',
+          parentPageId: yearFolder.id,
+          spaceId: createPageDto.spaceId,
+          creatorId: userId,
+          workspaceId: workspaceId,
+          lastUpdatedById: userId,
+          isJournal: false,
+          journalDate: null,
+        });
+        monthFolder = { id: createdMonthFolder.id };
+      }
+
+      parentPageId = monthFolder.id;
+    } else if (createPageDto.parentPageId) {
+      // 非日记页面的父页面检查
       const parentPage = await this.pageRepo.findById(
         createPageDto.parentPageId,
       );
@@ -77,6 +182,44 @@ export class PageService {
       }
 
       parentPageId = parentPage.id;
+    }
+
+    // 为日记页面准备初始内容
+    let initialContent = null;
+    if (createPageDto.isJournal && createPageDto.journalDate) {
+      const date = new Date(createPageDto.journalDate);
+      const formattedDate = date.toLocaleDateString('zh-CN', {
+        year: 'numeric',
+        month: 'numeric', 
+        day: 'numeric'
+      }).replace(/\//g, '.');
+      
+      initialContent = {
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            attrs: {
+              'data-journal-date': createPageDto.journalDate
+            },
+            content: [
+              {
+                type: 'text',
+                text: `日期：${formattedDate}`,
+                marks: [
+                  {
+                    type: 'bold'
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            type: 'paragraph',
+            content: []
+          }
+        ]
+      };
     }
 
     const createdPage = await this.pageRepo.insertPage({
@@ -92,6 +235,9 @@ export class PageService {
       creatorId: userId,
       workspaceId: workspaceId,
       lastUpdatedById: userId,
+      isJournal: createPageDto.isJournal || false,
+      journalDate: createPageDto.journalDate ? new Date(createPageDto.journalDate) : null,
+      content: initialContent,
     });
 
     return createdPage;
@@ -505,6 +651,194 @@ export class PageService {
 
   async forceDelete(pageId: string): Promise<void> {
     await this.pageRepo.deletePage(pageId);
+  }
+
+  // 日记相关方法
+  async createJournal(
+    spaceId: string,
+    journalDate: string,
+    creatorId: string,
+    title?: string,
+    icon?: string,
+  ): Promise<Page> {
+    // 检查该日期是否已有日记
+    const existingJournal = await this.db
+      .selectFrom('pages')
+      .selectAll()
+      .where('spaceId', '=', spaceId)
+      .where('isJournal', '=', true)
+      .where('journalDate', '=', new Date(journalDate))
+      .where('deletedAt', 'is', null)
+      .executeTakeFirst();
+
+    if (existingJournal) {
+      throw new BadRequestException('该日期已有日记');
+    }
+
+    const insertableData: InsertablePage = {
+      slugId: generateSlugId(),
+      title: title || `${journalDate} 日记`,
+      icon: icon || '📝',
+      spaceId,
+      workspaceId: (await this.db
+        .selectFrom('spaces')
+        .select('workspaceId')
+        .where('id', '=', spaceId)
+        .executeTakeFirstOrThrow()).workspaceId,
+      creatorId,
+      isJournal: true,
+      journalDate,
+    };
+
+    const createdPage = await this.pageRepo.insertPage(insertableData);
+    return await this.pageRepo.findById(createdPage.id, {
+      includeContent: true,
+      includeSpace: true,
+      includeCreator: true
+    });
+  }
+
+  async getJournalByDate(
+    spaceId: string,
+    journalDate: string,
+    includeContent = false,
+  ): Promise<Page | null> {
+    const query = this.db
+      .selectFrom('pages')
+      .where('spaceId', '=', spaceId)
+      .where('isJournal', '=', true)
+      .where('journalDate', '=', new Date(journalDate))
+      .where('deletedAt', 'is', null);
+
+    if (includeContent) {
+      return await query
+        .selectAll()
+        .executeTakeFirst() as Page | null;
+    } else {
+      return await query
+        .select([
+          'id',
+          'slugId',
+          'title',
+          'icon',
+          'journalDate',
+          'createdAt',
+          'updatedAt',
+          'spaceId',
+          'workspaceId',
+          'creatorId',
+        ])
+        .executeTakeFirst() as Page | null;
+    }
+  }
+
+  async getJournalList(
+    spaceId: string,
+    pagination: PaginationOptions,
+    startDate?: string,
+    endDate?: string,
+    includeContent = false,
+  ): Promise<PaginationResult<Page>> {
+    let query = this.db
+      .selectFrom('pages')
+      .where('spaceId', '=', spaceId)
+      .where('isJournal', '=', true)
+      .where('deletedAt', 'is', null);
+
+    if (startDate) {
+      query = query.where('journalDate', '>=', new Date(startDate));
+    }
+
+    if (endDate) {
+      query = query.where('journalDate', '<=', new Date(endDate));
+    }
+
+    if (includeContent) {
+      query = query.selectAll();
+    } else {
+      query = query.select([
+        'id',
+        'slugId',
+        'title',
+        'icon',
+        'journalDate',
+        'isJournal',
+        'createdAt',
+        'updatedAt',
+        'spaceId',
+        'workspaceId',
+        'creatorId',
+      ]);
+    }
+
+    query = query.orderBy('journalDate', 'desc');
+
+    return await executeWithPagination(query, {
+      page: pagination.page,
+      perPage: pagination.limit
+    }) as PaginationResult<Page>;
+  }
+
+  async updateJournal(
+    pageId: string,
+    updateData: {
+      title?: string;
+      icon?: string;
+      journalDate?: string;
+    },
+  ): Promise<Page> {
+    // 验证页面是日记
+    const page = await this.db
+      .selectFrom('pages')
+      .select(['id', 'isJournal', 'spaceId', 'journalDate'])
+      .where('id', '=', pageId)
+      .where('deletedAt', 'is', null)
+      .executeTakeFirst();
+
+    if (!page) {
+      throw new NotFoundException('页面不存在');
+    }
+
+    if (!page.isJournal) {
+      throw new BadRequestException('该页面不是日记');
+    }
+
+    // 如果要更新日期，检查新日期是否冲突
+    if (updateData.journalDate && new Date(updateData.journalDate).getTime() !== page.journalDate?.getTime()) {
+      const existingJournal = await this.db
+        .selectFrom('pages')
+        .select('id')
+        .where('spaceId', '=', page.spaceId)
+        .where('isJournal', '=', true)
+        .where('journalDate', '=', new Date(updateData.journalDate))
+        .where('deletedAt', 'is', null)
+        .where('id', '!=', pageId)
+        .executeTakeFirst();
+
+      if (existingJournal) {
+        throw new BadRequestException('该日期已有日记');
+      }
+    }
+
+    const updateFields: any = {};
+    if (updateData.title !== undefined) updateFields.title = updateData.title;
+    if (updateData.icon !== undefined) updateFields.icon = updateData.icon;
+    if (updateData.journalDate !== undefined) updateFields.journalDate = updateData.journalDate;
+
+    if (Object.keys(updateFields).length > 0) {
+      updateFields.updatedAt = new Date();
+      await this.db
+        .updateTable('pages')
+        .set(updateFields)
+        .where('id', '=', pageId)
+        .execute();
+    }
+
+    return await this.pageRepo.findById(pageId, {
+      includeContent: true,
+      includeSpace: true,
+      includeCreator: true
+    });
   }
 }
 

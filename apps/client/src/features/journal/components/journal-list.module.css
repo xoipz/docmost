@@ -1,0 +1,241 @@
+/* 主容器 */
+.container {
+  height: 100%;
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* 空状态 */
+.emptyState {
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 年份区域 */
+.yearSection {
+  margin-bottom: 12px;
+}
+
+/* 年份标题（可点击按钮） */
+.yearHeader {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--mantine-radius-sm);
+  border: none;
+  background-color: var(--mantine-color-gray-0);
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.yearHeader:hover {
+  background-color: var(--mantine-color-gray-1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transform: translateY(-0.5px);
+}
+
+[data-mantine-color-scheme="dark"] .yearHeader {
+  background-color: var(--mantine-color-dark-6);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+[data-mantine-color-scheme="dark"] .yearHeader:hover {
+  background-color: var(--mantine-color-dark-5);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* 年份内容区域（移除左边距和引导线） */
+.yearContent {
+  /* 移除所有缩进效果 */
+}
+
+/* 月份区域 */
+.monthSection {
+  margin-bottom: 6px;
+}
+
+/* 月份按钮 */
+.monthButton {
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: var(--mantine-radius-sm);
+  transition: all 0.2s ease;
+  border: none;
+  background-color: var(--mantine-color-white);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.monthButton:hover {
+  background-color: var(--mantine-color-gray-0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transform: translateY(-0.5px);
+}
+
+[data-mantine-color-scheme="dark"] .monthButton {
+  background-color: var(--mantine-color-dark-7);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+[data-mantine-color-scheme="dark"] .monthButton:hover {
+  background-color: var(--mantine-color-dark-6);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+/* 展开图标 */
+.expandIcon {
+  color: var(--mantine-color-gray-4);
+  transition: all 0.2s ease;
+}
+
+.expandIcon:hover {
+  color: var(--mantine-color-gray-6);
+}
+
+[data-mantine-color-scheme="dark"] .expandIcon {
+  color: var(--mantine-color-gray-5);
+}
+
+[data-mantine-color-scheme="dark"] .expandIcon:hover {
+  color: var(--mantine-color-gray-4);
+}
+
+/* 数量标签 */
+.count {
+  flex-shrink: 0;
+  min-width: 20px;
+  text-align: right;
+}
+
+/* 日记列表容器 */
+.journalList {
+  border: none;
+  border-radius: var(--mantine-radius-sm);
+  background-color: var(--mantine-color-white);
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  margin-top: 4px;
+}
+
+[data-mantine-color-scheme="dark"] .journalList {
+  background-color: var(--mantine-color-dark-7);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* 日记项 */
+.journalItem {
+  width: 100%;
+  padding: 12px 16px;
+  transition: all 0.2s ease;
+  text-align: left;
+  border-bottom: 1px solid var(--mantine-color-gray-0);
+  background-color: transparent;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.journalItem:hover {
+  background-color: var(--mantine-color-blue-0);
+  transform: translateX(1px);
+}
+
+[data-mantine-color-scheme="dark"] .journalItem {
+  border-bottom-color: var(--mantine-color-dark-6);
+}
+
+[data-mantine-color-scheme="dark"] .journalItem:hover {
+  background-color: var(--mantine-color-dark-6);
+}
+
+/* 移除最后一个项目的边框 */
+.journalItem[data-last="true"] {
+  border-bottom: none;
+}
+
+/* 选中状态 */
+.journalItem[data-selected="true"] {
+  background-color: var(--mantine-color-blue-0);
+  border-left: 3px solid var(--mantine-color-blue-5);
+  padding-left: 13px; /* 减少左边距以补偿边框 */
+  box-shadow: inset 0 0 0 1px var(--mantine-color-blue-1);
+}
+
+[data-mantine-color-scheme="dark"] .journalItem[data-selected="true"] {
+  background-color: var(--mantine-color-blue-9);
+  border-left-color: var(--mantine-color-blue-4);
+  box-shadow: inset 0 0 0 1px var(--mantine-color-blue-9);
+}
+
+/* 日期标签 */
+.dateTag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--mantine-color-blue-0);
+  color: var(--mantine-color-blue-6);
+  flex-shrink: 0;
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+[data-mantine-color-scheme="dark"] .dateTag {
+  background-color: var(--mantine-color-blue-9);
+  color: var(--mantine-color-blue-4);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.journalItem[data-selected="true"] .dateTag {
+  background-color: var(--mantine-color-blue-5);
+  color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* 日记标题 */
+.journalTitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.3;
+  margin-bottom: 2px;
+}
+
+/* 日记日期 */
+.journalDate {
+  line-height: 1.2;
+}
+
+/* 滚动条优化 */
+.container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.container::-webkit-scrollbar-track {
+  background: var(--mantine-color-gray-1);
+  border-radius: 3px;
+}
+
+.container::-webkit-scrollbar-thumb {
+  background: var(--mantine-color-gray-4);
+  border-radius: 3px;
+}
+
+.container::-webkit-scrollbar-thumb:hover {
+  background: var(--mantine-color-gray-5);
+}
+
+[data-mantine-color-scheme="dark"] .container::-webkit-scrollbar-track {
+  background: var(--mantine-color-dark-6);
+}
+
+[data-mantine-color-scheme="dark"] .container::-webkit-scrollbar-thumb {
+  background: var(--mantine-color-dark-4);
+}
+
+[data-mantine-color-scheme="dark"] .container::-webkit-scrollbar-thumb:hover {
+  background: var(--mantine-color-dark-3);
+}

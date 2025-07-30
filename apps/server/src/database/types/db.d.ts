@@ -192,7 +192,9 @@ export interface Pages {
   deletedById: string | null;
   icon: string | null;
   id: Generated<string>;
+  isJournal: Generated<boolean>;
   isLocked: Generated<boolean>;
+  journalDate: Timestamp | null;
   lastUpdatedById: string | null;
   parentPageId: string | null;
   position: string | null;

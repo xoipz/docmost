@@ -28,6 +28,12 @@ import {
 import SpaceAbilityFactory from '../casl/abilities/space-ability.factory';
 import { PageRepo } from '@docmost/db/repos/page/page.repo';
 import { RecentPageDto } from './dto/recent-page.dto';
+import {
+  CreateJournalDto,
+  JournalByDateDto,
+  JournalListDto,
+  UpdateJournalDto,
+} from './dto/journal.dto';
 import { CopyPageToSpaceDto } from './dto/copy-page.dto';
 
 @UseGuards(JwtAuthGuard)
@@ -303,5 +309,96 @@ export class PageController {
       throw new ForbiddenException();
     }
     return this.pageService.getPageBreadCrumbs(page.id);
+  }
+
+  // 日记相关API端点
+  @Post('journal/create')
+  @HttpCode(HttpStatus.CREATED)
+  async createJournal(
+    @Body() createJournalDto: CreateJournalDto,
+    @AuthUser() user: User,
+  ) {
+    const ability = await this.spaceAbility.createForUser(
+      user,
+      createJournalDto.spaceId,
+    );
+    if (ability.cannot(SpaceCaslAction.Create, SpaceCaslSubject.Page)) {
+      throw new ForbiddenException();
+    }
+
+    return this.pageService.createJournal(
+      createJournalDto.spaceId,
+      createJournalDto.journalDate,
+      user.id,
+      createJournalDto.title,
+      createJournalDto.icon,
+    );
+  }
+
+  @Post('journal/by-date')
+  @HttpCode(HttpStatus.OK)
+  async getJournalByDate(
+    @Body() journalByDateDto: JournalByDateDto,
+    @AuthUser() user: User,
+  ) {
+    const ability = await this.spaceAbility.createForUser(
+      user,
+      journalByDateDto.spaceId,
+    );
+    if (ability.cannot(SpaceCaslAction.Read, SpaceCaslSubject.Page)) {
+      throw new ForbiddenException();
+    }
+
+    return this.pageService.getJournalByDate(
+      journalByDateDto.spaceId,
+      journalByDateDto.journalDate,
+      journalByDateDto.includeContent,
+    );
+  }
+
+  @Post('journal/list')
+  @HttpCode(HttpStatus.OK)
+  async getJournalList(
+    @Body() journalListDto: JournalListDto,
+    @AuthUser() user: User,
+  ) {
+    const ability = await this.spaceAbility.createForUser(
+      user,
+      journalListDto.spaceId,
+    );
+    if (ability.cannot(SpaceCaslAction.Read, SpaceCaslSubject.Page)) {
+      throw new ForbiddenException();
+    }
+
+    return this.pageService.getJournalList(
+      journalListDto.spaceId,
+      journalListDto,
+      journalListDto.startDate,
+      journalListDto.endDate,
+      journalListDto.includeContent,
+    );
+  }
+
+  @Post('journal/update')
+  @HttpCode(HttpStatus.OK)
+  async updateJournal(
+    @Body() updateJournalDto: UpdateJournalDto,
+    @AuthUser() user: User,
+  ) {
+    const page = await this.pageRepo.findById(updateJournalDto.pageId);
+    if (!page) {
+      throw new NotFoundException('页面不存在');
+    }
+
+    const ability = await this.spaceAbility.createForUser(user, page.spaceId);
+    if (ability.cannot(SpaceCaslAction.Edit, SpaceCaslSubject.Page)) {
+      throw new ForbiddenException();
+    }
+
+    return this.pageService.updateJournal(updateJournalDto.pageId, {
+      title: updateJournalDto.title,
+      icon: updateJournalDto.icon,
+      journalDate: updateJournalDto.journalDate,
+    });
   }
 }

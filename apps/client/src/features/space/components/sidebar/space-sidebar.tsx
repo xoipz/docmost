@@ -5,7 +5,7 @@ import {
   Text,
   Tooltip,
   UnstyledButton,
-  Popover,
+  Divider,
 } from "@mantine/core";
 import {
   IconArrowDown,
@@ -15,12 +15,10 @@ import {
   IconPlus,
   IconSearch,
   IconSettings,
-  IconChevronUp,
-  IconChevronDown,
   IconLayoutSidebarLeftCollapse,
 } from "@tabler/icons-react";
 import classes from "./space-sidebar.module.css";
-import React, { useMemo, useState, useEffect, useRef } from "react";
+import React from "react";
 import { useAtom } from "jotai";
 import { SearchSpotlight } from "@/features/search/search-spotlight.tsx";
 import { treeApiAtom } from "@/features/page/tree/atoms/tree-api-atom.ts";
@@ -47,6 +45,7 @@ import {
 } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
 import { useToggleSidebar } from "@/components/layouts/global/hooks/hooks/use-toggle-sidebar.ts";
 import { searchSpotlight } from "@/features/search/constants";
+import { spaceViewModeAtom } from "@/features/journal/atoms/journal-atoms.ts";
 
 export function SpaceSidebar() {
   const { t } = useTranslation();
@@ -59,44 +58,13 @@ export function SpaceSidebar() {
   const [desktopSidebarOpened] = useAtom(desktopSidebarAtom);
   const toggleDesktopSidebar = useToggleSidebar(desktopSidebarAtom);
   const [headerVisible] = useAtom(headerVisibleAtom);
+  const [viewMode] = useAtom(spaceViewModeAtom);
 
   const { spaceSlug } = useParams();
   const { data: space, isLoading, isError } = useGetSpaceBySlugQuery(spaceSlug);
-  const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const targetRef = useRef<HTMLDivElement>(null);
-  const [menuCollapsed, setMenuCollapsed] = useState(() => {
-    const saved = localStorage.getItem('docmost-menu-collapsed');
-    return saved ? JSON.parse(saved) : false;
-  });
 
   const spaceRules = space?.membership?.permissions;
   const spaceAbility = useSpaceAbility(spaceRules);
-
-  useEffect(() => {
-    const handleGlobalClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (!target.closest('.mantine-Menu-dropdown')) {
-        setIsMenuOpen(false);
-      }
-    };
-
-    if (isMenuOpen) {
-      document.addEventListener('click', handleGlobalClick);
-    }
-
-    return () => {
-      document.removeEventListener('click', handleGlobalClick);
-    };
-  }, [isMenuOpen]);
-
-  // 保存折叠状态到 localStorage
-  const toggleMenuCollapse = () => {
-    const newState = !menuCollapsed;
-    setMenuCollapsed(newState);
-    localStorage.setItem('docmost-menu-collapsed', JSON.stringify(newState));
-  };
 
   // 处理侧边栏收起
   const handleSidebarCollapse = () => {
@@ -115,43 +83,12 @@ export function SpaceSidebar() {
 
   function handleCreatePage() {
     tree?.create({ parentId: null, type: "internal", index: 0 });
-    setIsMenuOpen(false);
   }
-
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // 获取视口尺寸
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    
-    // 菜单的预估尺寸（可根据实际菜单大小调整）
-    const menuWidth = 200;
-    const menuHeight = 45;
-    
-    // 计算菜单位置，确保不超出视口
-    let x = e.pageX;
-    let y = e.pageY;
-    
-    // 检查是否会超出右边界
-    if (x + menuWidth > viewportWidth) {
-      x = viewportWidth - menuWidth; // 减去 10px 作为边距
-    }
-    
-    // 检查是否会超出底部边界
-    if (y + menuHeight > viewportHeight) {
-      y = viewportHeight - menuHeight; // 减去 10px 作为边距
-    }
-    console.log(x,y)
-    
-    setMenuPosition({ x, y });
-    setIsMenuOpen(true);
-  };
 
   return (
     <>
       <div className={classes.navbar}>
+        {/* 空间标题部分 */}
         <div
           className={classes.section}
           style={{
@@ -183,31 +120,14 @@ export function SpaceSidebar() {
           )}
         </div>
 
+        {/* 导航模块 */}
         <div className={classes.section}>
-          <Group 
-            className={classes.pagesHeader} 
-            justify="space-between"
-            onClick={toggleMenuCollapse}
-            style={{ cursor: 'pointer' }}
-          >
+          <Group className={classes.pagesHeader} justify="space-between">
             <Text size="xs" fw={500} c="dimmed">
               {t("导航")}
             </Text>
-            <Tooltip label={menuCollapsed ? t("展开菜单") : t("收起菜单")} withArrow position="right">
-              <ActionIcon
-                variant="default"
-                size={18}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleMenuCollapse();
-                }}
-                aria-label={menuCollapsed ? t("展开菜单") : t("收起菜单")}
-              >
-                {menuCollapsed ? <IconChevronDown size={16} /> : <IconChevronUp size={16} />}
-              </ActionIcon>
-            </Tooltip>
           </Group>
-
+          
           <div className={classes.menuItems}>
             {/* 搜索功能始终显示 */}
             <UnstyledButton className={classes.menu} onClick={searchSpotlight.open}>
@@ -221,63 +141,60 @@ export function SpaceSidebar() {
               </div>
             </UnstyledButton>
 
-            {!menuCollapsed && (
-              <>
-                <UnstyledButton
-                  component={Link}
-                  to={getSpaceUrl(spaceSlug)}
-                  className={clsx(
-                    classes.menu,
-                    location.pathname.toLowerCase() === getSpaceUrl(spaceSlug)
-                      ? classes.activeButton
-                      : "",
-                  )}
-                >
-                  <div className={classes.menuItemInner}>
-                    <IconHome
-                      size={18}
-                      className={classes.menuItemIcon}
-                      stroke={2}
-                    />
-                    <span>{t("Overview")}</span>
-                  </div>
-                </UnstyledButton>
+            <UnstyledButton
+              component={Link}
+              to={getSpaceUrl(spaceSlug)}
+              className={clsx(
+                classes.menu,
+                location.pathname.toLowerCase() === getSpaceUrl(spaceSlug)
+                  ? classes.activeButton
+                  : "",
+              )}
+            >
+              <div className={classes.menuItemInner}>
+                <IconHome
+                  size={18}
+                  className={classes.menuItemIcon}
+                  stroke={2}
+                />
+                <span>{t("Overview")}</span>
+              </div>
+            </UnstyledButton>
 
-                <UnstyledButton className={classes.menu} onClick={openSettings}>
-                  <div className={classes.menuItemInner}>
-                    <IconSettings
-                      size={18}
-                      className={classes.menuItemIcon}
-                      stroke={2}
-                    />
-                    <span>{t("Space settings")}</span>
-                  </div>
-                </UnstyledButton>
+            <UnstyledButton className={classes.menu} onClick={openSettings}>
+              <div className={classes.menuItemInner}>
+                <IconSettings
+                  size={18}
+                  className={classes.menuItemIcon}
+                  stroke={2}
+                />
+                <span>{t("Space settings")}</span>
+              </div>
+            </UnstyledButton>
 
-                {spaceAbility.can(
-                  SpaceCaslAction.Manage,
-                  SpaceCaslSubject.Page,
-                ) && (
-                  <UnstyledButton
-                    className={classes.menu}
-                    onClick={handleCreatePage}
-                  >
-                    <div className={classes.menuItemInner}>
-                      <IconPlus
-                        size={18}
-                        className={classes.menuItemIcon}
-                        stroke={2}
-                      />
-                      <span>{t("New page")}</span>
-                    </div>
-                  </UnstyledButton>
-                )}
-              </>
+            {spaceAbility.can(
+              SpaceCaslAction.Manage,
+              SpaceCaslSubject.Page,
+            ) && (
+              <UnstyledButton
+                className={classes.menu}
+                onClick={handleCreatePage}
+              >
+                <div className={classes.menuItemInner}>
+                  <IconPlus
+                    size={18}
+                    className={classes.menuItemIcon}
+                    stroke={2}
+                  />
+                  <span>{t("New page")}</span>
+                </div>
+              </UnstyledButton>
             )}
           </div>
         </div>
 
-        <div className={clsx(classes.section, classes.sectionPages)}  style={{borderBottom: 'none'}}>
+        {/* 页面模块 */}
+        <div className={clsx(classes.section, classes.sectionPages)} style={{borderBottom: 'none'}}>
           <Group className={classes.pagesHeader} justify="space-between">
             <Text size="xs" fw={500} c="dimmed">
               {t("Pages")}
@@ -289,7 +206,6 @@ export function SpaceSidebar() {
             ) && (
               <Group gap="xs">
                 <SpaceMenu spaceId={space.id} onSpaceSettings={openSettings} />
-
                 <Tooltip label={t("Create page")} withArrow position="right">
                   <ActionIcon
                     variant="default"
@@ -303,7 +219,7 @@ export function SpaceSidebar() {
               </Group>
             )}
           </Group>
-
+          
           <div className={classes.pages}>
             <SpaceTree
               spaceId={space.id}
@@ -314,46 +230,7 @@ export function SpaceSidebar() {
             />
           </div>
         </div>
-        <div 
-          ref={targetRef}
-          style={{ flex: 1,zIndex: 9,marginTop: -30 }} 
-          onContextMenu={handleContextMenu}
-        />
-        
-        <Menu
-          opened={isMenuOpen}
-          onClose={() => setIsMenuOpen(false)}
-          closeOnClickOutside
-          closeOnEscape
-          withinPortal
-          position="bottom"
-          offset={0}
-          styles={{
-            dropdown: {
-              position: 'fixed',
-              top: menuPosition.y,
-              left: menuPosition.x,
-              minWidth: 200,
-              maxWidth: 'calc(100vw - 20px)',
-              maxHeight: 'calc(100vh - 20px)',
-              overflow: 'auto',
-            }
-          }}
-        >
-          <Menu.Dropdown>
-            {spaceAbility.can(
-              SpaceCaslAction.Manage,
-              SpaceCaslSubject.Page,
-            ) && (
-              <Menu.Item
-                leftSection={<IconPlus size={16} />}
-                onClick={handleCreatePage}
-              >
-                {t("新建文件")}
-              </Menu.Item>
-            )}
-          </Menu.Dropdown>
-        </Menu>
+
       </div>
 
       <SpaceSettingsModal
@@ -430,8 +307,8 @@ function SpaceMenu({ spaceId, onSpaceSettings }: SpaceMenuProps) {
       />
 
       <ExportModal
-        type="space"
         id={spaceId}
+        type="space"
         open={exportOpened}
         onClose={closeExportModal}
       />
