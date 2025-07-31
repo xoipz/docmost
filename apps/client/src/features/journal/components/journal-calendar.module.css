@@ -12,6 +12,114 @@
   }
 }
 
+/* 标题栏容器 */
+.headerContainer {
+  position: relative;
+  margin-top: 4px;
+}
+
+/* 桌面端布局 - 默认显示 */
+.desktopHeader {
+  display: block;
+}
+
+.mobileHeader {
+  display: none;
+}
+
+/* 日历网格容器 */
+.calendarGrid {
+  margin-bottom: 20px;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+  .sideClickArea {
+    display: none;
+  }
+  
+  .calendarGrid {
+    /* 在移动端为触摸滑动优化 */
+    touch-action: pan-y;
+  }
+
+  /* 移动端显示单行布局 */
+  .desktopHeader {
+    display: none;
+  }
+
+  .mobileHeader {
+    display: block;
+  }
+
+  .todayRow {
+    display: none;
+  }
+
+  .navRow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    min-height: 44px;
+    position: relative;
+  }
+
+  .titleGroup {
+    flex: none;
+    justify-content: center;
+  }
+
+  .yearNavGroup {
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    max-width: calc(100% - 80px);
+  }
+
+  .decadeNavGroup {
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    max-width: calc(100% - 80px);
+  }
+
+  .decadeTitleText {
+    font-size: 13px;
+    text-align: center;
+    white-space: nowrap;
+    min-width: 70px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .navButton {
+    display: none;
+  }
+
+  .titleButton {
+    font-size: 13px;
+    height: 30px;
+    padding: 0 6px;
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .todayButtonMobile {
+    min-width: 44px;
+    height: 32px;
+    font-size: 12px;
+    padding: 0 8px;
+    position: absolute;
+    right: 16px;
+  }
+
+  .titleText {
+    font-size: 15px;
+    text-align: center;
+  }
+}
+
 /* 月份/年份网格动画 */
 .monthsGridAnimated {
   animation: fadeIn 0.4s ease-out;
@@ -22,12 +130,20 @@
   animation: fadeIn 0.4s ease-out;
 }
 
+/* 星期标题 */
 .weekdaysHeader {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 2px;
   max-width: 400px;
   margin: 0 auto 8px auto;
+}
+
+@media (max-width: 768px) {
+  .weekdaysHeader {
+    max-width: 100%;
+    gap: 1px;
+  }
 }
 
 .weekday {
@@ -40,18 +156,50 @@
   color: var(--mantine-color-gray-6);
 }
 
+@media (max-width: 768px) {
+  .weekday {
+    min-height: 20px;
+    font-size: 11px;
+  }
+}
+
 [data-mantine-color-scheme="dark"] .weekday {
   color: var(--mantine-color-dark-2);
 }
 
+/* 日期网格 */
 .daysGrid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(50px, 1fr));
   gap: 2px;
   max-width: 400px;
   margin: 0 auto;
+  width: 100%;
 }
 
+@media (max-width: 768px) {
+  .daysGrid {
+    max-width: 100%;
+    gap: 2px;
+    grid-template-columns: repeat(7, minmax(48px, 1fr));
+    /* 改善触摸体验 */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    padding: 0 8px;
+  }
+}
+
+/* 超小屏幕优化 */
+@media (max-width: 480px) {
+  .daysGrid {
+    gap: 1px;
+    padding: 0 6px;
+    grid-template-columns: repeat(7, minmax(42px, 1fr));
+  }
+}
+
+/* 日期单元格 */
 .day {
   position: relative;
   aspect-ratio: 1;
@@ -61,9 +209,34 @@
   justify-content: center;
   transition: all 0.2s ease;
   cursor: pointer;
-  min-height: 36px;
-  padding: 2px;
+  min-height: 50px;
+  min-width: 50px;
+  padding: 4px;
   transform: scale(1);
+  /* 确保日期按钮在移动端有足够的触摸面积 */
+  z-index: 10;
+}
+
+@media (max-width: 768px) {
+  .day {
+    min-height: 48px;
+    min-width: 48px;
+    border-radius: 6px;
+    /* 移动端更大的触摸区域 */
+    padding: 3px;
+    /* 防止意外触摸 */
+    touch-action: manipulation;
+  }
+}
+
+/* 超小屏幕优化 */
+@media (max-width: 480px) {
+  .day {
+    min-height: 42px;
+    min-width: 42px;
+    border-radius: 4px;
+    padding: 2px;
+  }
 }
 
 .day:hover {
@@ -72,12 +245,155 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* 移动端取消hover效果，使用active效果 */
+@media (max-width: 768px) {
+  .day:hover {
+    transform: scale(1);
+    box-shadow: none;
+  }
+  
+  .day:active {
+    background-color: var(--mantine-color-gray-2);
+    transform: scale(0.95);
+  }
+}
+
 [data-mantine-color-scheme="dark"] .day:hover {
   background-color: var(--mantine-color-dark-6);
-  transform: scale(1.05);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
+/* 移动端暗色主题适配 */
+@media (max-width: 768px) {
+  [data-mantine-color-scheme="dark"] .day:hover {
+    transform: scale(1);
+    box-shadow: none;
+  }
+  
+  [data-mantine-color-scheme="dark"] .day:active {
+    background-color: var(--mantine-color-dark-5);
+    transform: scale(0.95);
+  }
+}
+
+/* 日期内容布局 */
+.dayContent {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2px;
+  gap: 2px;
+  position: relative;
+  min-height: 40px;
+}
+
+@media (max-width: 768px) {
+  .dayContent {
+    padding: 2px;
+    gap: 1px;
+    justify-content: center;
+    align-items: center;
+    min-height: 36px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dayContent {
+    padding: 1px;
+    gap: 1px;
+    min-height: 32px;
+  }
+}
+
+.dayNumber {
+  text-align: center;
+  line-height: 1.1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  font-weight: inherit;
+  font-size: 14px;
+  min-height: 16px;
+}
+
+@media (max-width: 768px) {
+  .dayNumber {
+    line-height: 1.1;
+    margin: 0;
+    padding: 0;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    min-height: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dayNumber {
+    font-size: 12px;
+    min-height: 14px;
+  }
+}
+
+.dayText {
+  text-align: center;
+  line-height: 1.1;
+  word-break: break-all;
+  hyphens: auto;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  font-size: 10px;
+  min-height: 12px;
+}
+
+@media (max-width: 768px) {
+  .dayText {
+    line-height: 1.1;
+    font-size: 9px !important;
+    letter-spacing: -0.1px;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+    min-height: 11px;
+  }
+}
+
+/* 超小屏幕文字优化 */
+@media (max-width: 480px) {
+  .dayText {
+    font-size: 8px !important;
+    line-height: 1;
+    letter-spacing: -0.2px;
+    margin: 0;
+    padding: 0;
+    min-height: 10px;
+  }
+}
+
+/* 日期状态 */
 .day[data-selected="true"] {
   background-color: var(--mantine-color-blue-6);
   color: white;
@@ -113,6 +429,7 @@
   color: var(--mantine-color-dark-3);
 }
 
+/* 日记标记点 */
 .journalDot {
   position: absolute;
   top: 2px;
@@ -123,6 +440,14 @@
   border-radius: 50%;
   background-color: var(--mantine-color-green-6);
   animation: pulse 2s infinite;
+}
+
+.day[data-selected="true"] .journalDot {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+[data-mantine-color-scheme="dark"] .journalDot {
+  background-color: var(--mantine-color-green-7);
 }
 
 @keyframes pulse {
@@ -137,7 +462,7 @@
   }
 }
 
-/* 日期按钮入场动画 */
+/* 入场动画 */
 .dayEnterAnimation {
   animation: dayFadeIn 0.5s ease-out backwards;
 }
@@ -153,7 +478,6 @@
   }
 }
 
-/* 月份按钮入场动画 */
 .monthEnterAnimation {
   animation: monthSlideIn 0.6s ease-out backwards;
 }
@@ -169,14 +493,7 @@
   }
 }
 
-.day[data-selected="true"] .journalDot {
-  background-color: rgba(255, 255, 255, 0.8);
-}
-
-[data-mantine-color-scheme="dark"] .journalDot {
-  background-color: var(--mantine-color-green-7);
-}
-
+/* 月份网格 */
 .monthsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -185,6 +502,14 @@
   margin: 0 auto;
 }
 
+@media (max-width: 768px) {
+  .monthsGrid {
+    max-width: 100%;
+    gap: 8px;
+  }
+}
+
+/* 月份单元格 */
 .month {
   position: relative;
   aspect-ratio: 2 / 1;
@@ -200,10 +525,30 @@
   transform: scale(1);
 }
 
+@media (max-width: 768px) {
+  .month {
+    min-height: 48px;
+    padding: 12px 8px;
+    touch-action: manipulation;
+  }
+}
+
 .month:hover {
   background-color: var(--mantine-color-gray-1);
   transform: scale(1.02);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .month:hover {
+    transform: scale(1);
+    box-shadow: none;
+  }
+  
+  .month:active {
+    background-color: var(--mantine-color-gray-2);
+    transform: scale(0.98);
+  }
 }
 
 [data-mantine-color-scheme="dark"] .month {
@@ -214,6 +559,18 @@
   background-color: var(--mantine-color-dark-6);
   transform: scale(1.02);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+  [data-mantine-color-scheme="dark"] .month:hover {
+    transform: scale(1);
+    box-shadow: none;
+  }
+  
+  [data-mantine-color-scheme="dark"] .month:active {
+    background-color: var(--mantine-color-dark-5);
+    transform: scale(0.98);
+  }
 }
 
 .month[data-has-journal="true"] {
