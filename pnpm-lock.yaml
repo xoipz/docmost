@@ -305,6 +305,9 @@ importers:
       lowlight:
         specifier: ^3.3.0
         version: 3.3.0
+      lunisolar:
+        specifier: ^2.5.2
+        version: 2.5.2
       mermaid:
         specifier: ^11.6.0
         version: 11.6.0
@@ -7246,6 +7249,9 @@ packages:
   lru-cache@6.0.0:
     resolution: {integrity: sha512-Jo6dJ04CmSjuznwJSS3pUeWmd/H0ffTlkXXgwZi+eq1UCmqQwCh+eLsYOYCwY991i2Fah4h1BEMCx4qThGbsiA==}
     engines: {node: '>=10'}
+
+  lunisolar@2.5.2:
+    resolution: {integrity: sha512-r3Af9L40Y2i46yscx8Nk7nPqOBF3KjSs3fAdbVfkJ5ihgNNyREk9MxFXxzbF8MXGkerNpE9JN28DmqmoL3k3WA==}
 
   luxon@3.5.0:
     resolution: {integrity: sha512-rh+Zjr6DNfUYR3bPwJEnuwDdqMbxZW7LOQfUN4B54+Cl+0o5zaU9RJ6bcidfDtC1cWCZXQ+nvX8bf6bAji37QQ==}
@@ -17872,6 +17878,8 @@ snapshots:
   lru-cache@6.0.0:
     dependencies:
       yallist: 4.0.0
+
+  lunisolar@2.5.2: {}
 
   luxon@3.5.0: {}
 

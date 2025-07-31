@@ -20,166 +20,114 @@ import {
 } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import dayjs from "dayjs";
+import lunisolar from "lunisolar";
 import classes from "./journal-calendar.module.css";
 
 // 节日数据
 const HOLIDAYS = {
-  // 阳历节日
+  // 阳历节日（固定日期）
   solar: {
     "01-01": "元旦",
-    "02-14": "情人节",
     "03-08": "妇女节",
-    "03-12": "植树节",
-    "03-15": "消费者权益日",
     "04-01": "愚人节",
-    "04-05": "清明节",
-    "04-22": "世界地球日",
     "05-01": "劳动节",
-    "05-04": "青年节",
-    "05-12": "护士节",
-    "05-31": "世界无烟日",
     "06-01": "儿童节",
-    "06-05": "世界环境日",
-    "06-26": "国际禁毒日",
     "07-01": "建党节",
-    "07-11": "世界人口日",
-    "07-22": "大暑", // 2024年大暑
     "08-01": "建军节",
-    "08-07": "立秋", // 2024年立秋
     "08-15": "抗战胜利日",
     "09-10": "教师节",
-    "09-17": "中秋节", // 2024年中秋节
-    "09-18": "九一八事变",
-    "09-20": "全国爱牙日",
     "10-01": "国庆节",
     "10-31": "万圣节",
-    "11-09": "消防日",
-    "11-11": "光棍节",
-    "12-01": "世界艾滋病日",
-    "12-04": "全国法制宣传日",
-    "12-13": "南京大屠杀纪念日",
-    "12-21": "冬至", // 2024年冬至
-    "12-24": "平安夜",
-    "12-25": "圣诞节",
+    "12-13": "南京大屠杀纪念日"
+    // 已移除不固定日期的节日：
+    // - 清明节（根据节气计算，每年约4月4-6日）
   },
-  // 农历节日（2024年阳历对应日期）
-  lunar: {
-    "02-10": "春节", // 农历正月初一
-    "02-24": "元宵节", // 农历正月十五
-    "03-11": "龙抬头", // 农历二月初二
-    "05-05": "端午节", // 农历五月初五
-    "08-10": "七夕节", // 农历七月初七
-    "10-11": "重阳节", // 农历九月初九
-    "01-18": "腊八节", // 农历腊月初八
+  // 农历节日（使用lunisolar动态计算）
+  lunar: {}
+};
+
+// 使用lunisolar库进行精确的农历计算
+const getLunarDay = (date: dayjs.Dayjs) => {
+  try {
+    // 使用lunisolar库转换为农历
+    const lunarDate = lunisolar(date.toDate());
+    
+    // 获取农历日期信息 - 使用正确的API
+    const day = lunarDate.lunar.day;
+    
+    // 农历日期转换为中文
+    const lunarDays = [
+      "初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十",
+      "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
+      "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"
+    ];
+    
+    return lunarDays[day - 1] || "初一";
+  } catch (error) {
+    console.error('农历计算错误:', error);
+    return "计算错误";
   }
 };
 
-// 更准确的农历日期计算
-const getLunarDay = (date: dayjs.Dayjs) => {
-  const lunarDays = [
-    "初一", "初二", "初三", "初四", "初五", "初六", "初七", "初八", "初九", "初十",
-    "十一", "十二", "十三", "十四", "十五", "十六", "十七", "十八", "十九", "二十",
-    "廿一", "廿二", "廿三", "廿四", "廿五", "廿六", "廿七", "廿八", "廿九", "三十"
-  ];
-  
-  const year = date.year();
-  const month = date.month() + 1; // dayjs的月份从0开始
-  const day = date.date();
-  
-  // 精确的农历对照表（基于真实农历数据）
-  if (year === 2025) {
-    if (month === 7) {
-      // 2025年7月农历对照（基于7月31日=初七）
-      const jul2025Lunar = {
-        1: "初八", 2: "初九", 3: "初十", 4: "十一", 5: "十二",
-        6: "十三", 7: "十四", 8: "十五", 9: "十六", 10: "十七",
-        11: "十八", 12: "十九", 13: "二十", 14: "廿一", 15: "廿二",
-        16: "廿三", 17: "廿四", 18: "廿五", 19: "廿六", 20: "廿七",
-        21: "廿八", 22: "廿九", 23: "三十", 24: "初一", 25: "初二",
-        26: "初三", 27: "初四", 28: "初五", 29: "初六", 30: "初七", 31: "初七"
-      };
-      return jul2025Lunar[day] || "初一";
-    }
-    if (month === 8) {
-      // 2025年8月农历对照（农历七月有30天，8月1日=初八）
-      const aug2025Lunar = {
-        1: "初八", 2: "初九", 3: "初十", 4: "十一", 5: "十二",
-        6: "十三", 7: "十四", 8: "十五", 9: "十六", 10: "十七",
-        11: "十八", 12: "十九", 13: "二十", 14: "廿一", 15: "廿二",
-        16: "廿三", 17: "廿四", 18: "廿五", 19: "廿六", 20: "廿七",
-        21: "廿八", 22: "廿九", 23: "初一", 24: "初二", 25: "初三",
-        26: "初四", 27: "初五", 28: "初六", 29: "初七", 30: "初八", 31: "初九"
-      };
-      return aug2025Lunar[day] || "初一";
-    }
-    if (month === 9) {
-      // 2025年9月农历对照（农历八月有29天，9月1日=初十）
-      const sep2025Lunar = {
-        1: "初十", 2: "十一", 3: "十二", 4: "十三", 5: "十四",
-        6: "十五", 7: "十六", 8: "十七", 9: "十八", 10: "十九",
-        11: "二十", 12: "廿一", 13: "廿二", 14: "廿三", 15: "廿四",
-        16: "廿五", 17: "廿六", 18: "廿七", 19: "廿八", 20: "廿九",
-        21: "三十", 22: "初一", 23: "初二", 24: "初三", 25: "初四",
-        26: "初五", 27: "初六", 28: "初七", 29: "初八", 30: "初九"
-      };
-      return sep2025Lunar[day] || "初一";
-    }
-    if (month === 6) {
-      // 2025年6月农历对照（农历六月有29天）
-      const jun2025Lunar = {
-        1: "初七", 2: "初八", 3: "初九", 4: "初十", 5: "十一",
-        6: "十二", 7: "十三", 8: "十四", 9: "十五", 10: "十六",
-        11: "十七", 12: "十八", 13: "十九", 14: "二十", 15: "廿一",
-        16: "廿二", 17: "廿三", 18: "廿四", 19: "廿五", 20: "廿六",
-        21: "廿七", 22: "廿八", 23: "廿九", 24: "初一", 25: "初二",
-        26: "初三", 27: "初四", 28: "初五", 29: "初六", 30: "初七"
-      };
-      return jun2025Lunar[day] || "初一";
-    }
-  }
-  
-  if (year === 2024 && month === 12) {
-    // 根据之前的参考图，2024年12月的农历日期
-    const dec2024Lunar = {
-      1: "初八", 2: "初九", 3: "初十", 4: "十一", 5: "十二",
-      6: "十三", 7: "十四", 8: "十五", 9: "十六", 10: "十七",
-      11: "十八", 12: "十九", 13: "二十", 14: "廿一", 15: "廿二",
-      16: "廿三", 17: "廿四", 18: "廿五", 19: "廿六", 20: "廿七",
-      21: "廿八", 22: "廿九", 23: "三十", 24: "初一", 25: "初二",
-      26: "初三", 27: "初四", 28: "初五", 29: "初六", 30: "初七", 31: "初八"
+// 获取农历节日
+const getLunarHoliday = (date: dayjs.Dayjs) => {
+  try {
+    const lunarDate = lunisolar(date.toDate());
+    const lunarMonth = lunarDate.lunar.month;
+    const lunarDay = lunarDate.lunar.day;
+    
+    // 固定农历节日
+    const fixedLunarHolidays: Record<string, string> = {
+      "1-1": "春节",
+      "1-15": "元宵节", 
+      "2-2": "龙抬头",
+      "5-5": "端午节",
+      "7-7": "七夕节",
+      "8-15": "中秋节",
+      "9-9": "重阳节",
+      "12-8": "腊八节",
+      "12-23": "小年"
     };
-    return dec2024Lunar[day] || lunarDays[(day - 1) % 30];
+    
+    // 检查固定节日
+    const fixedKey = `${lunarMonth}-${lunarDay}`;
+    if (fixedLunarHolidays[fixedKey]) {
+      return fixedLunarHolidays[fixedKey];
+    }
+    
+    // 特殊处理除夕：腊月最后一天
+    if (lunarMonth === 12) {
+      // 判断是否为腊月最后一天（除夕）
+      // 方法：检查明天是否为正月初一
+      const tomorrow = dayjs(date).add(1, 'day');
+      const tomorrowLunar = lunisolar(tomorrow.toDate());
+      
+      if (tomorrowLunar.lunar.month === 1 && tomorrowLunar.lunar.day === 1) {
+        return "除夕";
+      }
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('农历节日计算错误:', error);
+    return null;
   }
-  
-  // 其他日期使用基于已知数据点的推算
-  // 这是一个简化的近似算法，真实的农历需要复杂的天文计算
-  const targetDate = date.format('YYYY-MM-DD');
-  
-  // 已知的准确数据点
-  const knownPoints = [
-    { date: '2025-07-31', lunar: 6 }, // 初七对应索引6
-    { date: '2025-08-31', lunar: 8 }, // 初九对应索引8
-    { date: '2025-09-01', lunar: 9 }  // 初十对应索引9
-  ];
-  
-  // 找到最近的已知点进行推算
-  const basePoint = knownPoints.find(p => p.date <= targetDate) || knownPoints[0];
-  const baseDate = dayjs(basePoint.date);
-  const diffDays = date.diff(baseDate, 'day');
-  
-  let lunarIndex = (basePoint.lunar + diffDays) % 30;
-  if (lunarIndex < 0) lunarIndex += 30;
-  
-  return lunarDays[lunarIndex];
 };
 
 // 获取显示信息（节日优先，没有节日则显示农历日期）
 const getDisplayInfo = (date: dayjs.Dayjs) => {
   const monthDay = date.format("MM-DD");
-  const holiday = HOLIDAYS.solar[monthDay] || HOLIDAYS.lunar[monthDay];
   
-  if (holiday) {
-    return { text: holiday, isHoliday: true };
+  // 首先检查阳历节日
+  const solarHoliday = HOLIDAYS.solar[monthDay];
+  if (solarHoliday) {
+    return { text: solarHoliday, isHoliday: true };
+  }
+  
+  // 然后检查农历节日（使用lunisolar动态计算）
+  const lunarHoliday = getLunarHoliday(date);
+  if (lunarHoliday) {
+    return { text: lunarHoliday, isHoliday: true };
   }
   
   // 没有节日则显示农历日期
@@ -761,7 +709,7 @@ function YearCalendar({
                   size="md"
                   onClick={() => onViewModeChange("month")}
                   aria-label={t("返回月视图")}
-                  className={classes.navButton}
+                  className={classes.navBackButton}
                 >
                   <IconArrowLeft size={16} />
                 </ActionIcon>
@@ -988,7 +936,7 @@ function DecadeCalendar({
                   size="md"
                   onClick={() => onViewModeChange("year")}
                   aria-label={t("返回年视图")}
-                  className={classes.navButton}
+                  className={classes.navBackButton}
                 >
                   <IconArrowLeft size={16} />
                 </ActionIcon>

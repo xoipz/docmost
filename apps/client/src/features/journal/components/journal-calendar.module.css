@@ -97,6 +97,13 @@
     display: none;
   }
 
+  .navBackButton {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    min-width: 36px;
+  }
+
   .titleButton {
     font-size: 13px;
     height: 30px;
