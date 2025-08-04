@@ -29,6 +29,7 @@ const buttons = [
   // 基础功能区 - 始终显示
   { label: "/", content: "/", category: "base", priority: 1 },
   { label: "智能选词", icon: IconBulb, command: "smartSelection", category: "base", priority: 3 },
+  { label: "粘贴", icon: IconClipboard, command: "paste", category: "base", priority: 4 },
   // 标题
   { label: "H1", icon: IconH1, command: "toggleHeading", args: { level: 1 }, category: "headings" },
   { label: "H2", icon: IconH2, command: "toggleHeading", args: { level: 2 }, category: "headings" },
