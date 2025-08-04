@@ -115,9 +115,9 @@ export function QuickInputBar() {
       
       // 文本分割辅助函数
       const segmentText = (text: string, granularity: 'word' | 'sentence') => {
-        if ('Intl' in window && 'Segmenter' in Intl) {
+        if ('Intl' in window && 'Segmenter' in (Intl as any)) {
           // 使用浏览器原生 Intl.Segmenter API
-          const segmenter = new Intl.Segmenter('zh-CN', { granularity });
+          const segmenter = new (Intl as any).Segmenter('zh-CN', { granularity });
           return Array.from(segmenter.segment(text));
         } else {
           // 回退到简单的正则表达式分割
