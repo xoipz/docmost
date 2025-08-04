@@ -132,13 +132,11 @@ export function SpaceSidebar() {
 
         {/* 导航模块 */}
         <div className={classes.section}>
-          <UnstyledButton 
+          <div 
             onClick={toggleNavigation}
             style={{ 
               width: '100%', 
-              padding: 0,
-              border: 'none',
-              background: 'transparent'
+              cursor: 'pointer'
             }}
           >
             <Group className={classes.pagesHeader} justify="space-between">
@@ -146,21 +144,19 @@ export function SpaceSidebar() {
                 {t("导航")}
               </Text>
               <Tooltip label={navigationCollapsed ? t("展开导航") : t("收起导航")} withArrow position="right">
-                <ActionIcon
-                  variant="transparent"
-                  size="xs"
-                  aria-label={navigationCollapsed ? t("展开导航") : t("收起导航")}
+                <div
                   style={{ 
                     color: 'white',
-                    pointerEvents: 'none', // 防止阻止父级点击事件
-                    marginRight: '-2px'
+                    marginRight: '-2px',
+                    display: 'flex',
+                    alignItems: 'center'
                   }}
                 >
                   {navigationCollapsed ? <IconChevronRight size={14} /> : <IconChevronDown size={16} />}
-                </ActionIcon>
+                </div>
               </Tooltip>
             </Group>
-          </UnstyledButton>
+          </div>
           
           <div className={classes.menuItems}>
             {/* 搜索功能始终显示 */}

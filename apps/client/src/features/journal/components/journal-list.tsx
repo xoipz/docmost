@@ -125,7 +125,7 @@ export function JournalList({
         setExpandedMonths(new Set([mostRecentMonth]));
       }
       
-      initialized.current = true;
+      initialized.current = true;    
     }
   }, [groupedJournals]);
 
@@ -170,9 +170,8 @@ export function JournalList({
       console.log('Collapsing month:', monthKey);
       newExpandedMonths.delete(monthKey);
     } else {
-      console.log('Expanding month:', monthKey, 'and collapsing others');
-      // 展开这个月份时，只保留这一个月份展开，其他月份收缩
-      newExpandedMonths.clear();
+      console.log('Expanding month:', monthKey);
+      // 展开这个月份，保持其他月份的展开状态
       newExpandedMonths.add(monthKey);
     }
     
