@@ -48,7 +48,7 @@ export default function ExcalidrawView(props: NodeViewProps) {
   const [opened, { open, close }] = useDisclosure(false);
   const computedColorScheme = useComputedColorScheme();
   const [selectedTheme, setSelectedTheme] = useState<string>(computedColorScheme);
-  const [isWebFullscreen, setIsWebFullscreen] = useState(false);
+  const [isWebFullscreen, setIsWebFullscreen] = useState(true);
 
   const toggleTheme = () => {
     setSelectedTheme(selectedTheme === 'light' ? 'dark' : 'light');

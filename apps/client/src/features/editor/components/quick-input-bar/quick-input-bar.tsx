@@ -18,7 +18,6 @@ import {
   IconH3,
   IconH4,
   IconH5,
-  IconClipboard,
   IconBulb,
 } from "@tabler/icons-react";
 import React from "react";
@@ -29,7 +28,6 @@ const buttons = [
   // 基础功能区 - 始终显示
   { label: "/", content: "/", category: "base", priority: 1 },
   { label: "智能选词", icon: IconBulb, command: "smartSelection", category: "base", priority: 3 },
-  { label: "粘贴", icon: IconClipboard, command: "paste", category: "base", priority: 4 },
   // 标题
   { label: "H1", icon: IconH1, command: "toggleHeading", args: { level: 1 }, category: "headings" },
   { label: "H2", icon: IconH2, command: "toggleHeading", args: { level: 2 }, category: "headings" },
@@ -73,33 +71,7 @@ export function QuickInputBar() {
   const handleInsert = useCallback((button: typeof buttons[0]) => {
     if (!editor) return;
     
-    if (button.command === "paste") {
-      // 处理粘贴功能
-      if (navigator?.clipboard?.readText) {
-        navigator.clipboard.readText().then(text => {
-          if (text) {
-            editor.chain().focus().insertContent(text).run();
-          }
-        }).catch(err => {
-          console.warn('剪贴板读取失败:', err);
-          // 尝试使用浏览器原生粘贴
-          editor.chain().focus().run();
-          try {
-            document.execCommand('paste');
-          } catch (e) {
-            console.warn('粘贴失败:', e);
-          }
-        });
-      } else {
-        // 如果不支持 clipboard API，focus 编辑器后尝试原生粘贴
-        editor.chain().focus().run();
-        try {
-          document.execCommand('paste');
-        } catch (e) {
-          console.warn('粘贴失败，浏览器不支持:', e);
-        }
-      }
-    } else if (button.command === "smartSelection") {
+    if (button.command === "smartSelection") {
       // 渐进式智能选词功能: 单词 → 句子 → 下一个句子 → ... → 段落
       const { state } = editor;
       const { selection } = state;
