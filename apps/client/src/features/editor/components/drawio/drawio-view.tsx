@@ -20,7 +20,7 @@ import {
 import { IAttachment } from "@/lib/types";
 import { decodeBase64ToSvgString, svgStringToFile } from "@/lib/utils";
 import clsx from "clsx";
-import { IconEdit } from "@tabler/icons-react";
+import { IconEdit, IconSun, IconMoon } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 
 export default function DrawioView(props: NodeViewProps) {
@@ -31,6 +31,11 @@ export default function DrawioView(props: NodeViewProps) {
   const [initialXML, setInitialXML] = useState<string>("");
   const [opened, { open, close }] = useDisclosure(false);
   const computedColorScheme = useComputedColorScheme();
+  const [selectedTheme, setSelectedTheme] = useState<string>(computedColorScheme);
+
+  const toggleTheme = () => {
+    setSelectedTheme(selectedTheme === 'light' ? 'dark' : 'light');
+  };
 
   const handleOpen = async () => {
     if (!editor.isEditable) {
@@ -90,15 +95,37 @@ export default function DrawioView(props: NodeViewProps) {
     <NodeViewWrapper>
       <Modal.Root opened={opened} onClose={close} fullScreen>
         <Modal.Overlay />
-        <Modal.Content style={{ overflow: "hidden" }}>
-          <Modal.Body>
+        <Modal.Content style={{ 
+          overflow: "hidden",
+          backgroundColor: selectedTheme === 'dark' ? '#1a1a1a' : '#ffffff'
+        }}>
+          <ActionIcon
+            onClick={toggleTheme}
+            variant="light"
+            size="sm"
+            style={{ 
+              position: "absolute", 
+              right: "12px", 
+              top: "4px", 
+              zIndex: 1001,
+              backgroundColor: "rgba(255, 255, 255, 0.0)",
+              backdropFilter: "blur(4px)"
+            }}
+          >
+            {selectedTheme === 'light' ? <IconMoon size={16} /> : <IconSun size={16} />}
+          </ActionIcon>
+          <Modal.Body style={{ 
+            backgroundColor: selectedTheme === 'dark' ? '#1a1a1a' : '#ffffff',
+            padding: 0 
+          }}>
             <div style={{ height: "100vh" }}>
               <DrawIoEmbed
+                key={selectedTheme}
                 ref={drawioRef}
                 xml={initialXML}
                 baseUrl={getDrawioUrl()}
                 urlParameters={{
-                  ui: computedColorScheme === "light" ? "kennedy" : "dark",
+                  ui: selectedTheme === "light" ? "kennedy" : "dark",
                   spin: true,
                   libraries: true,
                   saveAndExit: true,
