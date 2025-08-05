@@ -145,43 +145,34 @@ export default function TopMenu() {
             {t("笔记顶栏设置")}
           </Menu.Item>
 
-          <Menu.Sub>
-            <Menu.Sub.Target>
-              <Menu.Item leftSection={<IconBrightnessFilled size={16} />}>
-                {t("Theme")}
-              </Menu.Item>
-            </Menu.Sub.Target>
-
-            <Menu.Sub.Dropdown>
-              <Menu.Item
-                onClick={() => setColorScheme("light")}
-                leftSection={<IconSun size={16} />}
-                rightSection={
-                  colorScheme === "light" ? <IconCheck size={16} /> : null
-                }
-              >
-                {t("Light")}
-              </Menu.Item>
-              <Menu.Item
-                onClick={() => setColorScheme("dark")}
-                leftSection={<IconMoon size={16} />}
-                rightSection={
-                  colorScheme === "dark" ? <IconCheck size={16} /> : null
-                }
-              >
-                {t("Dark")}
-              </Menu.Item>
-              <Menu.Item
-                onClick={() => setColorScheme("auto")}
-                leftSection={<IconDeviceDesktop size={16} />}
-                rightSection={
-                  colorScheme === "auto" ? <IconCheck size={16} /> : null
-                }
-              >
-                {t("System settings")}
-              </Menu.Item>
-            </Menu.Sub.Dropdown>
-          </Menu.Sub>
+          <Menu.Label>{t("Theme")}</Menu.Label>
+          <Menu.Item
+            onClick={() => setColorScheme("light")}
+            leftSection={<IconSun size={16} />}
+            rightSection={
+              colorScheme === "light" ? <IconCheck size={16} /> : null
+            }
+          >
+            {t("Light")}
+          </Menu.Item>
+          <Menu.Item
+            onClick={() => setColorScheme("dark")}
+            leftSection={<IconMoon size={16} />}
+            rightSection={
+              colorScheme === "dark" ? <IconCheck size={16} /> : null
+            }
+          >
+            {t("Dark")}
+          </Menu.Item>
+          <Menu.Item
+            onClick={() => setColorScheme("auto")}
+            leftSection={<IconDeviceDesktop size={16} />}
+            rightSection={
+              colorScheme === "auto" ? <IconCheck size={16} /> : null
+            }
+          >
+            {t("System settings")}
+          </Menu.Item>
 
           <Menu.Divider />
 

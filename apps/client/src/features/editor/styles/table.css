@@ -10,20 +10,59 @@
 
 .ProseMirror {
   table {
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     margin: 0;
     table-layout: fixed;
     width: 100%;
+    background-color: light-dark(transparent, var(--mantine-color-dark-7));
+    border-radius: 6px;
+    border: 1px solid light-dark(#ced4da, var(--mantine-color-dark-4));
 
     td,
     th {
-      border: 1px solid #ced4da;
+      border-right: 1px solid light-dark(#ced4da, var(--mantine-color-dark-4));
+      border-bottom: 1px solid light-dark(#ced4da, var(--mantine-color-dark-4));
       box-sizing: border-box;
       min-width: 1em;
       padding: 3px 5px;
       position: relative;
       vertical-align: top;
+      color: light-dark(inherit, var(--mantine-color-dark-0));
 
+      &:last-child {
+        border-right: none;
+      }
+    }
+
+    tr:last-child td,
+    tr:last-child th {
+      border-bottom: none;
+    }
+
+    /* 圆角处理 */
+    tr:first-child th:first-child,
+    tr:first-child td:first-child {
+      border-top-left-radius: 5px;
+    }
+
+    tr:first-child th:last-child,
+    tr:first-child td:last-child {
+      border-top-right-radius: 5px;
+    }
+
+    tr:last-child td:first-child,
+    tr:last-child th:first-child {
+      border-bottom-left-radius: 5px;
+    }
+
+    tr:last-child td:last-child,
+    tr:last-child th:last-child {
+      border-bottom-right-radius: 5px;
+    }
+
+    td,
+    th {
       &:first-of-type:not(a) {
         margin-top: 0;
       }
@@ -47,7 +86,7 @@
     }
 
     .column-resize-handle {
-      background-color: #adf;
+      background-color: light-dark(#adf, var(--mantine-color-blue-6));
       bottom: -1px;
       position: absolute;
       right: -2px;
@@ -57,7 +96,7 @@
     }
 
     .selectedCell:after {
-      background: rgba(200, 200, 255, 0.4);
+      background: light-dark(rgba(200, 200, 255, 0.4), rgba(100, 149, 237, 0.3));
       content: "";
       left: 0;
       right: 0;

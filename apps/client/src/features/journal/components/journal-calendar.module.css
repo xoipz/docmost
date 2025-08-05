@@ -457,6 +457,15 @@
   background-color: var(--mantine-color-green-7);
 }
 
+/* 非当前月份的日记标记点显示为浅70%的绿色 */
+.day[data-other-month="true"] .journalDot {
+  background-color: rgba(46, 160, 67, 0.3); /* 浅70%的绿色 */
+}
+
+[data-mantine-color-scheme="dark"] .day[data-other-month="true"] .journalDot {
+  background-color: rgba(64, 192, 87, 0.3); /* 暗色主题下浅70%的绿色 */
+}
+
 @keyframes pulse {
   0% {
     box-shadow: 0 0 0 0 rgba(46, 160, 67, 0.7);
