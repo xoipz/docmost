@@ -1,10 +1,10 @@
-import { Modal, Group, Text, Switch, Stack, Divider, Select } from "@mantine/core";
+import { Modal, Group, Text, Switch, Stack, Divider, Select, Button, Collapse } from "@mantine/core";
 import { useAtom } from "jotai";
 import { pageHeaderButtonsAtom } from "@/features/page/atoms/page-header-atoms.ts";
 import { headerVisibleAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom.ts";
 import { useTranslation } from "react-i18next";
 import {
-  IconArrowBackUp,
+  IconArrowBackUp,   
   IconArrowForwardUp,
   IconMessage,
   IconList,
@@ -16,8 +16,13 @@ import {
   IconLoader,
   IconEdit,
   IconRectangle,
+  IconStar,
+  IconChevronDown,
+  IconChevronUp,
 } from "@tabler/icons-react";
 import { bubbleMenuVisibleAtom } from "@/features/editor/atoms/bubble-menu-atoms.ts";
+import { FavoriteButtonsSettings } from "./favorite-buttons-settings";
+import { useState } from "react";
 
 interface PageHeaderSettingsModalProps {
   opened: boolean;
@@ -33,6 +38,7 @@ export default function PageHeaderSettingsModal({
   const [headerButtons, setHeaderButtons] = useAtom(pageHeaderButtonsAtom);
   const [headerVisible, setHeaderVisible] = useAtom(headerVisibleAtom);
   const [bubbleMenuVisible, setBubbleMenuVisible] = useAtom(bubbleMenuVisibleAtom);
+  const [showFavoriteSettings, setShowFavoriteSettings] = useState(false);
 
   return (
     <Modal
@@ -208,6 +214,26 @@ export default function PageHeaderSettingsModal({
             size="sm"
           />
         </Group>
+
+        {headerButtons.showQuickInputBar && (
+          <Stack pl="md" gap="xs">
+            <Button
+              variant="subtle"
+              size="sm"
+              leftSection={<IconStar size={16} />}
+              rightSection={showFavoriteSettings ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />}
+              onClick={() => setShowFavoriteSettings(!showFavoriteSettings)}
+              justify="space-between"
+              fullWidth
+            >
+              {t("设置常用快捷键")}
+            </Button>
+            
+            <Collapse in={showFavoriteSettings}>
+              <FavoriteButtonsSettings />
+            </Collapse>
+          </Stack>
+        )}
 
         <Group wrap="nowrap" justify="space-between" w="100%">
           <Group gap="xs">

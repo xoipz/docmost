@@ -19,6 +19,8 @@ import {
   IconH4,
   IconH5,
   IconBulb,
+  IconStar,
+  IconPlus,
 } from "@tabler/icons-react";
 import React from "react";
 
@@ -28,18 +30,17 @@ const buttons = [
   // 基础功能区 - 始终显示
   { label: "/", content: "/", category: "base", priority: 1 },
   { label: "智能选词", icon: IconBulb, command: "smartSelection", category: "base", priority: 3 },
-  // 标题
-  { label: "H1", icon: IconH1, command: "toggleHeading", args: { level: 1 }, category: "headings" },
-  { label: "H2", icon: IconH2, command: "toggleHeading", args: { level: 2 }, category: "headings" },
-  { label: "H3", icon: IconH3, command: "toggleHeading", args: { level: 3 }, category: "headings" },
-  { label: "H4", icon: IconH4, command: "toggleHeading", args: { level: 4 }, category: "headings" },
-  { label: "H5", icon: IconH5, command: "toggleHeading", args: { level: 5 }, category: "headings" },
-  // 块元素
-  { label: "表格", icon: IconTable, command: "insertTable", args: { rows: 3, cols: 3 }, category: "blocks" },
-  { label: "代码块", icon: IconCode, command: "toggleCodeBlock", category: "blocks" },
-  { label: "公式块", icon: IconMath, command: "toggleMathBlock", category: "blocks" },
-  { label: "引用块", icon: IconQuote, command: "toggleBlockquote", category: "blocks" },
-  { label: "可选块", icon: IconCheckbox, command: "toggleTaskList", category: "blocks" },
+  // 插入功能（标题 + 块元素）
+  { label: "H1", icon: IconH1, command: "toggleHeading", args: { level: 1 }, category: "insert" },
+  { label: "H2", icon: IconH2, command: "toggleHeading", args: { level: 2 }, category: "insert" },
+  { label: "H3", icon: IconH3, command: "toggleHeading", args: { level: 3 }, category: "insert" },
+  { label: "H4", icon: IconH4, command: "toggleHeading", args: { level: 4 }, category: "insert" },
+  { label: "H5", icon: IconH5, command: "toggleHeading", args: { level: 5 }, category: "insert" },
+  { label: "表格", icon: IconTable, command: "insertTable", args: { rows: 3, cols: 3 }, category: "insert" },
+  { label: "代码块", icon: IconCode, command: "toggleCodeBlock", category: "insert" },
+  { label: "公式块", icon: IconMath, command: "toggleMathBlock", category: "insert" },
+  { label: "引用块", icon: IconQuote, command: "toggleBlockquote", category: "insert" },
+  { label: "可选块", icon: IconCheckbox, command: "toggleTaskList", category: "insert" },
   // 符号
   { label: ".", content: ".", category: "symbols" },
   { label: "()", content: ["(", ")"], category: "symbols" },
@@ -51,20 +52,33 @@ const buttons = [
 
 // 定义筛选模式
 const filterModes = [
+  { name: "常用", key: "favorites", icon: IconStar },
+  { name: "插入", key: "insert", icon: IconPlus },
   { name: "全部", key: "all", icon: IconFilter },
-  { name: "标题", key: "headings", icon: IconH1 },
-  { name: "块元素", key: "blocks", icon: IconTable },
-  { name: "符号", key: "symbols", icon: IconCode },
 ];
 
 // 筛选模式状态
 const filterModeAtom = atomWithStorage("quickInputFilterMode", 0);
+
+// 常用按钮状态
+export const favoriteButtonsAtom = atomWithStorage("quickInputFavoriteButtons", [
+  "/", // 默认的常用按钮
+  "智能选词",
+  "H1",
+  "H2",
+  "表格",
+  "代码块"
+]);
+
+// 导出所有可用按钮，供设置界面使用
+export { buttons as allQuickInputButtons };
 
 // TAG:App - 底部快速输入栏
 export function QuickInputBar() {
   const { t } = useTranslation();
   const [editor] = useAtom(pageEditorAtom);
   const [filterMode, setFilterMode] = useAtom(filterModeAtom);
+  const [favoriteButtons] = useAtom(favoriteButtonsAtom);
   const [, setAsideState] = useAtom(asideStateAtom);
   const contentRef = React.useRef<HTMLDivElement>(null);
 
@@ -324,15 +338,21 @@ export function QuickInputBar() {
   const filteredButtons = useMemo(() => {
     const currentMode = filterModes[filterMode];
     
-    // 基础功能始终显示
-    const baseButtons = buttons.filter(button => button.category === 'base');
-    
-    if (currentMode.key === 'all') {
-      return buttons;
+    if (currentMode.key === 'favorites') {
+      // 常用模式：根据favoriteButtons数组的顺序显示按钮
+      return favoriteButtons.map(favLabel => 
+        buttons.find(button => button.label === favLabel)
+      ).filter(Boolean) as typeof buttons;
+    } else if (currentMode.key === 'insert') {
+      // 插入模式：显示基础功能 + 插入类按钮
+      const baseButtons = buttons.filter(button => button.category === 'base');
+      const insertButtons = buttons.filter(button => button.category === 'insert');
+      return [...baseButtons, ...insertButtons];
     } else {
-      return [...baseButtons, ...buttons.filter(button => button.category === currentMode.key)];
+      // 全部模式：显示所有按钮
+      return buttons;
     }
-  }, [filterMode]);
+  }, [filterMode, favoriteButtons]);
 
   // 轮换筛选模式
   const handleFilterToggle = useCallback((event: React.MouseEvent) => {
