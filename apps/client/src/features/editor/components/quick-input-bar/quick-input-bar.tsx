@@ -6,6 +6,7 @@ import classes from "./quick-input-bar.module.css";
 import { atomWithStorage } from "jotai/utils";
 import { asideStateAtom } from "@/components/layouts/global/hooks/atoms/sidebar-atom";
 import { useCallback, useMemo } from "react";
+import { uploadImageAction } from "@/features/editor/components/image/upload-image-action";
 import { 
   IconFilter, 
   IconTable, 
@@ -21,6 +22,7 @@ import {
   IconBulb,
   IconStar,
   IconPlus,
+  IconPhoto,
 } from "@tabler/icons-react";
 import React from "react";
 
@@ -41,6 +43,7 @@ const buttons = [
   { label: "公式块", icon: IconMath, command: "toggleMathBlock", category: "insert" },
   { label: "引用块", icon: IconQuote, command: "toggleBlockquote", category: "insert" },
   { label: "可选块", icon: IconCheckbox, command: "toggleTaskList", category: "insert" },
+  { label: "图片", icon: IconPhoto, command: "uploadImage", category: "insert" },
   // 符号
   { label: ".", content: ".", category: "symbols" },
   { label: "()", content: ["(", ")"], category: "symbols" },
@@ -67,7 +70,8 @@ export const favoriteButtonsAtom = atomWithStorage("quickInputFavoriteButtons", 
   "H1",
   "H2",
   "表格",
-  "代码块"
+  "代码块",
+  "图片"
 ]);
 
 // 导出所有可用按钮，供设置界面使用
@@ -305,6 +309,24 @@ export function QuickInputBar() {
           }
         }
       }
+    } else if (button.command === "uploadImage") {
+      // 处理图片上传
+      const pageId = editor.storage?.pageId;
+      if (!pageId) return;
+
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.multiple = true;
+      input.onchange = async () => {
+        if (input.files?.length) {
+          for (const file of input.files) {
+            const pos = editor.view.state.selection.from;
+            uploadImageAction(file, editor.view, pos, pageId);
+          }
+        }
+      };
+      input.click();
     } else if (button.command) {
       // 使用命令直接插入
       editor.commands[button.command](button.args);
