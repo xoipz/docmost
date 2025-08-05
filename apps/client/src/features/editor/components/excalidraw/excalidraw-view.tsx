@@ -7,18 +7,20 @@ import {
   Image,
   Text,
   useComputedColorScheme,
+  Tooltip,
 } from "@mantine/core";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { uploadFile } from "@/features/page/services/page-service.ts";
 import { svgStringToFile } from "@/lib";
 import { useDisclosure } from "@mantine/hooks";
+import { modals } from "@mantine/modals";
 import { getFileUrl } from "@/lib/config.ts";
 import "@excalidraw/excalidraw/index.css";
 import type { ExcalidrawImperativeAPI } from "@excalidraw/excalidraw/types";
 import { IAttachment } from "@/lib/types";
 import ReactClearModal from "react-clear-modal";
 import clsx from "clsx";
-import { IconEdit } from "@tabler/icons-react";
+import { IconEdit, IconSun, IconMoon, IconMaximize, IconMinimize } from "@tabler/icons-react";
 import { lazy } from "react";
 import { Suspense } from "react";
 import { useTranslation } from "react-i18next";
@@ -45,6 +47,26 @@ export default function ExcalidrawView(props: NodeViewProps) {
   const [excalidrawData, setExcalidrawData] = useState<any>(null);
   const [opened, { open, close }] = useDisclosure(false);
   const computedColorScheme = useComputedColorScheme();
+  const [selectedTheme, setSelectedTheme] = useState<string>(computedColorScheme);
+  const [isWebFullscreen, setIsWebFullscreen] = useState(false);
+
+  const toggleTheme = () => {
+    setSelectedTheme(selectedTheme === 'light' ? 'dark' : 'light');
+  };
+
+  const toggleWebFullscreen = () => {
+    setIsWebFullscreen(!isWebFullscreen);
+  };
+
+  const handleExitWithConfirm = () => {
+    modals.openConfirmModal({
+      title: t('Exit without saving?'),
+      children: t('Are you sure you want to exit without saving your changes? All unsaved changes will be lost.'),
+      labels: { confirm: t('Exit'), cancel: t('Cancel') },
+      confirmProps: { color: 'red' },
+      onConfirm: close,
+    });
+  };
 
   const handleOpen = async () => {
     if (!editor.isEditable) {
@@ -121,7 +143,7 @@ export default function ExcalidrawView(props: NodeViewProps) {
     <NodeViewWrapper>
       <ReactClearModal
         style={{
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          backgroundColor: selectedTheme === 'dark' ? "rgba(0, 0, 0, 0.8)" : "rgba(0, 0, 0, 0.5)",
           padding: 0,
           zIndex: 200,
         }}
@@ -131,24 +153,58 @@ export default function ExcalidrawView(props: NodeViewProps) {
         contentProps={{
           style: {
             padding: 0,
-            width: "90vw",
+            width: isWebFullscreen ? "100vw" : "90vw",
+            height: isWebFullscreen ? "100vh" : "auto",
+            maxWidth: isWebFullscreen ? "none" : undefined,
+            maxHeight: isWebFullscreen ? "none" : undefined,
+            position: isWebFullscreen ? "fixed" : "relative",
+            top: isWebFullscreen ? 0 : undefined,
+            left: isWebFullscreen ? 0 : undefined,
+            borderRadius: isWebFullscreen ? 0 : undefined,
+            backgroundColor: selectedTheme === 'dark' ? '#1a1a1a' : '#ffffff',
+            border: selectedTheme === 'dark' ? '1px solid #333333' : '1px solid #e0e0e0',
           },
         }}
       >
         <Group
-          justify="flex-end"
+          justify="space-between"
           wrap="nowrap"
-          bg="var(--mantine-color-body)"
+          style={{
+            backgroundColor: selectedTheme === 'dark' ? '#1a1a1a' : '#ffffff',
+            borderBottom: selectedTheme === 'dark' ? '1px solid #333333' : '1px solid #e0e0e0',
+          }}
           p="xs"
         >
-          <Button onClick={handleSave} size={"compact-sm"}>
-            {t("Save & Exit")}
-          </Button>
-          <Button onClick={close} color="red" size={"compact-sm"}>
-            {t("Exit")}
-          </Button>
+          <Group wrap="nowrap">
+            <Tooltip label={t('Toggle Theme')}>
+              <ActionIcon
+                onClick={toggleTheme}
+                variant="light"
+                size="sm"
+              >
+                {selectedTheme === 'light' ? <IconMoon size={16} /> : <IconSun size={16} />}
+              </ActionIcon>
+            </Tooltip>
+            <Tooltip label={isWebFullscreen ? t('Exit Fullscreen') : t('Enter Fullscreen')}>
+              <ActionIcon
+                onClick={toggleWebFullscreen}
+                variant="light"
+                size="sm"
+              >
+                {isWebFullscreen ? <IconMinimize size={16} /> : <IconMaximize size={16} />}
+              </ActionIcon>
+            </Tooltip>
+          </Group>
+          <Group wrap="nowrap">
+            <Button onClick={handleExitWithConfirm} color="red" size={"compact-sm"}>
+              {t("Exit")}
+            </Button>
+            <Button onClick={handleSave} size={"compact-sm"}>
+              {t("Save & Exit")}
+            </Button>
+          </Group>
         </Group>
-        <div style={{ height: "90vh" }}>
+        <div style={{ height: isWebFullscreen ? "calc(100vh - 60px)" : "90vh" }}>
           <Suspense fallback={null}>
             <Excalidraw
               excalidrawAPI={(api) => setExcalidrawAPI(api)}
@@ -156,7 +212,8 @@ export default function ExcalidrawView(props: NodeViewProps) {
                 ...excalidrawData,
                 scrollToContent: true,
               }}
-              theme={computedColorScheme}
+              theme={selectedTheme}
+              langCode="zh-CN"
             />
           </Suspense>
         </div>
