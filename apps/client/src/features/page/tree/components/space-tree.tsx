@@ -2,6 +2,7 @@ import { NodeApi, NodeRendererProps, Tree, TreeApi } from "react-arborist";
 import { atom, useAtom } from "jotai";
 import { treeApiAtom } from "@/features/page/tree/atoms/tree-api-atom.ts";
 import { multiWindowTabsAtom, activeTabAtom } from "@/features/editor/atoms/multi-window-atoms";
+import { pageHeaderButtonsAtom } from "@/features/page/atoms/page-header-atoms.ts";
 import {
   fetchAllAncestorChildren,
   useGetRootSidebarPagesQuery,
@@ -278,6 +279,7 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
   const updatePageMutation = useUpdatePageMutation();
   const [treeData, setTreeData] = useAtom(treeDataAtom);
   const [, appendChildren] = useAtom(appendNodeChildrenAtom);
+  const [headerButtons] = useAtom(pageHeaderButtonsAtom);
   const emit = useQueryEmit();
   const { spaceSlug } = useParams();
   const navigate = useNavigate();
@@ -288,6 +290,8 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
   const toggleMobileSidebar = useToggleSidebar(mobileSidebarAtom);
   const [lastClickedNodeId, setLastClickedNodeId] = useState<string | null>(null);
   const [lastClickTime, setLastClickTime] = useState<number>(0);
+
+  const requireDoubleClick = headerButtons.requireDoubleClickToEnterPage;
 
   const prefetchPage = () => {
     timerRef.current = setTimeout(() => {
@@ -347,23 +351,44 @@ function Node({ node, style, dragHandle, tree }: NodeRendererProps<any>) {
       return; // 阻止继续执行，原窗口不跳转
     }
 
-    // 如果节点有子节点，且当前未展开，则展开子节点
-    if ((node.children.length > 0 || node.data.hasChildren) && node.isClosed) {
-      node.toggle();
-      handleLoadChildren(node);
+    // 如果启用了双击模式
+    if (requireDoubleClick) {
+      // 如果这是双击
+      if (isDoubleClick) {
+        // 双击时才导航到页面
+        navigate(pageUrl);
+        
+        // 处理移动端侧边栏
+        if (mobileSidebarOpened) {
+          toggleMobileSidebar();
+        }
+      } else {
+        // 单击时只选中节点和展开/收缩子节点，不导航
+        if ((node.children.length > 0 || node.data.hasChildren) && node.isClosed) {
+          node.toggle();
+          handleLoadChildren(node);
+        }
+      }
+    } else {
+      // 原有的单击逻辑
+      // 如果节点有子节点，且当前未展开，则展开子节点
+      if ((node.children.length > 0 || node.data.hasChildren) && node.isClosed) {
+        node.toggle();
+        handleLoadChildren(node);
+      }
+      
+      // 普通点击时才在当前窗口导航
+      navigate(pageUrl);
+      
+      // 处理移动端侧边栏：只有在双击同一个节点时才关闭侧边栏
+      if (mobileSidebarOpened && isDoubleClick) {
+        toggleMobileSidebar();
+      }
     }
-    
-    // 普通点击时才在当前窗口导航
-    navigate(pageUrl);
     
     // 更新最后点击的节点ID和时间
     setLastClickedNodeId(node.data.id);
     setLastClickTime(currentTime);
-    
-    // 处理移动端侧边栏：只有在双击同一个节点时才关闭侧边栏
-    if (mobileSidebarOpened && isDoubleClick) {
-      toggleMobileSidebar();
-    }
   };
 
   const handleUpdateNodeIcon = (nodeId: string, newIcon: string) => {

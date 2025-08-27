@@ -15,6 +15,7 @@ const defaultSettings = {
   loadingIndicatorType: "gray", // "gray" | "loader"
   showPageState: false,
   showBubbleMenu: true,
+  requireDoubleClickToEnterPage: false,
 };
 
 export const pageHeaderButtonsAtom = atomWithStorage(

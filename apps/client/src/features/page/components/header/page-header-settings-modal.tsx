@@ -19,6 +19,7 @@ import {
   IconStar,
   IconChevronDown,
   IconChevronUp,
+  IconClick,
 } from "@tabler/icons-react";
 import { bubbleMenuVisibleAtom } from "@/features/editor/atoms/bubble-menu-atoms.ts";
 import { FavoriteButtonsSettings } from "./favorite-buttons-settings";
@@ -283,6 +284,20 @@ export default function PageHeaderSettingsModal({
             />
           </Group>
         )}
+
+        <Group wrap="nowrap" justify="space-between" w="100%">
+          <Group gap="xs">
+            <IconClick size={16} />
+            <Text>{t("双击进入笔记")}</Text>
+          </Group>
+          <Switch
+            checked={headerButtons.requireDoubleClickToEnterPage}
+            onChange={(e) => {
+              setHeaderButtons({ ...headerButtons, requireDoubleClickToEnterPage: e.currentTarget.checked });
+            }}
+            size="sm"
+          />
+        </Group>
 
       </Stack>
     </Modal>

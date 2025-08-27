@@ -18,6 +18,8 @@ import {
   IconCalendar,
 } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
+import { useAtom } from "jotai";
+import { pageHeaderButtonsAtom } from "@/features/page/atoms/page-header-atoms.ts";
 import dayjs from "dayjs";
 import { IPage } from "@/features/page/types/page.types.ts";
 import classes from "./journal-list.module.css";
@@ -48,9 +50,14 @@ export function JournalList({
   onJournalDoubleClick,
 }: JournalListProps) {
   const { t } = useTranslation();
+  const [headerButtons] = useAtom(pageHeaderButtonsAtom);
   const [expandedYears, setExpandedYears] = useState<Set<string>>(new Set());
   const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
   const initialized = useRef(false);
+  const [lastClickedJournalId, setLastClickedJournalId] = useState<string | null>(null);
+  const [lastClickTime, setLastClickTime] = useState<number>(0);
+
+  const requireDoubleClick = headerButtons.requireDoubleClickToEnterPage;
 
   const groupedJournals = useMemo(() => {
     const yearGroups: Record<string, YearGroup> = {};
@@ -180,8 +187,25 @@ export function JournalList({
   };
 
   const handleJournalClick = (journal: IPage) => {
-    // 单击直接跳转到笔记
-    onJournalDoubleClick(journal);
+    const currentTime = Date.now();
+    const isDoubleClick = lastClickedJournalId === journal.id && currentTime - lastClickTime < 500;
+    
+    if (requireDoubleClick) {
+      // 双击模式下，只有双击才跳转
+      if (isDoubleClick) {
+        onJournalDoubleClick(journal);
+      } else {
+        // 单击只选中
+        onJournalSelect(journal);
+      }
+    } else {
+      // 原有逻辑：单击直接跳转到笔记
+      onJournalDoubleClick(journal);
+    }
+    
+    // 更新最后点击的日记ID和时间
+    setLastClickedJournalId(journal.id);
+    setLastClickTime(currentTime);
   };
 
   if (journals.length === 0) {
@@ -213,17 +237,13 @@ export function JournalList({
               >
                 <Group justify="space-between" wrap="nowrap">
                   <Group gap="xs" wrap="nowrap">
-                    <ActionIcon
-                      variant="subtle"
-                      size="xs"
-                      className={classes.expandIcon}
-                    >
+                    <Box className={classes.expandIcon}>
                       {expandedYears.has(yearGroup.year) ? (
                         <IconChevronDown size={12} />
                       ) : (
                         <IconChevronRight size={12} />
                       )}
-                    </ActionIcon>
+                    </Box>
                     <Text size="sm" fw={600}>
                       {yearGroup.yearLabel}
                     </Text>
@@ -251,17 +271,13 @@ export function JournalList({
                       >
                         <Group justify="space-between" wrap="nowrap">
                           <Group gap="xs" wrap="nowrap">
-                            <ActionIcon
-                              variant="subtle"
-                              size="xs"
-                              className={classes.expandIcon}
-                            >
+                            <Box className={classes.expandIcon}>
                               {isMonthExpanded ? (
                                 <IconChevronDown size={12} />
                               ) : (
                                 <IconChevronRight size={12} />
                               )}
-                            </ActionIcon>
+                            </Box>
                             <Text size="sm" fw={500}>
                               {monthGroup.monthLabel}
                             </Text>

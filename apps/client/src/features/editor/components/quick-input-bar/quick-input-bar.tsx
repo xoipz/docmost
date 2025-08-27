@@ -85,6 +85,27 @@ export function QuickInputBar() {
   const [favoriteButtons] = useAtom(favoriteButtonsAtom);
   const [, setAsideState] = useAtom(asideStateAtom);
   const contentRef = React.useRef<HTMLDivElement>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileChange = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!editor) return;
+    
+    const pageId = editor.storage?.pageId;
+    if (!pageId) return;
+
+    const files = event.target.files;
+    if (files?.length) {
+      for (const file of files) {
+        const pos = editor.view.state.selection.from;
+        uploadImageAction(file, editor.view, pos, pageId);
+      }
+    }
+    
+    // 清空input值，允许重复选择同一文件
+    if (event.target) {
+      event.target.value = '';
+    }
+  }, [editor]);
 
   const handleInsert = useCallback((button: typeof buttons[0]) => {
     if (!editor) return;
@@ -310,23 +331,10 @@ export function QuickInputBar() {
         }
       }
     } else if (button.command === "uploadImage") {
-      // 处理图片上传
-      const pageId = editor.storage?.pageId;
-      if (!pageId) return;
-
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = "image/*";
-      input.multiple = true;
-      input.onchange = async () => {
-        if (input.files?.length) {
-          for (const file of input.files) {
-            const pos = editor.view.state.selection.from;
-            uploadImageAction(file, editor.view, pos, pageId);
-          }
-        }
-      };
-      input.click();
+      // 处理图片上传 - 使用ref确保在移动端也能正常工作
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
+      }
     } else if (button.command) {
       // 使用命令直接插入
       editor.commands[button.command](button.args);
