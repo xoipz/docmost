@@ -27,6 +27,7 @@ import { uploadImageAction } from "@/features/editor/components/image/upload-ima
 import { uploadVideoAction } from "@/features/editor/components/video/upload-video-action.tsx";
 import { uploadAttachmentAction } from "@/features/editor/components/attachment/upload-attachment-action.tsx";
 import IconExcalidraw from "@/components/icons/icon-excalidraw";
+import IconMindMap from "@/components/icons/icon-mindmap";
 import IconMermaid from "@/components/icons/icon-mermaid";
 import IconDrawio from "@/components/icons/icon-drawio";
 import {
@@ -338,6 +339,14 @@ const CommandGroups: SlashMenuGroupedItemsType = {
       icon: IconExcalidraw,
       command: ({ editor, range }: CommandProps) =>
         editor.chain().focus().deleteRange(range).setExcalidraw().run(),
+    },
+    {
+      title: "Mind Map",
+      description: "Create and edit mind maps",
+      searchTerms: ["mind", "mindmap", "思维导图", "脑图", "mind map", "brainstorm"],
+      icon: IconMindMap,
+      command: ({ editor, range }: CommandProps) =>
+        editor.chain().focus().deleteRange(range).setMindMap().run(),
     },
     {
       title: "Date",

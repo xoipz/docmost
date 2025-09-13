@@ -1,0 +1,85 @@
+.ReactModal__Overlay {
+  z-index: 200;
+}
+
+.ReactModal__Content {
+  z-index: 201;
+}
+
+/* Mind Map Container */
+.mind-map-container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+
+
+/* 重置思维导图节点内HTML元素的默认样式 */
+.smm-node p,
+.smm-richtext-content p,
+.smm-richtext-node-edit-content p {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.smm-node h1,
+.smm-node h2,
+.smm-node h3,
+.smm-node h4,
+.smm-node h5,
+.smm-node h6,
+.smm-richtext-content h1,
+.smm-richtext-content h2,
+.smm-richtext-content h3,
+.smm-richtext-content h4,
+.smm-richtext-content h5,
+.smm-richtext-content h6,
+.smm-richtext-node-edit-content h1,
+.smm-richtext-node-edit-content h2,
+.smm-richtext-node-edit-content h3,
+.smm-richtext-node-edit-content h4,
+.smm-richtext-node-edit-content h5,
+.smm-richtext-node-edit-content h6 {
+  margin: 0 !important;
+  padding: 0 !important;
+  font-weight: inherit !important;
+  font-size: inherit !important;
+}
+
+.smm-node ul,
+.smm-node ol,
+.smm-node li,
+.smm-richtext-content ul,
+.smm-richtext-content ol,
+.smm-richtext-content li,
+.smm-richtext-node-edit-content ul,
+.smm-richtext-node-edit-content ol,
+.smm-richtext-node-edit-content li {
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+.smm-node div,
+.smm-node span,
+.smm-node strong,
+.smm-node em,
+.smm-node b,
+.smm-node i,
+.smm-richtext-content div,
+.smm-richtext-content span,
+.smm-richtext-content strong,
+.smm-richtext-content em,
+.smm-richtext-content b,
+.smm-richtext-content i,
+.smm-richtext-node-edit-content div,
+.smm-richtext-node-edit-content span,
+.smm-richtext-node-edit-content strong,
+.smm-richtext-node-edit-content em,
+.smm-richtext-node-edit-content b,
+.smm-richtext-node-edit-content i {
+  margin: 0 !important;
+  padding: 0 !important;
+}

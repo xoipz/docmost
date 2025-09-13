@@ -1,0 +1,483 @@
+/* 节点样式面板 */
+.node-style-panel {
+  /* 继承通用面板样式 */
+}
+
+/* 基础样式面板 */
+.base-style-panel {
+  /* 继承通用面板样式 */
+}
+
+/* 标签容器 */
+.tab-container {
+  margin-bottom: 16px;
+}
+
+.tab-header {
+  display: flex;
+  border-bottom: 1px solid #e8e8e8;
+  margin-bottom: 12px;
+}
+
+.isDark .tab-header {
+  border-bottom-color: hsla(0, 0%, 100%, 0.1);
+}
+
+.tab-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #666;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.tab-item:hover {
+  color: #409eff;
+}
+
+.tab-item.active {
+  color: #409eff;
+  border-bottom-color: #409eff;
+}
+
+.isDark .tab-item {
+  color: #ccc;
+}
+
+.isDark .tab-item:hover,
+.isDark .tab-item.active {
+  color: #409eff;
+}
+
+/* 图片上传 */
+.image-upload {
+  margin-bottom: 12px;
+}
+
+.file-input {
+  display: none;
+}
+
+.upload-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px dashed #d9d9d9;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.upload-btn:hover {
+  border-color: #409eff;
+  color: #409eff;
+}
+
+.isDark .upload-btn {
+  border-color: #444;
+  color: #ccc;
+}
+
+.isDark .upload-btn:hover {
+  border-color: #409eff;
+  color: #409eff;
+}
+
+/* 图片预览 */
+.image-preview {
+  position: relative;
+  display: inline-block;
+  margin-top: 8px;
+}
+
+.image-preview img {
+  width: 100px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #e8e8e8;
+}
+
+.image-preview .remove-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ff4d4f;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 结构面板 */
+.structure-panel {
+  /* 继承通用面板样式 */
+}
+
+.layout-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.layout-item {
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.layout-item:hover {
+  border-color: #409eff;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.2);
+}
+
+.layout-item.active {
+  border-color: #409eff;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.3);
+}
+
+.isDark .layout-item {
+  border-color: #444;
+}
+
+.layout-preview {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.preview-placeholder {
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.layout-info {
+  padding: 8px;
+  background: #fff;
+}
+
+.isDark .layout-info {
+  background: #2a2a2a;
+}
+
+.layout-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.layout-desc {
+  font-size: 11px;
+  color: #666;
+}
+
+.isDark .layout-name {
+  color: #fff;
+}
+
+.isDark .layout-desc {
+  color: #ccc;
+}
+
+/* 主题面板 */
+.theme-panel {
+  /* 继承通用面板样式 */
+}
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.theme-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.theme-item:hover {
+  border-color: #409eff;
+}
+
+.theme-item.active {
+  border-color: #409eff;
+  background: #e3f2fd;
+}
+
+.isDark .theme-item {
+  border-color: #444;
+}
+
+.isDark .theme-item.active {
+  background: rgba(64, 158, 255, 0.1);
+}
+
+.theme-color {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  border: 1px solid #e8e8e8;
+}
+
+.theme-name {
+  font-size: 11px;
+  color: #333;
+  text-align: center;
+}
+
+.isDark .theme-name {
+  color: #fff;
+}
+
+/* 大纲面板 */
+.outline-panel {
+  /* 继承通用面板样式 */
+}
+
+.outline-count {
+  font-size: 11px;
+  color: #999;
+  font-weight: normal;
+}
+
+.outline-list {
+  max-height: 400px;
+  overflow-y: auto;
+  /* 隐藏滚动条 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* 隐藏WebKit浏览器的滚动条 */
+.outline-list::-webkit-scrollbar {
+  display: none;
+}
+
+.outline-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.outline-item:hover {
+  background: #f5f5f5;
+}
+
+.outline-item.root {
+  font-weight: 600;
+}
+
+.isDark .outline-item:hover {
+  background: #333;
+}
+
+.outline-bullet {
+  font-size: 10px;
+  color: #409eff;
+  width: 12px;
+  text-align: center;
+}
+
+.outline-text {
+  flex: 1;
+  font-size: 12px;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.isDark .outline-text {
+  color: #fff;
+}
+
+.outline-level {
+  font-size: 10px;
+  color: #999;
+  background: #f0f0f0;
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+.isDark .outline-level {
+  background: #444;
+  color: #ccc;
+}
+
+.outline-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.isDark .outline-actions {
+  border-top-color: hsla(0, 0%, 100%, 0.1);
+}
+
+.outline-btn {
+  flex: 1;
+  padding: 6px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  background: #fff;
+  color: #333;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.outline-btn:hover {
+  border-color: #409eff;
+  color: #409eff;
+}
+
+.isDark .outline-btn {
+  background: #1f1f1f;
+  border-color: #444;
+  color: #fff;
+}
+
+/* 快捷键面板 */
+.shortcut-panel {
+  /* 继承通用面板样式 */
+}
+
+.shortcut-category {
+  margin-bottom: 16px;
+}
+
+.shortcut-category:last-child {
+  margin-bottom: 0;
+}
+
+.shortcut-category-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #409eff;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(64, 158, 255, 0.2);
+}
+
+.isDark .shortcut-category-title {
+  color: #409eff;
+  border-bottom-color: rgba(64, 158, 255, 0.3);
+}
+
+.shortcut-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 16px;
+}
+
+.shortcut-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.isDark .shortcut-item {
+  border-bottom-color: hsla(0, 0%, 100%, 0.05);
+}
+
+.shortcut-key {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.shortcut-key kbd {
+  padding: 2px 6px;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  font-size: 10px;
+  font-family: monospace;
+  color: #333;
+  min-width: 16px;
+  text-align: center;
+}
+
+.isDark .shortcut-key kbd {
+  background: #333;
+  border-color: #555;
+  color: #fff;
+}
+
+.shortcut-desc {
+  font-size: 11px;
+  color: #666;
+  text-align: right;
+  flex: 1;
+  margin-left: 12px;
+}
+
+.isDark .shortcut-desc {
+  color: #ccc;
+}
+
+.shortcut-tips {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.isDark .shortcut-tips {
+  border-top-color: hsla(0, 0%, 100%, 0.1);
+}
+
+.shortcut-tips {
+  font-size: 11px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.shortcut-tips .section-title {
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.shortcut-tips p {
+  margin: 0 0 6px 0;
+}
+
+.shortcut-tips p:last-child {
+  margin-bottom: 0;
+}
+
+.isDark .shortcut-tips {
+  color: #ccc;
+}

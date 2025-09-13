@@ -35,6 +35,7 @@ import {
   CustomCodeBlock,
   Drawio,
   Excalidraw,
+  MindMap,
   Embed,
   SearchAndReplace,
   Mention,
@@ -58,6 +59,7 @@ import AttachmentView from "@/features/editor/components/attachment/attachment-v
 import CodeBlockView from "@/features/editor/components/code-block/code-block-view.tsx";
 import DrawioView from "../components/drawio/drawio-view";
 import ExcalidrawView from "@/features/editor/components/excalidraw/excalidraw-view.tsx";
+import MindMapView from "@/features/editor/components/mindmap/mindmap-view.tsx";
 import EmbedView from "@/features/editor/components/embed/embed-view.tsx";
 import plaintext from "highlight.js/lib/languages/plaintext";
 import powershell from "highlight.js/lib/languages/powershell";
@@ -213,6 +215,9 @@ export const mainExtensions = [
   }),
   Excalidraw.configure({
     view: ExcalidrawView,
+  }),
+  MindMap.configure({
+    view: MindMapView,
   }),
   Embed.configure({
     view: EmbedView,

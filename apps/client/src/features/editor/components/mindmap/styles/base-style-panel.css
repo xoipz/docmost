@@ -1,0 +1,157 @@
+/* BaseStylePanel 样式 */
+.base-style-panel {
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  /* 隐藏滚动条 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* 隐藏WebKit浏览器的滚动条 */
+.base-style-panel::-webkit-scrollbar {
+  display: none;
+}
+
+.base-style-panel .section-title {
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+}
+
+.base-style-panel .panel-section {
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 20px;
+}
+
+.base-style-panel .panel-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+/* 颜色选择器 */
+.color-picker {
+  margin-top: 10px;
+}
+
+.color-list {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  max-width: 200px;
+}
+
+.color-item {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.color-item:hover {
+  transform: scale(1.1);
+  border-color: #666;
+}
+
+.color-item.active {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+.color-item[style*="#FFFFFF"] {
+  border: 1px solid #ddd !important;
+}
+
+.color-item span {
+  color: #666;
+  font-size: 8px;
+  font-weight: 500;
+}
+
+/* 表单行样式 */
+.form-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+
+.form-row .mantine-Text-root {
+  flex-shrink: 0;
+}
+
+.form-row .mantine-Select-root,
+.form-row .mantine-Slider-root {
+  flex-grow: 1;
+}
+
+.form-row .mantine-Slider-root {
+  margin-left: 10px;
+}
+
+/* 暗色主题 */
+.base-style-panel[data-theme="dark"] .section-title {
+  color: #e8e8e8;
+  border-bottom-color: #333;
+}
+
+.base-style-panel[data-theme="dark"] .panel-section {
+  border-bottom-color: #2a2a2a;
+}
+
+.base-style-panel[data-theme="dark"] .color-item:hover {
+  border-color: #999;
+}
+
+.base-style-panel[data-theme="dark"] .color-item span {
+  color: #ccc;
+}
+
+/* 滑动条样式调整 */
+.mantine-Slider-root .mantine-Slider-track {
+  height: 4px;
+}
+
+.mantine-Slider-root .mantine-Slider-thumb {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+.mantine-Slider-root .mantine-Slider-mark {
+  width: 4px;
+  height: 4px;
+}
+
+/* 标签页样式 */
+.mantine-Tabs-tab {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.mantine-Tabs-panel {
+  padding-top: 12px;
+}
+
+/* 选择器样式 */
+.mantine-Select-input {
+  height: 28px;
+  min-height: 28px;
+  font-size: 12px;
+}
+
+/* 复选框样式 */
+.mantine-Checkbox-root .mantine-Checkbox-label {
+  font-size: 13px;
+  padding-left: 8px;
+}
+
+.mantine-Checkbox-input {
+  width: 16px;
+  height: 16px;
+}

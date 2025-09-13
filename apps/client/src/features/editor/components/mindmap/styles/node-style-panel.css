@@ -1,0 +1,277 @@
+/* 节点样式面板 */
+.node-style-panel {
+  max-height: 100%;
+  overflow-y: auto;
+  /* 隐藏滚动条 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* 隐藏WebKit浏览器的滚动条 */
+.node-style-panel::-webkit-scrollbar {
+  display: none;
+}
+
+.panel-section {
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--mantine-color-gray-3);
+  padding-bottom: 16px;
+}
+
+.panel-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mantine-color-gray-9);
+  margin-bottom: 12px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--mantine-color-gray-2);
+}
+
+.form-row {
+  display: flex;
+  gap: 8px; /* 减少间距以节省空间 */
+  margin-bottom: 12px;
+  align-items: center;
+}
+
+.form-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0; /* 允许收缩 */
+}
+
+/* 字体选择项占用更多空间 */
+.form-row .form-item:first-child {
+  flex: 3; /* 字体选择框占更多空间 */
+  min-width: 120px;
+}
+
+/* 字号和对齐方式占用较少空间 */
+.form-row .form-item:nth-child(2),
+.form-row .form-item:nth-child(3) {
+  flex: 1;
+  min-width: 80px;
+}
+
+/* 文字样式按钮行的样式 */
+.style-btn-group {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  justify-content: flex-start; /* 按钮左对齐 */
+}
+
+.form-item label {
+  font-size: 12px;
+  color: var(--mantine-color-gray-7);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.form-select {
+  padding: 6px 8px;
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: 4px;
+  font-size: 13px;
+  background-color: var(--mantine-color-white);
+  color: var(--mantine-color-gray-9);
+  outline: none;
+  transition: border-color 0.2s ease;
+  min-width: 80px; /* 确保最小宽度 */
+  width: 100%; /* 填满容器 */
+}
+
+.form-select:focus {
+  border-color: var(--mantine-color-blue-5);
+}
+
+.form-select.small {
+  width: 80px;
+  min-width: 80px;
+}
+
+.form-input {
+  padding: 6px 8px;
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: 4px;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.form-input:focus {
+  border-color: var(--mantine-color-blue-5);
+}
+
+.form-input.small {
+  width: 60px;
+}
+
+.form-range {
+  width: 100%;
+  height: 4px;
+  background: var(--mantine-color-gray-2);
+  outline: none;
+  border-radius: 2px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.form-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: var(--mantine-color-blue-5);
+  cursor: pointer;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.form-range::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: var(--mantine-color-blue-5);
+  cursor: pointer;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.style-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  background: var(--mantine-color-white);
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--mantine-color-gray-7);
+}
+
+.style-btn:hover {
+  background: var(--mantine-color-gray-0);
+  border-color: var(--mantine-color-gray-4);
+}
+
+.style-btn.active {
+  background: var(--mantine-color-blue-5);
+  border-color: var(--mantine-color-blue-5);
+  color: white;
+}
+
+.color-picker {
+  margin-top: 4px;
+}
+
+.color-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 240px;
+}
+
+.color-item {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  cursor: pointer;
+  border: 1px solid var(--mantine-color-gray-3);
+  position: relative;
+  transition: transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--mantine-color-gray-6);
+}
+
+.color-item:hover {
+  transform: scale(1.1);
+  z-index: 1;
+}
+
+.color-item.active {
+  border-color: var(--mantine-color-blue-5);
+  border-width: 2px;
+  transform: scale(1.1);
+  z-index: 2;
+}
+
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--mantine-color-gray-6);
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* 暗色主题支持 */
+[data-mantine-color-scheme="dark"] .node-style-panel {
+  color: var(--mantine-color-gray-3);
+}
+
+[data-mantine-color-scheme="dark"] .section-title {
+  color: var(--mantine-color-gray-1);
+  border-bottom-color: var(--mantine-color-gray-7);
+}
+
+[data-mantine-color-scheme="dark"] .panel-section {
+  border-bottom-color: var(--mantine-color-gray-7);
+}
+
+[data-mantine-color-scheme="dark"] .form-item label {
+  color: var(--mantine-color-gray-4);
+}
+
+[data-mantine-color-scheme="dark"] .form-select,
+[data-mantine-color-scheme="dark"] .form-input {
+  background-color: var(--mantine-color-gray-8);
+  border-color: var(--mantine-color-gray-6);
+  color: var(--mantine-color-gray-1);
+}
+
+[data-mantine-color-scheme="dark"] .form-select:focus,
+[data-mantine-color-scheme="dark"] .form-input:focus {
+  border-color: var(--mantine-color-blue-4);
+}
+
+[data-mantine-color-scheme="dark"] .style-btn {
+  background: var(--mantine-color-gray-8);
+  border-color: var(--mantine-color-gray-6);
+  color: var(--mantine-color-gray-3);
+}
+
+[data-mantine-color-scheme="dark"] .style-btn:hover {
+  background: var(--mantine-color-gray-7);
+  border-color: var(--mantine-color-gray-5);
+}
+
+[data-mantine-color-scheme="dark"] .style-btn.active {
+  background: var(--mantine-color-blue-6);
+  border-color: var(--mantine-color-blue-6);
+}
+
+[data-mantine-color-scheme="dark"] .color-item {
+  border-color: var(--mantine-color-gray-6);
+}
+
+[data-mantine-color-scheme="dark"] .empty-state {
+  color: var(--mantine-color-gray-5);
+}
