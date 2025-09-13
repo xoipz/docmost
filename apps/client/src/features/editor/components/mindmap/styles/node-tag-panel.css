@@ -1,0 +1,92 @@
+/* 节点标签面板样式 */
+.node-tag-panel {
+  padding: 16px;
+}
+
+.panel-section {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--mantine-color-gray-3);
+}
+
+.panel-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--mantine-color-gray-9);
+  margin-bottom: 12px;
+}
+
+/* 标签列表 */
+.tags-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tag-item {
+  display: flex;
+  align-items: center;
+}
+
+.tag-edit {
+  width: 100%;
+}
+
+.tag-color-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* 添加标签表单 */
+.add-tag-form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 标签模板 */
+.tag-templates {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.template-button {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.template-color-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* 空状态 */
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+/* 暗色主题支持 */
+[data-mantine-color-scheme="dark"] .panel-section {
+  border-bottom-color: var(--mantine-color-gray-7);
+}
+
+[data-mantine-color-scheme="dark"] .section-title {
+  color: var(--mantine-color-gray-1);
+}
+
+[data-mantine-color-scheme="dark"] .template-color-dot {
+  border-color: rgba(255, 255, 255, 0.2);
+}

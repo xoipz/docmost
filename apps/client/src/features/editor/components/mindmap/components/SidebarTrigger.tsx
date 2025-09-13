@@ -9,6 +9,7 @@ import {
   IconChevronRight,
   IconSettings,
   IconMessage,
+  IconTag,
 } from '@tabler/icons-react';
 
 interface SidebarTriggerProps {
@@ -44,6 +45,11 @@ const sidebarTriggerList = [
     name: '大纲',
     value: 'outline',
     icon: IconList,
+  },
+  {
+    name: '节点标签',
+    value: 'nodeTag',
+    icon: IconTag,
   },
   {
     name: 'AI对话',

@@ -90,12 +90,13 @@ export const SimpleColorPicker: React.FC<SimpleColorPickerProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '10px',
-            color: '#666'
+            fontSize: '12px',
+            fontWeight: 'bold',
+            color: '#999'
           }}
           onClick={() => onChange(color)}
         >
-          {color === 'transparent' && '透明'}
+          {color === 'transparent' && '/'}
         </Box>
       ))}
     </Group>
@@ -170,13 +171,15 @@ export const SmartColorPicker: React.FC<SmartColorPickerProps> = ({
         return [
           '#FFFFFF', '#F8F9FA', '#E9ECEF', '#DEE2E6', '#CED4DA',
           '#ADB5BD', '#6C757D', '#495057', '#343A40', '#212529',
-          '#FFF3CD', '#D4EDDA', '#CCE5FF', '#F8D7DA', '#E2E3E5'
+          '#FFF3CD', '#D4EDDA', '#CCE5FF', '#F8D7DA', '#E2E3E5',
+          'transparent'
         ];
       case 'border':
         return [
           '#DEE2E6', '#ADB5BD', '#6C757D', '#495057', '#343A40',
           '#007BFF', '#28A745', '#FFC107', '#DC3545', '#6F42C1',
-          '#FD7E14', '#20C997', '#E83E8C', '#6C757D', '#343A40'
+          '#FD7E14', '#20C997', '#E83E8C', '#6C757D', '#343A40',
+          'transparent'
         ];
       default:
         return defaultSwatches;

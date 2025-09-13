@@ -55,13 +55,13 @@ const shapeList = [
 
 // 边框虚线样式
 const borderDasharrayList = [
-  { name: '无', value: 'none' },
-  { name: '虚线1', value: '5,5' },
-  { name: '虚线2', value: '10,10' },
-  { name: '虚线3', value: '20,10,5,5,5,10' },
-  { name: '虚线4', value: '5,5,1,5' },
-  { name: '虚线5', value: '15,10,5,10,15' },
-  { name: '虚线6', value: '1,5' }
+  { name: '实线', value: '' },
+  { name: '虚线 1', value: '5,5' },
+  { name: '虚线 2', value: '10,5' },
+  { name: '虚线 3', value: '15,10,5,10' },
+  { name: '点线 1', value: '2,3' },
+  { name: '点线 2', value: '1,2' },
+  { name: '点划线', value: '10,5,2,5' }
 ];
 
 // 渐变方向
@@ -100,7 +100,7 @@ export default function NodeStylePanel({
         borderColor: node.getStyle('borderColor', false) || '#549688',
         borderWidth: node.getStyle('borderWidth', false) || 1,
         borderRadius: node.getStyle('borderRadius', false) || 5,
-        borderDasharray: node.getStyle('borderDasharray', false) || 'none',
+        borderDasharray: node.getStyle('borderDasharray', false) || '',
         shape: node.getStyle('shape', false) || 'rectangle',
         gradientStyle: node.getStyle('gradientStyle', false) || false,
         startColor: node.getStyle('startColor', false) || '#ffffff',
@@ -120,11 +120,46 @@ export default function NodeStylePanel({
     
     // 使用正确的API方法更新节点样式
     activeNodes.forEach(node => {
-      node.setStyle(key, value);
+      try {
+        // 专门处理边框相关样式
+        if (key === 'borderColor') {
+          node.setStyle('borderColor', value);
+          // 如果设置为透明，不需要强制设置边框宽度
+          if (value !== 'transparent' && node.getStyle('borderWidth', false) === 0) {
+            node.setStyle('borderWidth', 1);
+          }
+        } else if (key === 'borderWidth') {
+          node.setStyle('borderWidth', Math.max(0, value));
+        } else if (key === 'borderRadius') {
+          node.setStyle('borderRadius', Math.max(0, value));
+        } else if (key === 'borderDasharray') {
+          // 处理边框虚线样式
+          if (value === '' || value === 'none') {
+            node.setStyle('borderDasharray', 'none');
+          } else {
+            node.setStyle('borderDasharray', value);
+          }
+        } else if (key === 'fillColor') {
+          // 处理背景颜色，特别处理透明值
+          if (value === 'transparent') {
+            node.setStyle('fillColor', 'transparent');
+          } else {
+            node.setStyle('fillColor', value);
+          }
+        } else {
+          node.setStyle(key, value);
+        }
+      } catch (error) {
+        console.error('设置节点样式失败:', key, value, error);
+      }
     });
     
     // 重新渲染
-    mindMap.render();
+    try {
+      mindMap.render();
+    } catch (error) {
+      console.error('重新渲染失败:', error);
+    }
   };
 
   const toggleFontWeight = () => {
@@ -195,6 +230,10 @@ export default function NodeStylePanel({
                   ))}
                 </select>
               </div>
+            </div>
+
+            {/* 对齐方式 */}
+            <div className="form-row">
               <div className="form-item">
                 <select
                   value={style.textAlign}
@@ -377,18 +416,48 @@ export default function NodeStylePanel({
           {/* 节点形状 */}
           <div className="panel-section">
             <div className="section-title">节点形状</div>
-            <div className="form-item">
-              <select
-                value={style.shape}
-                onChange={(e) => update('shape', e.target.value)}
-                className="form-select"
-              >
-                {shapeList.map((shape) => (
-                  <option key={shape.value} value={shape.value}>
-                    {shape.name}
-                  </option>
-                ))}
-              </select>
+            <div className="shape-grid">
+              {shapeList.map((shape) => (
+                <div
+                  key={shape.value}
+                  className={`shape-item ${style.shape === shape.value ? 'active' : ''}`}
+                  onClick={() => update('shape', shape.value)}
+                  title={shape.name}
+                >
+                  <div className="shape-preview">
+                    <svg width="40" height="30" viewBox="0 0 40 30">
+                      {shape.value === 'rectangle' && (
+                        <rect x="5" y="8" width="30" height="14" fill="currentColor" stroke="currentColor" strokeWidth="1" />
+                      )}
+                      {shape.value === 'diamond' && (
+                        <polygon points="20,5 35,15 20,25 5,15" fill="currentColor" stroke="currentColor" strokeWidth="1" />
+                      )}
+                      {shape.value === 'parallelogram' && (
+                        <polygon points="8,8 35,8 32,22 5,22" fill="currentColor" stroke="currentColor" strokeWidth="1" />
+                      )}
+                      {shape.value === 'roundedRectangle' && (
+                        <rect x="5" y="8" width="30" height="14" rx="3" ry="3" fill="currentColor" stroke="currentColor" strokeWidth="1" />
+                      )}
+                      {shape.value === 'octagonalRectangle' && (
+                        <polygon points="8,8 32,8 35,11 35,19 32,22 8,22 5,19 5,11" fill="currentColor" stroke="currentColor" strokeWidth="1" />
+                      )}
+                      {shape.value === 'outerTriangularRectangle' && (
+                        <polygon points="2,15 8,8 32,8 38,15 32,22 8,22" fill="currentColor" stroke="currentColor" strokeWidth="1" />
+                      )}
+                      {shape.value === 'innerTriangularRectangle' && (
+                        <polygon points="5,8 35,8 32,15 35,22 5,22 8,15" fill="currentColor" stroke="currentColor" strokeWidth="1" />
+                      )}
+                      {shape.value === 'ellipse' && (
+                        <ellipse cx="20" cy="15" rx="15" ry="7" fill="currentColor" stroke="currentColor" strokeWidth="1" />
+                      )}
+                      {shape.value === 'circle' && (
+                        <circle cx="20" cy="15" r="10" fill="currentColor" stroke="currentColor" strokeWidth="1" />
+                      )}
+                    </svg>
+                  </div>
+                  <div className="shape-name">{shape.name}</div>
+                </div>
+              ))}
             </div>
           </div>
 

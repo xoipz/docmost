@@ -275,3 +275,86 @@
 [data-mantine-color-scheme="dark"] .empty-state {
   color: var(--mantine-color-gray-5);
 }
+
+/* 形状选择网格 */
+.shape-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.shape-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--mantine-color-white);
+}
+
+.shape-item:hover {
+  border-color: var(--mantine-color-blue-5);
+  background: var(--mantine-color-gray-0);
+}
+
+.shape-item.active {
+  border-color: var(--mantine-color-blue-5);
+  background: var(--mantine-color-blue-0);
+}
+
+.shape-preview {
+  color: var(--mantine-color-gray-6);
+  margin-bottom: 4px;
+}
+
+.shape-item.active .shape-preview {
+  color: var(--mantine-color-blue-6);
+}
+
+.shape-name {
+  font-size: 11px;
+  color: var(--mantine-color-gray-6);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.shape-item.active .shape-name {
+  color: var(--mantine-color-blue-6);
+  font-weight: 500;
+}
+
+/* 暗色主题下的形状网格 */
+[data-mantine-color-scheme="dark"] .shape-item {
+  background: var(--mantine-color-gray-8);
+  border-color: var(--mantine-color-gray-6);
+}
+
+[data-mantine-color-scheme="dark"] .shape-item:hover {
+  border-color: var(--mantine-color-blue-4);
+  background: var(--mantine-color-gray-7);
+}
+
+[data-mantine-color-scheme="dark"] .shape-item.active {
+  border-color: var(--mantine-color-blue-4);
+  background: var(--mantine-color-blue-9);
+}
+
+[data-mantine-color-scheme="dark"] .shape-preview {
+  color: var(--mantine-color-gray-4);
+}
+
+[data-mantine-color-scheme="dark"] .shape-item.active .shape-preview {
+  color: var(--mantine-color-blue-4);
+}
+
+[data-mantine-color-scheme="dark"] .shape-name {
+  color: var(--mantine-color-gray-4);
+}
+
+[data-mantine-color-scheme="dark"] .shape-item.active .shape-name {
+  color: var(--mantine-color-blue-4);
+}

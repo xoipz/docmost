@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Group, Text, Slider, Select, Checkbox } from '@mantine/core';
 import { SmartColorPicker } from './EnhancedColorPicker';
+import '../styles/rainbow-lines.css';
 
 interface LineStylePanelProps {
   mindMap: any;
@@ -40,15 +41,43 @@ const rootLineStartOptions = [
   { value: 'border', label: '边缘' }
 ];
 
-// 彩虹线条色系
+// 彩虹线条色系 - 增强版
 const rainbowColorOptions = [
-  { value: 'default', label: '默认' },
-  { value: 'red', label: '红色系' },
-  { value: 'orange', label: '橙色系' },
-  { value: 'yellow', label: '黄色系' },
-  { value: 'green', label: '绿色系' },
-  { value: 'blue', label: '蓝色系' },
-  { value: 'purple', label: '紫色系' }
+  { 
+    value: 'default', 
+    label: '默认', 
+    colors: ['#f44336', '#ff9800', '#ffeb3b', '#4caf50', '#2196f3', '#9c27b0']
+  },
+  { 
+    value: 'red', 
+    label: '红色系', 
+    colors: ['#ffcdd2', '#f8bbd9', '#f48fb1', '#f06292', '#e91e63', '#ad1457']
+  },
+  { 
+    value: 'orange', 
+    label: '橙色系', 
+    colors: ['#ffe0b2', '#ffcc02', '#ffb74d', '#ff9800', '#f57c00', '#e65100']
+  },
+  { 
+    value: 'yellow', 
+    label: '黄色系', 
+    colors: ['#fff9c4', '#fff59d', '#fff176', '#ffee58', '#ffeb3b', '#f9a825']
+  },
+  { 
+    value: 'green', 
+    label: '绿色系', 
+    colors: ['#dcedc8', '#c5e1a5', '#aed581', '#9ccc65', '#8bc34a', '#689f38']
+  },
+  { 
+    value: 'blue', 
+    label: '蓝色系', 
+    colors: ['#e3f2fd', '#bbdefb', '#90caf9', '#64b5f6', '#42a5f5', '#1e88e5']
+  },
+  { 
+    value: 'purple', 
+    label: '紫色系', 
+    colors: ['#f3e5f5', '#e1bee7', '#ce93d8', '#ba68c8', '#ab47bc', '#8e24aa']
+  }
 ];
 
 export const LineStylePanel: React.FC<LineStylePanelProps> = ({
@@ -110,7 +139,6 @@ export const LineStylePanel: React.FC<LineStylePanelProps> = ({
           }));
         }
       } catch (error) {
-        console.log('获取主题配置失败:', error);
       }
     }
   }, [mindMap]);
@@ -325,11 +353,36 @@ export const LineStylePanel: React.FC<LineStylePanelProps> = ({
         {lineConfig.enableRainbowLines && (
           <Box>
             <Text size="sm" mb="xs">色系选择</Text>
-            <Select
-              value={lineConfig.rainbowColorScheme}
-              data={rainbowColorOptions}
-              onChange={(value) => value && updateConfig('rainbowColorScheme', value)}
-            />
+            <div className="rainbow-options">
+              {rainbowColorOptions.map((option) => (
+                <div
+                  key={option.value}
+                  className={`rainbow-option ${lineConfig.rainbowColorScheme === option.value ? 'active' : ''}`}
+                  onClick={() => updateConfig('rainbowColorScheme', option.value)}
+                >
+                  <div className="rainbow-preview">
+                    <svg width="60" height="20" viewBox="0 0 60 20">
+                      {option.colors.map((color, index) => (
+                        <line
+                          key={index}
+                          x1={index * 10 + 5}
+                          y1={10}
+                          x2={index * 10 + 15}
+                          y2={10}
+                          stroke={color}
+                          strokeWidth="3"
+                          className="rainbow-line"
+                          style={{
+                            animationDelay: `${index * 0.1}s`
+                          }}
+                        />
+                      ))}
+                    </svg>
+                  </div>
+                  <Text size="xs" ta="center">{option.label}</Text>
+                </div>
+              ))}
+            </div>
           </Box>
         )}
       </Box>

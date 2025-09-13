@@ -5,7 +5,6 @@ import {
   IconBrush,
   IconLayout,
   IconList,
-  IconKeyboard,
   IconChevronLeft,
   IconChevronRight,
   IconSettings,
@@ -64,11 +63,6 @@ const sidebarItems = [
     value: 'setting',
     icon: IconSettings,
   },
-  {
-    name: '快捷键',
-    value: 'shortcutKey',
-    icon: IconKeyboard,
-  },
 ];
 
 export default function SidebarPanel({ mindMap, theme, onClose }: SidebarPanelProps) {
@@ -79,28 +73,17 @@ export default function SidebarPanel({ mindMap, theme, onClose }: SidebarPanelPr
 
   // 监听节点激活事件
   useEffect(() => {
-    console.log('SidebarPanel useEffect 被调用, mindMap:', mindMap);
     
     if (!mindMap) {
-      console.log('mindMap 为空，跳过事件监听');
       return;
     }
 
-    // 检查 mindMap 的方法
-    console.log('mindMap 可用方法:', {
-      hasOn: typeof mindMap.on === 'function',
-      hasOff: typeof mindMap.off === 'function',
-      hasRenderer: !!mindMap.renderer,
-      mindMapKeys: Object.keys(mindMap || {})
-    });
 
     const handleNodeActive = (node: any, nodeList: any[]) => {
-      console.log('节点激活事件被触发:', { node, nodeList });
       setActiveNodes(nodeList || []);
     };
 
     const handleNodeClick = (...args: any[]) => {
-      console.log('节点点击事件被触发:', args);
       // 尝试获取当前激活的节点
       if (mindMap.renderer && mindMap.renderer.activeNodeList) {
         setActiveNodes(mindMap.renderer.activeNodeList);
@@ -108,17 +91,14 @@ export default function SidebarPanel({ mindMap, theme, onClose }: SidebarPanelPr
     };
 
     const handleAnyEvent = (eventName: string) => (...args: any[]) => {
-      console.log(`事件 ${eventName} 被触发:`, args);
     };
 
     const handleModeChange = (mode: string) => {
-      console.log('模式变化:', mode);
       setIsReadonly(mode === 'readonly');
     };
 
     // 尝试多个可能的事件名称
     if (typeof mindMap.on === 'function') {
-      console.log('添加事件监听器...');
       mindMap.on('node_active', handleNodeActive);
       mindMap.on('nodeActive', handleNodeActive);
       mindMap.on('node_click', handleNodeClick);
@@ -136,20 +116,16 @@ export default function SidebarPanel({ mindMap, theme, onClose }: SidebarPanelPr
 
     // 初始化状态
     if (mindMap.renderer && mindMap.renderer.activeNodeList) {
-      console.log('初始化活跃节点:', mindMap.renderer.activeNodeList);
       setActiveNodes(mindMap.renderer.activeNodeList);
     }
 
     // 手动检查当前激活节点的其他可能方法
     try {
       if (mindMap.command && mindMap.command.selection) {
-        console.log('通过 command.selection 获取节点:', mindMap.command.selection.selection);
       }
       if (mindMap.renderer && mindMap.renderer.activeNodeList) {
-        console.log('通过 renderer.activeNodeList 获取节点:', mindMap.renderer.activeNodeList);
       }
     } catch (error) {
-      console.log('检查其他获取节点方法时出错:', error);
     }
 
     return () => {
@@ -172,7 +148,7 @@ export default function SidebarPanel({ mindMap, theme, onClose }: SidebarPanelPr
   // 过滤可用的侧边栏项
   const availableItems = sidebarItems.filter(item => {
     if (isReadonly) {
-      return ['outline', 'shortcutKey'].includes(item.value);
+      return ['outline'].includes(item.value);
     }
     // AI功能暂时隐藏
     if (item.value === 'ai') return false;
@@ -205,8 +181,6 @@ export default function SidebarPanel({ mindMap, theme, onClose }: SidebarPanelPr
         return <StructurePanel {...commonProps} />;
       case 'outline':
         return <OutlinePanel {...commonProps} />;
-      case 'shortcutKey':
-        return <ShortcutKeyPanel {...commonProps} />;
       case 'setting':
         return <SettingPanel {...commonProps} />;
       default:
@@ -431,6 +405,57 @@ function OutlinePanel({ mindMap, theme }: { mindMap: any; theme: string }) {
 
 // 设置面板
 function SettingPanel({ mindMap, theme }: { mindMap: any; theme: string }) {
+  // 快捷键数据
+  const shortcuts = [
+    // 基本操作
+    { category: '基本操作', key: 'Tab', desc: '插入子节点' },
+    { category: '基本操作', key: 'Enter', desc: '插入同级节点' },
+    { category: '基本操作', key: 'Delete/Backspace', desc: '删除节点' },
+    { category: '基本操作', key: 'F2', desc: '编辑节点' },
+    { category: '基本操作', key: 'Space', desc: '展开/收起节点' },
+    
+    // 编辑操作
+    { category: '编辑操作', key: 'Ctrl+Z', desc: '撤销' },
+    { category: '编辑操作', key: 'Ctrl+Y / Ctrl+Shift+Z', desc: '重做' },
+    { category: '编辑操作', key: 'Ctrl+C', desc: '复制节点' },
+    { category: '编辑操作', key: 'Ctrl+V', desc: '粘贴节点' },
+    { category: '编辑操作', key: 'Ctrl+X', desc: '剪切节点' },
+    { category: '编辑操作', key: 'Ctrl+A', desc: '全选' },
+    
+    // 导航操作
+    { category: '导航操作', key: '↑↓←→', desc: '导航选择节点' },
+    { category: '导航操作', key: 'Ctrl+↑↓', desc: '上下移动节点' },
+    { category: '导航操作', key: 'Home', desc: '回到根节点' },
+    
+    // 视图操作
+    { category: '视图操作', key: 'Ctrl+0', desc: '重置视图' },
+    { category: '视图操作', key: 'Ctrl+ +', desc: '放大' },
+    { category: '视图操作', key: 'Ctrl+ -', desc: '缩小' },
+    { category: '视图操作', key: 'Ctrl+F', desc: '搜索节点' },
+    { category: '视图操作', key: 'Escape', desc: '关闭搜索' },
+    
+    // 样式操作
+    { category: '样式操作', key: 'Ctrl+B', desc: '加粗文字' },
+    { category: '样式操作', key: 'Ctrl+I', desc: '斜体文字' },
+    
+    // 高级功能
+    { category: '高级功能', key: 'Ctrl+G', desc: '添加概要' },
+    { category: '高级功能', key: 'Ctrl+L', desc: '创建关联线' },
+    
+    // 文件操作
+    { category: '文件操作', key: 'Ctrl+S', desc: '保存文件' },
+  ];
+
+  // 按分类分组
+  const groupedShortcuts = shortcuts.reduce((groups, shortcut) => {
+    const category = shortcut.category;
+    if (!groups[category]) {
+      groups[category] = [];
+    }
+    groups[category].push(shortcut);
+    return groups;
+  }, {} as Record<string, typeof shortcuts>);
+
   return (
     <div className="panel-section">
       <div className="section-title">编辑器设置</div>
@@ -505,65 +530,9 @@ function SettingPanel({ mindMap, theme }: { mindMap: any; theme: string }) {
           启用自由拖拽
         </label>
       </div>
-    </div>
-  );
-}
-
-// 快捷键面板
-function ShortcutKeyPanel({ theme }: { theme: string }) {
-  const shortcuts = [
-    // 基本操作
-    { category: '基本操作', key: 'Tab', desc: '插入子节点' },
-    { category: '基本操作', key: 'Enter', desc: '插入同级节点' },
-    { category: '基本操作', key: 'Delete/Backspace', desc: '删除节点' },
-    { category: '基本操作', key: 'F2', desc: '编辑节点' },
-    { category: '基本操作', key: 'Space', desc: '展开/收起节点' },
-    
-    // 编辑操作
-    { category: '编辑操作', key: 'Ctrl+Z', desc: '撤销' },
-    { category: '编辑操作', key: 'Ctrl+Y / Ctrl+Shift+Z', desc: '重做' },
-    { category: '编辑操作', key: 'Ctrl+C', desc: '复制节点' },
-    { category: '编辑操作', key: 'Ctrl+V', desc: '粘贴节点' },
-    { category: '编辑操作', key: 'Ctrl+X', desc: '剪切节点' },
-    { category: '编辑操作', key: 'Ctrl+A', desc: '全选' },
-    
-    // 导航操作
-    { category: '导航操作', key: '↑↓←→', desc: '导航选择节点' },
-    { category: '导航操作', key: 'Ctrl+↑↓', desc: '上下移动节点' },
-    { category: '导航操作', key: 'Home', desc: '回到根节点' },
-    
-    // 视图操作
-    { category: '视图操作', key: 'Ctrl+0', desc: '重置视图' },
-    { category: '视图操作', key: 'Ctrl+ +', desc: '放大' },
-    { category: '视图操作', key: 'Ctrl+ -', desc: '缩小' },
-    { category: '视图操作', key: 'Ctrl+F', desc: '搜索节点' },
-    { category: '视图操作', key: 'Escape', desc: '关闭搜索' },
-    
-    // 样式操作
-    { category: '样式操作', key: 'Ctrl+B', desc: '加粗文字' },
-    { category: '样式操作', key: 'Ctrl+I', desc: '斜体文字' },
-    
-    // 高级功能
-    { category: '高级功能', key: 'Ctrl+G', desc: '添加概要' },
-    { category: '高级功能', key: 'Ctrl+L', desc: '创建关联线' },
-    
-    // 文件操作
-    { category: '文件操作', key: 'Ctrl+S', desc: '保存文件' },
-  ];
-
-  // 按分类分组
-  const groupedShortcuts = shortcuts.reduce((groups, shortcut) => {
-    const category = shortcut.category;
-    if (!groups[category]) {
-      groups[category] = [];
-    }
-    groups[category].push(shortcut);
-    return groups;
-  }, {} as Record<string, typeof shortcuts>);
-
-  return (
-    <div className="panel-section">
-      <div className="section-title">快捷键列表</div>
+      
+      {/* 快捷键部分 */}
+      <div className="section-title" style={{ marginTop: '24px' }}>快捷键列表</div>
       <div className="shortcut-list">
         {Object.entries(groupedShortcuts).map(([category, categoryShortcuts]) => (
           <div key={category} className="shortcut-category">
@@ -596,3 +565,4 @@ function ShortcutKeyPanel({ theme }: { theme: string }) {
     </div>
   );
 }
+

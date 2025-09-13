@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
+import '../styles/theme-panel.css';
 
 interface ThemePanelProps {
   mindMap: any;
@@ -87,10 +88,30 @@ export default function ThemePanel({
                 className={`theme-item ${currentTheme === themeItem.value ? 'active' : ''}`}
                 onClick={() => handleThemeChange(themeItem.value)}
               >
-                <div 
-                  className="theme-color"
-                  style={{ backgroundColor: themeItem.color }}
-                ></div>
+                <div className="theme-preview">
+                  <svg width="60" height="40" viewBox="0 0 60 40" className="theme-thumbnail">
+                    {/* 背景 */}
+                    <rect width="60" height="40" fill={themeItem.color} opacity="0.1" />
+                    
+                    {/* 中心节点 */}
+                    <rect x="20" y="15" width="20" height="10" rx="2" fill={themeItem.color} />
+                    <text x="30" y="22" textAnchor="middle" fontSize="6" fill="white">主题</text>
+                    
+                    {/* 左侧子节点 */}
+                    <rect x="5" y="8" width="12" height="6" rx="1" fill={themeItem.color} opacity="0.7" />
+                    <rect x="5" y="26" width="12" height="6" rx="1" fill={themeItem.color} opacity="0.7" />
+                    
+                    {/* 右侧子节点 */}
+                    <rect x="43" y="8" width="12" height="6" rx="1" fill={themeItem.color} opacity="0.7" />
+                    <rect x="43" y="26" width="12" height="6" rx="1" fill={themeItem.color} opacity="0.7" />
+                    
+                    {/* 连线 */}
+                    <line x1="20" y1="20" x2="17" y2="11" stroke={themeItem.color} strokeWidth="1" />
+                    <line x1="20" y1="20" x2="17" y2="29" stroke={themeItem.color} strokeWidth="1" />
+                    <line x1="40" y1="20" x2="43" y2="11" stroke={themeItem.color} strokeWidth="1" />
+                    <line x1="40" y1="20" x2="43" y2="29" stroke={themeItem.color} strokeWidth="1" />
+                  </svg>
+                </div>
                 <div className="theme-name">{themeItem.name}</div>
               </div>
             ))}

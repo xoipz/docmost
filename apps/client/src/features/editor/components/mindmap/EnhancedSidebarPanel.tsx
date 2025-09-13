@@ -6,6 +6,7 @@ import StructurePanel from './components/StructurePanel';
 import ThemePanel from './components/ThemePanel';
 import OutlinePanel from './components/OutlinePanel';
 import ShortcutKeyPanel from './components/ShortcutKeyPanel';
+import NodeTagPanel from './components/NodeTagPanel';
 
 interface EnhancedSidebarPanelProps {
   mindMap: any;
@@ -79,6 +80,8 @@ export default function EnhancedSidebarPanel({
         return <StructurePanel {...commonProps} />;
       case 'outline':
         return <OutlinePanel {...commonProps} />;
+      case 'nodeTag':
+        return <NodeTagPanel {...commonProps} activeNodes={activeNodes} />;
       case 'shortcutKey':
         return <ShortcutKeyPanel {...commonProps} />;
       default:

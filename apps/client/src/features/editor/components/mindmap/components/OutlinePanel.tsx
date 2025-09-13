@@ -23,6 +23,63 @@ export default function OutlinePanel({
 }: OutlinePanelProps) {
   const [outline, setOutline] = useState<OutlineItem[]>([]);
 
+  // 通用的 toast 提示函数
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    const toast = document.createElement('div');
+    toast.innerHTML = message;
+    
+    const colors = {
+      success: { bg: '#4caf50', icon: '✅' },
+      error: { bg: '#f44336', icon: '❌' },
+      info: { bg: '#2196f3', icon: 'ℹ️' }
+    };
+    
+    const { bg, icon } = colors[type];
+    
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${bg};
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      z-index: 10002;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      animation: slideInOut 2s ease-in-out;
+      max-width: 300px;
+      word-wrap: break-word;
+    `;
+    
+    // 添加图标
+    toast.innerHTML = `${icon} ${message}`;
+    
+    // 添加CSS动画
+    if (!document.querySelector('#toast-styles')) {
+      const style = document.createElement('style');
+      style.id = 'toast-styles';
+      style.textContent = `
+        @keyframes slideInOut {
+          0% { opacity: 0; transform: translateX(100%); }
+          15% { opacity: 1; transform: translateX(0); }
+          85% { opacity: 1; transform: translateX(0); }
+          100% { opacity: 0; transform: translateX(100%); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(toast);
+    
+    // 2秒后自动移除
+    setTimeout(() => {
+      if (document.body.contains(toast)) {
+        document.body.removeChild(toast);
+      }
+    }, 2000);
+  };
+
   const generateOutline = () => {
     if (!mindMap) return [];
     
@@ -160,7 +217,7 @@ export default function OutlinePanel({
                 ).join('\n');
                 
                 navigator.clipboard?.writeText(text).then(() => {
-                  alert('大纲已复制到剪贴板');
+                  showToast('大纲已复制到剪贴板', 'success');
                 }).catch(() => {
                   // 降级处理
                   const textArea = document.createElement('textarea');
@@ -169,7 +226,7 @@ export default function OutlinePanel({
                   textArea.select();
                   document.execCommand('copy');
                   document.body.removeChild(textArea);
-                  alert('大纲已复制到剪贴板');
+                  showToast('大纲已复制到剪贴板', 'success');
                 });
               }}
             >

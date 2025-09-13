@@ -37,6 +37,10 @@ export default function MindMapView(props: NodeViewProps) {
   const [isWebFullscreen, setIsWebFullscreen] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [currentLayout, setCurrentLayout] = useState('logicalStructure');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [showExportFormatDialog, setShowExportFormatDialog] = useState(false);
+  const [exportFormatResolve, setExportFormatResolve] = useState<((format: string) => void) | null>(null);
 
   const handleThemeChange = () => {
     const newTheme = selectedTheme === 'light' ? 'dark' : 'light';
@@ -50,8 +54,113 @@ export default function MindMapView(props: NodeViewProps) {
     setIsWebFullscreen(!isWebFullscreen);
   };
 
-  const handleExit = () => {
+  // 通用的 toast 提示函数
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    const toast = document.createElement('div');
+    toast.innerHTML = message;
+    
+    const colors = {
+      success: { bg: '#4caf50', icon: '✅' },
+      error: { bg: '#f44336', icon: '❌' },
+      info: { bg: '#2196f3', icon: 'ℹ️' }
+    };
+    
+    const { bg, icon } = colors[type];
+    
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${bg};
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      z-index: 10002;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      animation: slideInOut 3s ease-in-out;
+      max-width: 300px;
+      word-wrap: break-word;
+    `;
+    
+    // 添加图标
+    toast.innerHTML = `${icon} ${message}`;
+    
+    // 添加CSS动画
+    if (!document.querySelector('#toast-styles')) {
+      const style = document.createElement('style');
+      style.id = 'toast-styles';
+      style.textContent = `
+        @keyframes slideInOut {
+          0% { opacity: 0; transform: translateX(100%); }
+          15% { opacity: 1; transform: translateX(0); }
+          85% { opacity: 1; transform: translateX(0); }
+          100% { opacity: 0; transform: translateX(100%); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(toast);
+    
+    // 3秒后自动移除
+    setTimeout(() => {
+      if (document.body.contains(toast)) {
+        document.body.removeChild(toast);
+      }
+    }, 3000);
+  };
+
+  const handleExit = async () => {
+    // 检查是否有未保存的更改
+    if (hasUnsavedChanges) {
+      setShowExitConfirm(true);
+    } else {
+      // 没有未保存的更改，直接退出
+      close();
+    }
+  };
+
+  // 保存并退出
+  const handleSaveAndExit = async () => {
+    setShowExitConfirm(false);
+    try {
+      await handleSave();
+      close();
+    } catch (error) {
+      console.error('保存失败:', error);
+      showToast('保存失败，无法退出', 'error');
+    }
+  };
+
+  // 不保存直接退出
+  const handleDiscardAndExit = () => {
+    setShowExitConfirm(false);
+    setHasUnsavedChanges(false); // 清理未保存标记
     close();
+  };
+
+  // 取消退出
+  const handleCancelExit = () => {
+    setShowExitConfirm(false);
+  };
+
+  // 处理导出格式选择
+  const handleExportFormat = (format: string) => {
+    setShowExportFormatDialog(false);
+    if (exportFormatResolve) {
+      exportFormatResolve(format);
+      setExportFormatResolve(null);
+    }
+  };
+
+  // 取消导出
+  const handleCancelExport = () => {
+    setShowExportFormatDialog(false);
+    if (exportFormatResolve) {
+      exportFormatResolve(null);
+      setExportFormatResolve(null);
+    }
   };
 
   const handleOpen = async () => {
@@ -61,14 +170,11 @@ export default function MindMapView(props: NodeViewProps) {
 
     setIsLoading(true);
     try {
-      console.log('打开思维导图，节点属性:', node.attrs);
       
       // 优先从节点属性中读取思维导图数据
       if (node.attrs.mindMapData) {
-        console.log('从节点属性加载思维导图数据:', node.attrs.mindMapData);
         setMindMapData(node.attrs.mindMapData);
       } else if (src) {
-        console.log('从SVG文件加载数据，src:', src);
         // 兼容旧版本：从SVG文件中提取数据
         const url = getFileUrl(src);
         const request = await fetch(url, {
@@ -85,20 +191,19 @@ export default function MindMapView(props: NodeViewProps) {
         if (metadata && metadata.textContent) {
           try {
             const data = JSON.parse(metadata.textContent);
-            console.log('从SVG metadata中解析的数据:', data);
             setMindMapData(data);
           } catch (e) {
             console.error('Failed to parse mindmap data from SVG', e);
           }
         }
       } else {
-        console.log('没有找到保存的数据，使用默认数据');
         setMindMapData(null);
       }
     } catch (err) {
       console.error(err);
     } finally {
       setIsLoading(false);
+      setHasUnsavedChanges(false); // 打开时重置未保存状态
       open();
     }
   };
@@ -113,13 +218,16 @@ export default function MindMapView(props: NodeViewProps) {
       
       // 获取思维导图数据
       const data = mindMapInstance.current.getData();
-      console.log('导出思维导图数据:', data);
       
-      // 创建导出选择菜单
+      // 创建导出选择菜单 - 使用自定义对话框
       const exportFormat = await new Promise<string>((resolve) => {
-        const choice = confirm('选择导出格式:\n确定 - SVG格式\n取消 - PNG格式');
-        resolve(choice ? 'svg' : 'png');
+        setExportFormatResolve(() => resolve);
+        setShowExportFormatDialog(true);
       });
+      
+      if (!exportFormat) {
+        return; // 用户取消了
+      }
       
       let exportData;
       let filename;
@@ -192,11 +300,10 @@ export default function MindMapView(props: NodeViewProps) {
         document.body.removeChild(link);
       }
       
-      console.log(`${exportFormat.toUpperCase()}导出成功`);
       
     } catch (error) {
       console.error('Failed to export mindmap:', error);
-      alert('导出思维导图失败: ' + (error.message || error));
+      showToast('导出思维导图失败: ' + (error.message || error), 'error');
     } finally {
       setIsLoading(false);
     }
@@ -216,7 +323,6 @@ export default function MindMapView(props: NodeViewProps) {
       
       // 获取思维导图数据
       const data = mindMapInstance.current.getData();
-      console.log('保存的思维导图数据:', data);
       
       // 直接从DOM获取SVG，避免使用export方法引起下载
       let svgString = '';
@@ -274,11 +380,13 @@ export default function MindMapView(props: NodeViewProps) {
           mindMapData: data, // 同时保存数据作为备份
         });
         
-        console.log('思维导图已保存到服务器，文件ID:', attachment.id);
         
         // 显示保存成功提示
         const saveSuccessToast = document.createElement('div');
         saveSuccessToast.innerHTML = '✅ 思维导图已保存到服务器';
+        
+        // 保存成功后清除未保存标记
+        setHasUnsavedChanges(false);
         saveSuccessToast.style.cssText = `
           position: fixed;
           top: 20px;
@@ -325,7 +433,7 @@ export default function MindMapView(props: NodeViewProps) {
       
     } catch (error) {
       console.error('Failed to save mindmap:', error);
-      alert('保存思维导图失败: ' + (error.message || error));
+      showToast('保存思维导图失败: ' + (error.message || error), 'error');
     } finally {
       setIsLoading(false);
       setIsSaving(false);
@@ -391,8 +499,6 @@ export default function MindMapView(props: NodeViewProps) {
             children: [],
           };
 
-          console.log('初始化思维导图，使用的数据:', defaultData);
-          console.log('mindMapData状态值:', mindMapData);
 
           mindMapInstance.current = new MindMap({
             el: mindMapContainerRef.current,
@@ -527,7 +633,6 @@ export default function MindMapView(props: NodeViewProps) {
                 
                 nodes.forEach(applyNodeStyle);
                 mindMapInstance.current.render();
-                console.log('已应用自定义节点样式');
               } catch (error) {
                 console.error('应用节点样式失败:', error);
               }
@@ -541,22 +646,26 @@ export default function MindMapView(props: NodeViewProps) {
 
           // 监听数据变化
           mindMapInstance.current.on('data_change', () => {
-            // 可以在这里添加自动保存逻辑
+            // 标记为有未保存的更改
+            setHasUnsavedChanges(true);
           });
 
           // 添加键盘快捷键支持
           const handleKeyDown = (e: KeyboardEvent) => {
-            // 检查思维导图模态框是否真的打开（通过DOM检查）
-            const modalElement = document.querySelector('.ReactModal__Content');
+            // 检查思维导图模态框是否打开并且容器存在
             const mindMapContainer = mindMapContainerRef.current;
             
-            if (!mindMapInstance.current || !modalElement || !mindMapContainer || 
-                !modalElement.contains(mindMapContainer)) {
+            // 使用 opened 状态和容器存在性来检查，而不是依赖DOM查询
+            if (!mindMapInstance.current || !opened || !mindMapContainer) {
               return;
             }
 
-            // 获取是否在编辑状态
-            const isEditing = mindMapInstance.current.renderer?.textEdit?.isShow;
+            // 获取是否在编辑状态 - 使用多种方式检测
+            const isEditing = mindMapInstance.current.renderer?.textEdit?.isShow || 
+                            document.querySelector('.smm-node-edit-area') !== null ||
+                            document.activeElement?.tagName === 'INPUT' ||
+                            document.activeElement?.tagName === 'TEXTAREA' ||
+                            document.activeElement?.contentEditable === 'true';
             
             // 文件操作快捷键 - 即使在编辑状态也要响应
             if (e.ctrlKey && e.key === 's') {
@@ -573,8 +682,27 @@ export default function MindMapView(props: NodeViewProps) {
               return;
             }
 
-            // 如果正在编辑文本，跳过其他快捷键
-            if (isEditing) return;
+            // 如果正在编辑文本，只允许部分快捷键通过
+            if (isEditing) {
+              // 在编辑模式下，只阻止思维导图特定的快捷键，让文本编辑快捷键正常工作
+              const mindMapSpecificKeys = [
+                'Tab', 'Enter', 'Delete', 'Backspace', 'F2', ' ', 'Escape',
+                'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'
+              ];
+              
+              const mindMapSpecificCtrlKeys = [
+                'z', 'y' // 阻止思维导图的撤销/重做，让文本编辑器处理
+              ];
+              
+              // 如果是思维导图特定的快捷键，就阻止处理
+              if (mindMapSpecificKeys.includes(e.key) || 
+                  (e.ctrlKey && mindMapSpecificCtrlKeys.includes(e.key))) {
+                return; // 让文本编辑器处理这些快捷键
+              }
+              
+              // 其他快捷键（如 Ctrl+A, Ctrl+C, Ctrl+V 等）让浏览器默认处理
+              return;
+            }
 
             // 视图操作快捷键
             if (e.ctrlKey && e.key === '0') {
@@ -614,22 +742,54 @@ export default function MindMapView(props: NodeViewProps) {
 
             if (e.ctrlKey && e.key === 'a') {
               e.preventDefault();
-              mindMapInstance.current.renderer.selectAll();
+              try {
+                if (mindMapInstance.current.execCommand) {
+                  mindMapInstance.current.execCommand('SELECT_ALL');
+                } else if (mindMapInstance.current.renderer && mindMapInstance.current.renderer.selectAll) {
+                  mindMapInstance.current.renderer.selectAll();
+                }
+              } catch (error) {
+                console.error('全选失败:', error);
+              }
             }
 
             if (e.ctrlKey && e.key === 'c') {
               e.preventDefault();
-              mindMapInstance.current.renderer.copy();
+              try {
+                if (mindMapInstance.current.execCommand) {
+                  mindMapInstance.current.execCommand('COPY_NODE');
+                } else if (mindMapInstance.current.renderer && mindMapInstance.current.renderer.copy) {
+                  mindMapInstance.current.renderer.copy();
+                }
+              } catch (error) {
+                console.error('复制失败:', error);
+              }
             }
 
             if (e.ctrlKey && e.key === 'v') {
               e.preventDefault();
-              mindMapInstance.current.renderer.paste();
+              try {
+                if (mindMapInstance.current.execCommand) {
+                  mindMapInstance.current.execCommand('PASTE_NODE');
+                } else if (mindMapInstance.current.renderer && mindMapInstance.current.renderer.paste) {
+                  mindMapInstance.current.renderer.paste();
+                }
+              } catch (error) {
+                console.error('粘贴失败:', error);
+              }
             }
 
             if (e.ctrlKey && e.key === 'x') {
               e.preventDefault();
-              mindMapInstance.current.renderer.cut();
+              try {
+                if (mindMapInstance.current.execCommand) {
+                  mindMapInstance.current.execCommand('CUT_NODE');
+                } else if (mindMapInstance.current.renderer && mindMapInstance.current.renderer.cut) {
+                  mindMapInstance.current.renderer.cut();
+                }
+              } catch (error) {
+                console.error('剪切失败:', error);
+              }
             }
 
             // 节点操作快捷键
@@ -637,7 +797,16 @@ export default function MindMapView(props: NodeViewProps) {
               e.preventDefault();
               e.stopPropagation();
               e.stopImmediatePropagation();
-              mindMapInstance.current.renderer.insertChildNode();
+              // 插入子节点
+              try {
+                if (mindMapInstance.current.execCommand) {
+                  mindMapInstance.current.execCommand('INSERT_CHILD_NODE');
+                } else if (mindMapInstance.current.renderer && mindMapInstance.current.renderer.insertChildNode) {
+                  mindMapInstance.current.renderer.insertChildNode();
+                }
+              } catch (error) {
+                console.error('插入子节点失败:', error);
+              }
               return;
             }
 
@@ -645,7 +814,16 @@ export default function MindMapView(props: NodeViewProps) {
               e.preventDefault();
               e.stopPropagation();
               e.stopImmediatePropagation();
-              mindMapInstance.current.renderer.insertSiblingNode();
+              // 插入同级节点
+              try {
+                if (mindMapInstance.current.execCommand) {
+                  mindMapInstance.current.execCommand('INSERT_NODE');
+                } else if (mindMapInstance.current.renderer && mindMapInstance.current.renderer.insertSiblingNode) {
+                  mindMapInstance.current.renderer.insertSiblingNode();
+                }
+              } catch (error) {
+                console.error('插入同级节点失败:', error);
+              }
               return;
             }
 
@@ -653,7 +831,18 @@ export default function MindMapView(props: NodeViewProps) {
               e.preventDefault();
               e.stopPropagation();
               e.stopImmediatePropagation();
-              mindMapInstance.current.renderer.deleteNode();
+              // 尝试不同的删除方法
+              try {
+                if (mindMapInstance.current.execCommand) {
+                  mindMapInstance.current.execCommand('REMOVE_NODE');
+                } else if (mindMapInstance.current.renderer && mindMapInstance.current.renderer.removeNode) {
+                  mindMapInstance.current.renderer.removeNode();
+                } else if (mindMapInstance.current.command) {
+                  mindMapInstance.current.command.exec('REMOVE_NODE');
+                }
+              } catch (error) {
+                console.error('删除节点失败:', error);
+              }
               return;
             }
 
@@ -661,7 +850,18 @@ export default function MindMapView(props: NodeViewProps) {
               e.preventDefault();
               e.stopPropagation();
               e.stopImmediatePropagation();
-              mindMapInstance.current.renderer.activeNodeText();
+              // 激活节点编辑
+              try {
+                if (mindMapInstance.current.execCommand) {
+                  mindMapInstance.current.execCommand('SET_NODE_TEXT_EDIT');
+                } else if (mindMapInstance.current.renderer && mindMapInstance.current.renderer.activeNodeText) {
+                  mindMapInstance.current.renderer.activeNodeText();
+                } else if (mindMapInstance.current.renderer && mindMapInstance.current.renderer.editNode) {
+                  mindMapInstance.current.renderer.editNode();
+                }
+              } catch (error) {
+                console.error('激活节点编辑失败:', error);
+              }
               return;
             }
 
@@ -899,6 +1099,202 @@ export default function MindMapView(props: NodeViewProps) {
             </Text>
           </div>
         </Card>
+      )}
+      
+      {/* 自定义退出确认对话框 */}
+      {showExitConfirm && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10003
+        }}>
+          <div style={{
+            backgroundColor: selectedTheme === 'dark' ? '#2d2d2d' : '#ffffff',
+            color: selectedTheme === 'dark' ? '#ffffff' : '#000000',
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '400px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+            border: selectedTheme === 'dark' ? '1px solid #404040' : '1px solid #e0e0e0'
+          }}>
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <div style={{ fontSize: '48px', marginBottom: '16px' }}>💾</div>
+              <h3 style={{ margin: '0 0 12px 0', fontSize: '18px', fontWeight: '600' }}>您有未保存的更改</h3>
+              <p style={{ margin: 0, fontSize: '14px', color: selectedTheme === 'dark' ? '#b0b0b0' : '#666666', lineHeight: '1.5' }}>
+                在退出之前，请选择如何处理您的更改
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button
+                onClick={handleSaveAndExit}
+                style={{
+                  backgroundColor: '#4caf50',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '10px 20px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#45a049'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#4caf50'}
+              >
+                💾 保存并退出
+              </button>
+              <button
+                onClick={handleDiscardAndExit}
+                style={{
+                  backgroundColor: '#f44336',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '10px 20px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#d32f2f'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#f44336'}
+              >
+                🗑️ 放弃更改并退出
+              </button>
+              <button
+                onClick={handleCancelExit}
+                style={{
+                  backgroundColor: 'transparent',
+                  color: selectedTheme === 'dark' ? '#ffffff' : '#666666',
+                  border: selectedTheme === 'dark' ? '1px solid #404040' : '1px solid #ddd',
+                  borderRadius: '8px',
+                  padding: '10px 20px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = selectedTheme === 'dark' ? '#404040' : '#f5f5f5'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+              >
+                取消
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* 导出格式选择对话框 */}
+      {showExportFormatDialog && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.6)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10003
+        }}>
+          <div style={{
+            backgroundColor: selectedTheme === 'dark' ? '#2d2d2d' : '#ffffff',
+            color: selectedTheme === 'dark' ? '#ffffff' : '#000000',
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '400px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+            border: selectedTheme === 'dark' ? '1px solid #404040' : '1px solid #e0e0e0'
+          }}>
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <div style={{ fontSize: '48px', marginBottom: '16px' }}>📄</div>
+              <h3 style={{ margin: '0 0 12px 0', fontSize: '18px', fontWeight: '600' }}>选择导出格式</h3>
+              <p style={{ margin: 0, fontSize: '14px', color: selectedTheme === 'dark' ? '#b0b0b0' : '#666666', lineHeight: '1.5' }}>
+                请选择您希望导出的文件格式
+              </p>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <button
+                onClick={() => handleExportFormat('svg')}
+                style={{
+                  backgroundColor: '#4caf50',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '12px 20px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  justifyContent: 'flex-start'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#45a049'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#4caf50'}
+              >
+                <span style={{ fontSize: '18px' }}>🎨</span>
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ fontWeight: '600' }}>SVG 格式</div>
+                  <div style={{ fontSize: '12px', opacity: '0.9' }}>矢量图，适合再次编辑和缩放</div>
+                </div>
+              </button>
+              <button
+                onClick={() => handleExportFormat('png')}
+                style={{
+                  backgroundColor: '#2196f3',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '12px 20px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  justifyContent: 'flex-start'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#1976d2'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#2196f3'}
+              >
+                <span style={{ fontSize: '18px' }}>🖼️</span>
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ fontWeight: '600' }}>PNG 格式</div>
+                  <div style={{ fontSize: '12px', opacity: '0.9' }}>图片格式，适合分享和打印</div>
+                </div>
+              </button>
+              <button
+                onClick={handleCancelExport}
+                style={{
+                  backgroundColor: 'transparent',
+                  color: selectedTheme === 'dark' ? '#ffffff' : '#666666',
+                  border: selectedTheme === 'dark' ? '1px solid #404040' : '1px solid #ddd',
+                  borderRadius: '8px',
+                  padding: '10px 20px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = selectedTheme === 'dark' ? '#404040' : '#f5f5f5'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+              >
+                取消
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </NodeViewWrapper>
   );

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   IconArrowBack,
   IconArrowForward,
@@ -38,6 +39,8 @@ import {
 import './mindmap-toolbar.css';
 import SidebarPanel from './SidebarPanel';
 import BaseStylePanelSimple from './components/BaseStylePanelSimple';
+import MiniMapNavigator from './components/MiniMapNavigator';
+import IconMapNavigator from '@/components/icons/icon-map-navigator';
 
 interface MindMapToolbarProps {
   mindMap: any;
@@ -58,7 +61,7 @@ export default function MindMapToolbar({
   onExit,
   isSaving = false,
 }: MindMapToolbarProps) {
-  console.log('MindMapToolbar 接收到的 mindMap:', mindMap);
+  const { t } = useTranslation();
   
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
@@ -70,6 +73,64 @@ export default function MindMapToolbar({
   const [searchText, setSearchText] = useState('');
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showBaseStyle, setShowBaseStyle] = useState(false);
+  const [showMiniMap, setShowMiniMap] = useState(false);
+
+  // 通用的 toast 提示函数
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    const toast = document.createElement('div');
+    toast.innerHTML = message;
+    
+    const colors = {
+      success: { bg: '#4caf50', icon: '✅' },
+      error: { bg: '#f44336', icon: '❌' },
+      info: { bg: '#2196f3', icon: 'ℹ️' }
+    };
+    
+    const { bg, icon } = colors[type];
+    
+    toast.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: ${bg};
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      z-index: 10002;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      animation: slideInOut 3s ease-in-out;
+      max-width: 300px;
+      word-wrap: break-word;
+    `;
+    
+    // 添加图标
+    toast.innerHTML = `${icon} ${message}`;
+    
+    // 添加CSS动画
+    if (!document.querySelector('#toast-styles')) {
+      const style = document.createElement('style');
+      style.id = 'toast-styles';
+      style.textContent = `
+        @keyframes slideInOut {
+          0% { opacity: 0; transform: translateX(100%); }
+          15% { opacity: 1; transform: translateX(0); }
+          85% { opacity: 1; transform: translateX(0); }
+          100% { opacity: 0; transform: translateX(100%); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
+    document.body.appendChild(toast);
+    
+    // 3秒后自动移除
+    setTimeout(() => {
+      if (document.body.contains(toast)) {
+        document.body.removeChild(toast);
+      }
+    }, 3000);
+  };
 
   // 监听历史记录变化和节点激活
   useEffect(() => {
@@ -79,7 +140,6 @@ export default function MindMapToolbar({
     const handleBackForward = (index: number, len: number) => {
       setCanUndo(index > 0);          // 不在起始位置时可以撤回
       setCanRedo(index < len - 1);    // 不在末尾位置时可以前进
-      console.log('History changed:', { index, len, canUndo: index > 0, canRedo: index < len - 1 });
     };
 
     const handleNodeActive = (node: any, nodeList: any[]) => {
@@ -147,7 +207,6 @@ export default function MindMapToolbar({
         return;
       }
       
-      console.log('执行命令:', command, ...args);
       mindMap.execCommand(command, ...args);
     } catch (error) {
       console.error('执行命令失败:', command, error);
@@ -217,37 +276,41 @@ export default function MindMapToolbar({
   // 链接功能
   const handleLink = () => {
     if (activeNodes.length <= 0) return;
-    const url = prompt('请输入链接地址:');
+    const url = window.prompt('🔗 请输入链接地址\n\n示例：https://www.example.com');
     if (url && mindMap) {
       mindMap.execCommand('SET_NODE_HYPERLINK', activeNodes[0], url, url);
+      showToast('链接已添加', 'success');
     }
   };
 
   // 备注功能
   const handleNote = () => {
     if (activeNodes.length <= 0) return;
-    const note = prompt('请输入备注内容:');
+    const note = window.prompt('📝 请输入备注内容\n\n可以输入多行文本来详细说明这个节点');
     if (note && mindMap) {
       mindMap.execCommand('SET_NODE_NOTE', activeNodes[0], note);
+      showToast('备注已添加', 'success');
     }
   };
 
   // 标签功能
   const handleTag = () => {
     if (activeNodes.length <= 0) return;
-    const tag = prompt('请输入标签内容 (多个标签用逗号分隔):');
+    const tag = window.prompt('🏷️ 请输入标签内容\n\n示例：重要,待办,紧急\n（多个标签用逗号分隔）');
     if (tag && mindMap) {
       const tags = tag.split(',').map(t => t.trim()).filter(t => t);
       mindMap.execCommand('SET_NODE_TAG', activeNodes[0], tags);
+      showToast(`已添加 ${tags.length} 个标签`, 'success');
     }
   };
 
   // 公式功能
   const handleFormula = () => {
     if (activeNodes.length <= 0 || hasGeneralization) return;
-    const formula = prompt('请输入LaTeX公式:');
+    const formula = window.prompt('📊 请输入LaTeX公式\n\n示例：\n· E=mc^2\n· \\frac{a}{b}\n· \\sum_{i=1}^{n} x_i');
     if (formula && mindMap) {
       mindMap.execCommand('INSERT_FORMULA', formula);
+      showToast('公式已添加', 'success');
     }
   };
 
@@ -641,6 +704,16 @@ export default function MindMapToolbar({
         </div>
         
         <div className="mindmap-navigator-item">
+          <div 
+            className={`mindmap-nav-btn ${showMiniMap ? 'active' : ''}`} 
+            onClick={() => setShowMiniMap(!showMiniMap)} 
+            title={showMiniMap ? t("Close MiniMap") : t("Open MiniMap")}
+          >
+            <IconMapNavigator size={18} />
+          </div>
+        </div>
+
+        <div className="mindmap-navigator-item">
           <div className="mindmap-nav-btn" onClick={handleSearch} title="搜索">
             <IconSearch size={18} />
           </div>
@@ -705,7 +778,7 @@ export default function MindMapToolbar({
             <div className="mindmap-more-menu">
               <div className="mindmap-more-menu-item" onClick={() => {
                 // 显示快捷键
-                alert('快捷键功能待实现');
+                showToast('快捷键功能已在设置面板中，请点击右侧设置图标查看', 'info');
                 setShowMoreMenu(false);
               }}>
                 <IconKeyboard size={16} />
@@ -713,7 +786,7 @@ export default function MindMapToolbar({
               </div>
               <div className="mindmap-more-menu-item" onClick={() => {
                 // AI对话
-                alert('AI对话功能待实现');
+                showToast('AI对话功能待实现', 'info');
                 setShowMoreMenu(false);
               }}>
                 <IconMessage size={16} />
@@ -782,6 +855,14 @@ export default function MindMapToolbar({
         theme={theme}
         show={showBaseStyle}
         onClose={() => setShowBaseStyle(false)}
+      />
+
+      {/* 小地图导航器 */}
+      <MiniMapNavigator
+        mindMap={mindMap}
+        show={showMiniMap}
+        theme={theme}
+        onToggle={() => setShowMiniMap(!showMiniMap)}
       />
     </>
   );
