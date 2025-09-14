@@ -35,13 +35,9 @@ import {
   IconMessage,
   IconX,
   IconDeviceFloppy,
-  IconUpload,
   IconChevronDown,
   IconSquare,
   IconSticker,
-  IconCopy,
-  IconCut,
-  IconClipboard,
   IconTemplate,
 } from '@tabler/icons-react';
 import './mindmap-toolbar.css';
@@ -50,6 +46,9 @@ import BaseStylePanelSimple from './components/BaseStylePanelSimple';
 import MiniMapNavigator from './components/MiniMapNavigator';
 import IconMapNavigator from '@/components/icons/icon-map-navigator';
 import IconSelector from './components/IconSelector';
+import LinkEditor from './components/LinkEditor';
+import NoteEditor from './components/NoteEditor';
+import TagEditor from './components/TagEditor';
 
 interface MindMapToolbarProps {
   mindMap: any;
@@ -89,6 +88,12 @@ export default function MindMapToolbar({
   const [popoverShow, setPopoverShow] = useState(false);
   const [showIconSelector, setShowIconSelector] = useState(false);
   const [selectedIcons, setSelectedIcons] = useState<string[]>([]);
+  const [showLinkEditor, setShowLinkEditor] = useState(false);
+  const [currentLink, setCurrentLink] = useState({ url: '', title: '' });
+  const [showNoteEditor, setShowNoteEditor] = useState(false);
+  const [currentNote, setCurrentNote] = useState('');
+  const [showTagEditor, setShowTagEditor] = useState(false);
+  const [currentTags, setCurrentTags] = useState<any[]>([]);
   
   const toolbarRef = useRef<HTMLDivElement>(null);
 
@@ -165,11 +170,7 @@ export default function MindMapToolbar({
     'summary',
     'associativeLine',
     'formula',
-    'attachment',
     'outerFrame',
-    'copy',
-    'cut',
-    'paste',
   ];
 
   // 计算工具按钮如何显示
@@ -238,10 +239,27 @@ export default function MindMapToolbar({
       setActiveNodes(nodeList || []);
       // 更新选中的图标列表
       if (nodeList && nodeList.length > 0) {
-        const icons = nodeList[0].getData('icon') || [];
+        const firstNode = nodeList[0];
+        const icons = firstNode.getData('icon') || [];
         setSelectedIcons(icons);
+        
+        // 更新链接数据
+        const hyperlink = firstNode.getData('hyperlink') || '';
+        const hyperlinkTitle = firstNode.getData('hyperlinkTitle') || '';
+        setCurrentLink({ url: hyperlink, title: hyperlinkTitle });
+        
+        // 更新备注数据
+        const note = firstNode.getData('note') || '';
+        setCurrentNote(note);
+        
+        // 更新标签数据
+        const tags = firstNode.getData('tag') || [];
+        setCurrentTags(tags);
       } else {
         setSelectedIcons([]);
+        setCurrentLink({ url: '', title: '' });
+        setCurrentNote('');
+        setCurrentTags([]);
       }
     };
 
@@ -416,32 +434,75 @@ export default function MindMapToolbar({
   // 链接功能
   const handleLink = () => {
     if (activeNodes.length <= 0) return;
-    const url = window.prompt(t('mindmap.prompts.enterLink'));
-    if (url && mindMap) {
-      mindMap.execCommand('SET_NODE_HYPERLINK', activeNodes[0], url, url);
+    setShowLinkEditor(true);
+  };
+
+  // 处理链接确认
+  const handleLinkConfirm = (url: string, title: string) => {
+    if (activeNodes.length <= 0) return;
+    
+    activeNodes.forEach((node: any) => {
+      if (node && node.setHyperlink) {
+        node.setHyperlink(url, title);
+      }
+    });
+    
+    // 更新当前链接状态
+    setCurrentLink({ url, title });
+    
+    if (url.trim()) {
       showToast(t('mindmap.messages.linkAdded'), 'success');
+    } else {
+      showToast('链接已删除', 'success');
     }
   };
 
   // 备注功能
   const handleNote = () => {
     if (activeNodes.length <= 0) return;
-    const note = window.prompt(t('mindmap.prompts.enterNote'));
-    if (note && mindMap) {
-      mindMap.execCommand('SET_NODE_NOTE', activeNodes[0], note);
+    setShowNoteEditor(true);
+  };
+
+  // 处理备注确认
+  const handleNoteConfirm = (note: string) => {
+    if (activeNodes.length <= 0) return;
+    
+    activeNodes.forEach((node: any) => {
+      if (node && node.setNote) {
+        node.setNote(note);
+      }
+    });
+    
+    // 更新当前备注状态
+    setCurrentNote(note);
+    
+    if (note.trim()) {
       showToast(t('mindmap.messages.noteAdded'), 'success');
+    } else {
+      showToast('备注已删除', 'success');
     }
   };
 
   // 标签功能
   const handleTag = () => {
     if (activeNodes.length <= 0) return;
-    const tag = window.prompt(t('mindmap.prompts.enterTag'));
-    if (tag && mindMap) {
-      const tags = tag.split(',').map(t => t.trim()).filter(t => t);
-      mindMap.execCommand('SET_NODE_TAG', activeNodes[0], tags);
-      showToast(t('mindmap.messages.tagsAdded', { count: tags.length }), 'success');
-    }
+    setShowTagEditor(true);
+  };
+
+  // 处理标签确认
+  const handleTagConfirm = (tags: any[]) => {
+    if (activeNodes.length <= 0) return;
+    
+    activeNodes.forEach((node: any) => {
+      if (node && node.setTag) {
+        node.setTag(tags);
+      }
+    });
+    
+    // 更新当前标签状态
+    setCurrentTags(tags);
+    
+    showToast(t('mindmap.tag.tagsUpdated', { count: tags.length }), 'success');
   };
 
   // 公式功能
@@ -451,78 +512,6 @@ export default function MindMapToolbar({
     if (formula && mindMap) {
       mindMap.execCommand('INSERT_FORMULA', formula);
       showToast(t('mindmap.messages.formulaAdded'), 'success');
-    }
-  };
-
-  // 附件功能
-  const handleAttachment = () => {
-    if (activeNodes.length <= 0 || hasGeneralization) return;
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '*';
-    input.onchange = (e: any) => {
-      const file = e.target.files[0];
-      if (file && mindMap) {
-        try {
-          const reader = new FileReader();
-          reader.onload = (e: any) => {
-            const dataUrl = e.target.result;
-            mindMap.execCommand('SET_NODE_ATTACHMENT', activeNodes[0], {
-              name: file.name,
-              size: file.size,
-              type: file.type,
-              data: dataUrl
-            });
-            showToast(t('mindmap.messages.attachmentAdded', { name: file.name }), 'success');
-          };
-          reader.readAsDataURL(file);
-        } catch (error) {
-          console.error('附件添加失败:', error);
-          showToast(t('mindmap.messages.attachmentFailed'), 'error');
-        }
-      }
-    };
-    input.click();
-  };
-
-  // 复制功能
-  const handleCopy = () => {
-    if (activeNodes.length <= 0) return;
-    try {
-      if (mindMap && mindMap.renderer && mindMap.renderer.copy) {
-        mindMap.renderer.copy();
-        showToast(t('mindmap.messages.nodeCopied'), 'success');
-      }
-    } catch (error) {
-      console.error('复制失败:', error);
-      showToast(t('mindmap.messages.copyFailed'), 'error');
-    }
-  };
-
-  // 剪切功能
-  const handleCut = () => {
-    if (activeNodes.length <= 0) return;
-    try {
-      if (mindMap && mindMap.renderer && mindMap.renderer.cut) {
-        mindMap.renderer.cut();
-        showToast(t('mindmap.messages.nodeCut'), 'success');
-      }
-    } catch (error) {
-      console.error('剪切失败:', error);
-      showToast(t('mindmap.messages.cutFailed'), 'error');
-    }
-  };
-
-  // 粘贴功能
-  const handlePaste = () => {
-    try {
-      if (mindMap && mindMap.renderer && mindMap.renderer.paste) {
-        mindMap.renderer.paste();
-        showToast(t('mindmap.messages.nodePasted'), 'success');
-      }
-    } catch (error) {
-      console.error('粘贴失败:', error);
-      showToast(t('mindmap.messages.pasteFailed'), 'error');
     }
   };
 
@@ -618,35 +607,11 @@ export default function MindMapToolbar({
         disabled: activeNodes.length <= 0 || hasGeneralization,
         onClick: handleFormula
       },
-      attachment: {
-        icon: <IconUpload size={16} />,
-        text: t('mindmap.toolbar.attachment'),
-        disabled: activeNodes.length <= 0 || hasGeneralization,
-        onClick: handleAttachment
-      },
       outerFrame: {
         icon: <IconSquare size={16} />,
         text: t('mindmap.toolbar.outerFrame'),
         disabled: activeNodes.length <= 0 || hasGeneralization,
         onClick: () => execCommand('ADD_OUTER_FRAME')
-      },
-      copy: {
-        icon: <IconCopy size={16} />,
-        text: t('mindmap.toolbar.copy'),
-        disabled: activeNodes.length <= 0,
-        onClick: handleCopy
-      },
-      cut: {
-        icon: <IconCut size={16} />,
-        text: t('mindmap.toolbar.cut'),
-        disabled: activeNodes.length <= 0,
-        onClick: handleCut
-      },
-      paste: {
-        icon: <IconClipboard size={16} />,
-        text: t('mindmap.toolbar.paste'),
-        disabled: false,
-        onClick: handlePaste
       }
     };
 
@@ -870,11 +835,7 @@ export default function MindMapToolbar({
                             }
                           },
                           formula: handleFormula,
-                          attachment: handleAttachment,
-                          outerFrame: () => execCommand('ADD_OUTER_FRAME'),
-                          copy: handleCopy,
-                          cut: handleCut,
-                          paste: handlePaste
+                          outerFrame: () => execCommand('ADD_OUTER_FRAME')
                         };
                         
                         const handler = config[item as keyof typeof config];
@@ -1133,6 +1094,34 @@ export default function MindMapToolbar({
         onIconSelect={handleIconSelect}
         selectedIcons={selectedIcons}
         mindMap={mindMap}
+        theme={theme}
+      />
+
+      {/* 链接编辑器 */}
+      <LinkEditor
+        show={showLinkEditor}
+        onClose={() => setShowLinkEditor(false)}
+        onConfirm={handleLinkConfirm}
+        initialUrl={currentLink.url}
+        initialTitle={currentLink.title}
+        theme={theme}
+      />
+
+      {/* 备注编辑器 */}
+      <NoteEditor
+        show={showNoteEditor}
+        onClose={() => setShowNoteEditor(false)}
+        onConfirm={handleNoteConfirm}
+        initialNote={currentNote}
+        theme={theme}
+      />
+
+      {/* 标签编辑器 */}
+      <TagEditor
+        show={showTagEditor}
+        onClose={() => setShowTagEditor(false)}
+        onConfirm={handleTagConfirm}
+        initialTags={currentTags}
         theme={theme}
       />
     </>
