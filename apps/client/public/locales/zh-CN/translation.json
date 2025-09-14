@@ -811,6 +811,46 @@
       "tagsUpdated": "标签已更新，共{{count}}个标签",
       "clickToEdit": "点击编辑",
       "maxTags": "最多{{max}}个"
+    },
+    "formula": {
+      "title": "数学公式",
+      "inputLabel": "LaTeX 公式",
+      "placeholder": "请输入 LaTeX 格式的数学公式...\n\n例如：\n• E=mc^2\n• \\frac{a}{b}\n• \\sum_{i=1}^{n} x_i\n• \\int_{-\\infty}^{\\infty} f(x)dx",
+      "tip": "💡 提示：使用标准 LaTeX 语法编写数学公式",
+      "commonFormulas": "常用公式",
+      "added": "公式已插入",
+      "failed": "公式插入失败"
+    },
+    "import": {
+      "title": "导入思维导图",
+      "dragDropText": "拖放文件到此处",
+      "orClickToSelect": "或点击选择文件",
+      "supportedFormats": "支持格式",
+      "formatDescriptions": "格式说明",
+      "smmDescription": "SimpleMindMap 专用格式，完整保留所有数据",
+      "xmindDescription": "XMind 思维导图文件",
+      "markdownDescription": "Markdown 文档，自动转换为思维导图",
+      "unsupportedFormat": "不支持的文件格式，请选择 {{formats}} 文件",
+      "noFileSelected": "请选择要导入的文件",
+      "parseError": "文件解析失败，请检查文件格式",
+      "success": "导入成功",
+      "failed": "导入失败",
+      "import": "导入",
+      "importing": "导入中..."
+    },
+    "export": {
+      "title": "导出思维导图",
+      "fileName": "文件名",
+      "format": "格式",
+      "description": "说明",
+      "options": "选项",
+      "paddingX": "水平边距",
+      "paddingY": "垂直边距",
+      "transparentBackground": "透明背景",
+      "success": "{{format}} 格式导出成功",
+      "failed": "导出失败",
+      "export": "导出",
+      "exporting": "导出中..."
     }
   }
 }

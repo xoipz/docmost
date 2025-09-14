@@ -49,13 +49,15 @@ import IconSelector from './components/IconSelector';
 import LinkEditor from './components/LinkEditor';
 import NoteEditor from './components/NoteEditor';
 import TagEditor from './components/TagEditor';
+import FormulaEditor from './components/FormulaEditor';
+import ImportEditor from './components/ImportEditor';
+import ExportEditor from './components/ExportEditor';
 
 interface MindMapToolbarProps {
   mindMap: any;
   theme: 'light' | 'dark';
   onThemeChange?: () => void;
   onSave: () => void;
-  onExport?: () => void;
   onExit: () => void;
   isSaving?: boolean;
 }
@@ -65,7 +67,6 @@ export default function MindMapToolbar({
   theme,
   onThemeChange,
   onSave,
-  onExport,
   onExit,
   isSaving = false,
 }: MindMapToolbarProps) {
@@ -94,6 +95,9 @@ export default function MindMapToolbar({
   const [currentNote, setCurrentNote] = useState('');
   const [showTagEditor, setShowTagEditor] = useState(false);
   const [currentTags, setCurrentTags] = useState<any[]>([]);
+  const [showFormulaEditor, setShowFormulaEditor] = useState(false);
+  const [showImportEditor, setShowImportEditor] = useState(false);
+  const [showExportEditor, setShowExportEditor] = useState(false);
   
   const toolbarRef = useRef<HTMLDivElement>(null);
 
@@ -508,10 +512,19 @@ export default function MindMapToolbar({
   // 公式功能
   const handleFormula = () => {
     if (activeNodes.length <= 0 || hasGeneralization) return;
-    const formula = window.prompt(t('mindmap.prompts.enterFormula'));
-    if (formula && mindMap) {
+    setShowFormulaEditor(true);
+  };
+
+  // 处理公式确认
+  const handleFormulaConfirm = (formula: string) => {
+    if (!mindMap) return;
+    
+    try {
       mindMap.execCommand('INSERT_FORMULA', formula);
-      showToast(t('mindmap.messages.formulaAdded'), 'success');
+      showToast(t('mindmap.formula.added'), 'success');
+    } catch (error) {
+      console.error('公式插入失败:', error);
+      showToast(t('mindmap.formula.failed'), 'error');
     }
   };
 
@@ -632,47 +645,128 @@ export default function MindMapToolbar({
     );
   };
 
-  // 导出功能
-  const handleExport = async () => {
+  // 导入功能
+  const handleImport = () => {
+    setShowImportEditor(true);
+  };
+
+  // 处理导入确认
+  const handleImportConfirm = (data: any) => {
     if (!mindMap) return;
     
     try {
-      const data = await mindMap.export('png', true);
-      const blob = new Blob([data], { type: 'image/png' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'mindmap.png';
-      a.click();
-      URL.revokeObjectURL(url);
+      mindMap.setData(data);
+      showToast(t('mindmap.import.success'), 'success');
     } catch (error) {
-      console.error('Export failed:', error);
+      console.error('导入失败:', error);
+      showToast(t('mindmap.import.failed'), 'error');
     }
   };
 
-  // 导入功能
-  const handleImport = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json,.smm,.xmind,.md';
-    input.onchange = async (e: any) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          try {
-            const data = JSON.parse(e.target.result);
-            if (mindMap) {
-              mindMap.setData(data);
-            }
-          } catch (error) {
-            console.error('Import failed:', error);
-          }
-        };
-        reader.readAsText(file);
+  // 导出功能
+  const handleExportEditor = () => {
+    setShowExportEditor(true);
+  };
+
+  // 处理导出确认
+  const handleExportConfirm = async (format: string, options: any) => {
+    if (!mindMap) return;
+    
+    try {
+      let exportData;
+      const { fileName, paddingX = 10, paddingY = 10, isTransparent = false } = options;
+      
+      if (format === 'smm' || format === 'json') {
+        // 导出数据格式
+        exportData = mindMap.getData();
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { 
+          type: 'application/json' 
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${fileName}.${format}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } else if (format === 'md') {
+        // 导出 Markdown
+        const { default: toMarkdown } = await import('simple-mind-map/src/parse/toMarkdown.js');
+        const mdContent = toMarkdown(mindMap.getData());
+        const blob = new Blob([mdContent], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${fileName}.md`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } else if (format === 'txt') {
+        // 导出纯文本
+        const { default: toTxt } = await import('simple-mind-map/src/parse/toTxt.js');
+        const txtContent = toTxt(mindMap.getData());
+        const blob = new Blob([txtContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${fileName}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } else if (format === 'xmind') {
+        // 导出 XMind 格式
+        if (mindMap.doExportXMind) {
+          const xmindData = await mindMap.doExportXMind.xmind(mindMap.getData(), fileName);
+          const blob = new Blob([xmindData], { type: 'application/vnd.xmind.workbook' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${fileName}.xmind`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        } else {
+          throw new Error('XMind 导出插件未加载');
+        }
+      } else {
+        // 导出图片格式 (png, svg, pdf)
+        exportData = await mindMap.export(format, true, {
+          paddingX,
+          paddingY,
+          transparent: isTransparent,
+          ...(format === 'pdf' && { pdf: true })
+        });
+        
+        if (format === 'svg') {
+          const blob = new Blob([exportData], { type: 'image/svg+xml' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${fileName}.svg`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        } else {
+          // PNG/PDF 已经是 data URL 格式
+          const link = document.createElement('a');
+          link.href = exportData;
+          link.download = `${fileName}.${format}`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
       }
-    };
-    input.click();
+      
+      showToast(t('mindmap.export.success', { format: format.toUpperCase() }), 'success');
+    } catch (error) {
+      console.error('导出失败:', error);
+      showToast(t('mindmap.export.failed'), 'error');
+    }
   };
 
   // 缩放控制
@@ -860,7 +954,7 @@ export default function MindMapToolbar({
             </span>
             <span className="text">{t('mindmap.toolbar.import')}</span>
           </div>
-          <div className="mindmap-toolbar-btn" onClick={handleExport}>
+          <div className="mindmap-toolbar-btn" onClick={handleExportEditor}>
             <span className="icon">
               <IconFileExport size={16} />
             </span>
@@ -886,19 +980,6 @@ export default function MindMapToolbar({
             </span>
             <span className="text">{isSaving ? t('mindmap.toolbar.saving') : t('mindmap.toolbar.save')}</span>
           </div>
-          
-          {/* 导出按钮 */}
-          {onExport && (
-            <div 
-              className="mindmap-toolbar-btn"
-              onClick={onExport}
-            >
-              <span className="icon">
-                <IconDownload size={16} />
-              </span>
-              <span className="text">{t('mindmap.toolbar.export')}</span>
-            </div>
-          )}
           
           {/* 退出按钮 */}
           <div 
@@ -1122,6 +1203,30 @@ export default function MindMapToolbar({
         onClose={() => setShowTagEditor(false)}
         onConfirm={handleTagConfirm}
         initialTags={currentTags}
+        theme={theme}
+      />
+
+      {/* 公式编辑器 */}
+      <FormulaEditor
+        show={showFormulaEditor}
+        onClose={() => setShowFormulaEditor(false)}
+        onConfirm={handleFormulaConfirm}
+        theme={theme}
+      />
+
+      {/* 导入编辑器 */}
+      <ImportEditor
+        show={showImportEditor}
+        onClose={() => setShowImportEditor(false)}
+        onConfirm={handleImportConfirm}
+        theme={theme}
+      />
+
+      {/* 导出编辑器 */}
+      <ExportEditor
+        show={showExportEditor}
+        onClose={() => setShowExportEditor(false)}
+        onExport={handleExportConfirm}
         theme={theme}
       />
     </>

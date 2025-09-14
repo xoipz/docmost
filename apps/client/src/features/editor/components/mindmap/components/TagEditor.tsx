@@ -266,7 +266,7 @@ const TagEditor: React.FC<TagEditorProps> = ({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .tag-editor-overlay {
           position: fixed;
           top: 0;

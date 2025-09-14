@@ -462,6 +462,9 @@ export default function MindMapView(props: NodeViewProps) {
           import('simple-mind-map/src/plugins/Watermark.js'),
           import('simple-mind-map/src/plugins/Painter.js'),
           import('simple-mind-map/src/plugins/Search.js'),
+          import('simple-mind-map/src/plugins/Formula.js'),
+          import('simple-mind-map/src/plugins/OuterFrame.js'),
+          import('simple-mind-map/src/plugins/ExportXMind.js'),
         ]).then(([
           Drag,
           KeyboardNavigation,
@@ -475,6 +478,9 @@ export default function MindMapView(props: NodeViewProps) {
           Watermark,
           Painter,
           Search,
+          Formula,
+          OuterFrame,
+          ExportXMind,
         ]) => {
           // 注册插件
           MindMap.usePlugin(Drag.default)
@@ -488,7 +494,10 @@ export default function MindMapView(props: NodeViewProps) {
             .usePlugin(MiniMap.default)
             .usePlugin(Watermark.default)
             .usePlugin(Painter.default)
-            .usePlugin(Search.default);
+            .usePlugin(Search.default)
+            .usePlugin(Formula.default)
+            .usePlugin(OuterFrame.default)
+            .usePlugin(ExportXMind.default);
 
           const defaultData = mindMapData || {
             data: {
@@ -1002,7 +1011,6 @@ export default function MindMapView(props: NodeViewProps) {
           theme={selectedTheme as 'light' | 'dark'}
           onThemeChange={handleThemeChange}
           onSave={handleSave}
-          onExport={handleExport}
           onExit={handleExit}
           isSaving={isLoading}
         />
@@ -1029,10 +1037,8 @@ export default function MindMapView(props: NodeViewProps) {
             justifyContent: "center",
             alignItems: "center",
             cursor: 'pointer',
-            width: "320px", // 固定宽度
+            width: "100%", // 固定宽度
             height: "120px", // 固定高度
-            minWidth: "320px", // 最小宽度
-            maxWidth: "500px", // 最大宽度
             position: "relative"
           }}
           withBorder
