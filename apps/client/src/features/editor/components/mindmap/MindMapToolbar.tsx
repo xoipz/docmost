@@ -98,8 +98,20 @@ export default function MindMapToolbar({
   const [showFormulaEditor, setShowFormulaEditor] = useState(false);
   const [showImportEditor, setShowImportEditor] = useState(false);
   const [showExportEditor, setShowExportEditor] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(false); // 新增小屏幕检测
   
   const toolbarRef = useRef<HTMLDivElement>(null);
+
+  // 检测屏幕大小
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsSmallScreen(window.innerWidth <= 768);
+    };
+    
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
 
   // 通用的 toast 提示函数
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
@@ -181,7 +193,33 @@ export default function MindMapToolbar({
   const computeToolbarShow = () => {
     if (!toolbarRef.current) return;
     
-    const windowWidth = window.innerWidth - 40;
+    const windowWidth = window.innerWidth;
+    
+    // 根据屏幕宽度动态计算可用空间
+    let availableWidth;
+    let secondBlockWidth;
+    
+    if (windowWidth <= 768) {
+      // 手机屏幕：第二块约200px（文字隐藏）
+      secondBlockWidth = 200;
+      availableWidth = windowWidth - secondBlockWidth - 60; // 更多边距
+    } else if (windowWidth <= 1024) {
+      // 平板屏幕：第二块约280px
+      secondBlockWidth = 280;
+      availableWidth = windowWidth - secondBlockWidth - 80;
+    } else if (windowWidth <= 1200) {
+      // 小笔记本：第二块约320px
+      secondBlockWidth = 320;
+      availableWidth = windowWidth - secondBlockWidth - 100;
+    } else {
+      // 大屏幕：第二块约350px
+      secondBlockWidth = 350;
+      availableWidth = windowWidth - secondBlockWidth - 120;
+    }
+    
+    // 确保最小可用宽度
+    availableWidth = Math.max(availableWidth, 200);
+    
     const all = [...defaultBtnList];
     let index = 1;
     
@@ -193,12 +231,14 @@ export default function MindMapToolbar({
       setTimeout(() => {
         if (toolbarRef.current) {
           const width = toolbarRef.current.getBoundingClientRect().width;
-          if (width < windowWidth) {
+          if (width < availableWidth && index < all.length) {
             index++;
             loopCheck();
-          } else if (index > 0 && width > windowWidth) {
+          } else if (width >= availableWidth && index > 1) {
             index--;
             setHorizontalList(all.slice(0, index));
+            done();
+          } else {
             done();
           }
         }
@@ -226,8 +266,17 @@ export default function MindMapToolbar({
     })();
     
     window.addEventListener('resize', throttledCompute);
+    
+    // 初始化时也重新计算一次，确保正确显示
+    setTimeout(computeToolbarShow, 100);
+    
     return () => window.removeEventListener('resize', throttledCompute);
   }, []);
+
+  // 监听 defaultBtnList 变化时重新计算
+  useEffect(() => {
+    setTimeout(computeToolbarShow, 100);
+  }, [defaultBtnList.length]);
 
   // 监听历史记录变化和节点激活
   useEffect(() => {
@@ -960,15 +1009,18 @@ export default function MindMapToolbar({
             </span>
             <span className="text">{t('mindmap.toolbar.export')}</span>
           </div>
-          <div 
-            className="mindmap-toolbar-btn" 
-            onClick={() => setShowSearch(!showSearch)}
-          >
-            <span className="icon">
-              <IconSearch size={16} />
-            </span>
-            <span className="text">{t('mindmap.toolbar.search')}</span>
-          </div>
+          {/* 在小屏幕上隐藏搜索按钮 */}
+          {!isSmallScreen && (
+            <div 
+              className="mindmap-toolbar-btn" 
+              onClick={() => setShowSearch(!showSearch)}
+            >
+              <span className="icon">
+                <IconSearch size={16} />
+              </span>
+              <span className="text">{t('mindmap.toolbar.search')}</span>
+            </div>
+          )}
           
           {/* 保存按钮 */}
           <div 
