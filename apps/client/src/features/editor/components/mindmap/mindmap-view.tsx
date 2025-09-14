@@ -113,20 +113,17 @@ export default function MindMapView(props: NodeViewProps) {
   };
 
   const handleExit = async () => {
-    // 检查是否有未保存的更改
-    if (hasUnsavedChanges) {
-      setShowExitConfirm(true);
-    } else {
-      // 没有未保存的更改，直接退出
-      close();
-    }
+    // 总是显示退出确认对话框
+    setShowExitConfirm(true);
   };
 
   // 保存并退出
   const handleSaveAndExit = async () => {
     setShowExitConfirm(false);
     try {
-      await handleSave();
+      if (hasUnsavedChanges) {
+        await handleSave();
+      }
       close();
     } catch (error) {
       console.error('保存失败:', error);
@@ -135,7 +132,7 @@ export default function MindMapView(props: NodeViewProps) {
   };
 
   // 不保存直接退出
-  const handleDiscardAndExit = () => {
+  const handleDirectExit = () => {
     setShowExitConfirm(false);
     setHasUnsavedChanges(false); // 清理未保存标记
     close();
@@ -931,8 +928,15 @@ export default function MindMapView(props: NodeViewProps) {
 
             // 退出编辑器快捷键 (Escape)
             if (e.key === 'Escape') {
+              // 检查是否有其他对话框打开
+              if (showExitConfirm || showExportFormatDialog) {
+                return; // 如果有对话框打开，让对话框处理 ESC
+              }
+              
               e.preventDefault();
+              e.stopPropagation();
               handleExit();
+              return;
             }
           };
 
@@ -985,7 +989,7 @@ export default function MindMapView(props: NodeViewProps) {
           zIndex: 200,
         }}
         isOpen={opened}
-        onRequestClose={close}
+        onRequestClose={handleExit}
         disableCloseOnBgClick={true}
         contentProps={{
           style: {
@@ -1130,53 +1134,87 @@ export default function MindMapView(props: NodeViewProps) {
             border: selectedTheme === 'dark' ? '1px solid #404040' : '1px solid #e0e0e0'
           }}>
             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-              <div style={{ fontSize: '48px', marginBottom: '16px' }}>💾</div>
-              <h3 style={{ margin: '0 0 12px 0', fontSize: '18px', fontWeight: '600' }}>您有未保存的更改</h3>
+              <div style={{ fontSize: '48px', marginBottom: '16px' }}>
+                {hasUnsavedChanges ? '💾' : '❓'}
+              </div>
+              <h3 style={{ margin: '0 0 12px 0', fontSize: '18px', fontWeight: '600' }}>
+                {hasUnsavedChanges ? '您有未保存的更改' : '确认退出'}
+              </h3>
               <p style={{ margin: 0, fontSize: '14px', color: selectedTheme === 'dark' ? '#b0b0b0' : '#666666', lineHeight: '1.5' }}>
-                在退出之前，请选择如何处理您的更改
+                {hasUnsavedChanges 
+                  ? '在退出之前，请选择如何处理您的更改' 
+                  : '您确定要退出思维导图编辑器吗？'
+                }
               </p>
             </div>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-              <button
-                onClick={handleSaveAndExit}
-                style={{
-                  backgroundColor: '#4caf50',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '10px 20px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#45a049'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = '#4caf50'}
-              >
-                💾 保存并退出
-              </button>
-              <button
-                onClick={handleDiscardAndExit}
-                style={{
-                  backgroundColor: '#f44336',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '10px 20px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#d32f2f'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = '#f44336'}
-              >
-                🗑️ 放弃更改并退出
-              </button>
+              {hasUnsavedChanges ? (
+                <>
+                  <button
+                    onClick={handleSaveAndExit}
+                    style={{
+                      backgroundColor: '#4caf50',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '10px 20px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = '#45a049'}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = '#4caf50'}
+                  >
+                    💾 保存并退出
+                  </button>
+                  <button
+                    onClick={handleDirectExit}
+                    style={{
+                      backgroundColor: '#f44336',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '10px 20px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = '#d32f2f'}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = '#f44336'}
+                  >
+                    🗑️ 放弃更改并退出
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={handleSaveAndExit}
+                    style={{
+                      backgroundColor: '#4caf50',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '10px 20px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = '#45a049'}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = '#4caf50'}
+                  >
+                    ✅ 确认退出
+                  </button>
+                </>
+              )}
               <button
                 onClick={handleCancelExit}
                 style={{
