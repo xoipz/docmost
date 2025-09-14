@@ -704,5 +704,75 @@
   "MiniMap": "小地图",
   "Navigator": "导航器",
   "Mind Map Navigator": "思维导图导航器",
-  "Built at": "构建于"
+  "Built at": "构建于",
+  
+  "mindmap": {
+    "toolbar": {
+      "undo": "撤销",
+      "redo": "前进", 
+      "painter": "格式刷",
+      "siblingNode": "同级节点",
+      "childNode": "子节点",
+      "deleteNode": "删除",
+      "image": "图片",
+      "icon": "图标",
+      "link": "链接",
+      "note": "备注", 
+      "tag": "标签",
+      "summary": "概要",
+      "associativeLine": "关联线",
+      "formula": "公式",
+      "attachment": "附件",
+      "outerFrame": "外框",
+      "copy": "复制",
+      "cut": "剪切",
+      "paste": "粘贴",
+      "more": "更多",
+      "import": "导入",
+      "export": "导出",
+      "search": "搜索",
+      "save": "保存",
+      "saving": "保存中...",
+      "exit": "退出",
+      "backToRoot": "回到根节点",
+      "miniMap": "小地图",
+      "baseStyle": "基础样式",
+      "readonly": "只读",
+      "edit": "编辑",
+      "zoomIn": "放大",
+      "zoomOut": "缩小",
+      "reset": "回正",
+      "theme": "切换主题"
+    },
+    "messages": {
+      "linkAdded": "链接已添加",
+      "noteAdded": "备注已添加", 
+      "tagsAdded": "已添加 {{count}} 个标签",
+      "formulaAdded": "公式已添加",
+      "attachmentAdded": "附件 {{name}} 已添加",
+      "attachmentFailed": "附件添加失败",
+      "nodeCopied": "节点已复制",
+      "nodeCut": "节点已剪切",
+      "nodePasted": "节点已粘贴",
+      "copyFailed": "复制失败",
+      "cutFailed": "剪切失败",
+      "pasteFailed": "粘贴失败"
+    },
+    "prompts": {
+      "enterLink": "🔗 请输入链接地址\n\n示例：https://www.example.com",
+      "enterNote": "📝 请输入备注内容\n\n可以输入多行文本来详细说明这个节点",
+      "enterTag": "🏷️ 请输入标签内容\n\n示例：重要,待办,紧急\n（多个标签用逗号分隔）",
+      "enterFormula": "📊 请输入LaTeX公式\n\n示例：\n· E=mc^2\n· \\frac{a}{b}\n· \\sum_{i=1}^{n} x_i"
+    },
+    "icons": {
+      "priority": "优先级",
+      "emotion": "情感",
+      "status": "状态",
+      "marker": "标记",
+      "iconAdded": "图标已添加",
+      "iconRemoved": "图标已删除",
+      "sameTypeReplace": "同类型图标只能选择一个，已替换",
+      "tip": "💡 提示：同类型图标只能选择一个，不同类型可以共存"
+    }
+  }
 }

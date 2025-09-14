@@ -20,6 +20,7 @@ import {
 } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import MindMapToolbar from './MindMapToolbar';
+import { customIconList } from './config/icons';
 import './mindmap.css';
 
 export default function MindMapView(props: NodeViewProps) {
@@ -537,6 +538,8 @@ export default function MindMapView(props: NodeViewProps) {
             imgMaxWidth: 80,
             imgMaxHeight: 80,
             iconSize: 16,
+            // 添加自定义图标配置
+            iconList: customIconList,
           });
 
           // 应用自定义主题配置，覆盖默认的彩色主题

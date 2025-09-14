@@ -1,0 +1,302 @@
+/* 图标选择器样式 */
+.icon-selector-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(4px);
+}
+
+.icon-selector-dialog {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  width: 90%;
+  max-height: 600px;
+  overflow: hidden;
+  animation: slideIn 0.2s ease-out;
+}
+
+.icon-selector-dialog.dark {
+  background: #262a2e;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  color: hsla(0, 0%, 100%, 0.9);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* 头部 */
+.icon-selector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.icon-selector-dialog.dark .icon-selector-header {
+  border-bottom-color: #333;
+}
+
+.icon-selector-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.icon-selector-dialog.dark .icon-selector-header h3 {
+  color: hsla(0, 0%, 100%, 0.9);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.close-btn:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.icon-selector-dialog.dark .close-btn {
+  color: hsla(0, 0%, 100%, 0.6);
+}
+
+.icon-selector-dialog.dark .close-btn:hover {
+  background: hsla(0, 0%, 100%, 0.05);
+  color: hsla(0, 0%, 100%, 0.9);
+}
+
+/* 内容区域 */
+.icon-selector-content {
+  padding: 20px 24px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.icon-selector-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.icon-selector-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.icon-selector-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.icon-selector-content::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+.icon-selector-dialog.dark .icon-selector-content::-webkit-scrollbar-track {
+  background: #333;
+}
+
+.icon-selector-dialog.dark .icon-selector-content::-webkit-scrollbar-thumb {
+  background: #555;
+}
+
+.icon-selector-dialog.dark .icon-selector-content::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+/* 图标组 */
+.icon-group {
+  margin-bottom: 24px;
+}
+
+.icon-group:last-child {
+  margin-bottom: 0;
+}
+
+.icon-group-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 12px;
+  padding-left: 2px;
+}
+
+.icon-selector-dialog.dark .icon-group-title {
+  color: hsla(0, 0%, 100%, 0.7);
+}
+
+/* 图标网格 */
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 8px;
+}
+
+.icon-item {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #f8f9fa;
+  position: relative;
+}
+
+.icon-item:hover {
+  background: #e9ecef;
+  transform: scale(1.05);
+}
+
+.icon-item.selected {
+  border-color: #409eff;
+  background: rgba(64, 158, 255, 0.1);
+}
+
+.icon-item.selected::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  background: #409eff;
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+
+.icon-selector-dialog.dark .icon-item {
+  background: #333;
+}
+
+.icon-selector-dialog.dark .icon-item:hover {
+  background: #404040;
+}
+
+.icon-selector-dialog.dark .icon-item.selected {
+  background: rgba(64, 158, 255, 0.2);
+}
+
+.icon-selector-dialog.dark .icon-item.selected::after {
+  border-color: #262a2e;
+}
+
+.icon-display {
+  font-size: 20px;
+  user-select: none;
+  line-height: 1;
+  font-weight: bold;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* 优先级图标样式 */
+.icon-display.priority {
+  background: var(--icon-bg-color, #E93B30);
+  color: white !important;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: bold;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 情感图标样式 */
+.icon-display.emotion {
+  font-size: 18px;
+}
+
+/* 状态图标样式 */
+.icon-display.status {
+  font-size: 10px;
+  font-weight: bold;
+}
+
+/* 标记图标样式 */
+.icon-display.marker {
+  font-size: 18px;
+}
+
+/* 底部 */
+.icon-selector-footer {
+  padding: 16px 24px 20px;
+  border-top: 1px solid #e0e0e0;
+  background: #f8f9fa;
+}
+
+.icon-selector-dialog.dark .icon-selector-footer {
+  border-top-color: #333;
+  background: #222;
+}
+
+.icon-tip {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.icon-selector-dialog.dark .icon-tip {
+  color: hsla(0, 0%, 100%, 0.6);
+}
+
+/* 响应式 */
+@media (max-width: 600px) {
+  .icon-selector-dialog {
+    width: 95%;
+    max-height: 80vh;
+  }
+  
+  .icon-selector-header,
+  .icon-selector-content,
+  .icon-selector-footer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  
+  .icon-grid {
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+    gap: 6px;
+  }
+  
+  .icon-item {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .icon-display {
+    font-size: 18px;
+  }
+}

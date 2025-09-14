@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
   IconArrowBack,
@@ -36,12 +36,20 @@ import {
   IconX,
   IconDeviceFloppy,
   IconUpload,
+  IconChevronDown,
+  IconSquare,
+  IconSticker,
+  IconCopy,
+  IconCut,
+  IconClipboard,
+  IconTemplate,
 } from '@tabler/icons-react';
 import './mindmap-toolbar.css';
 import SidebarPanel from './SidebarPanel';
 import BaseStylePanelSimple from './components/BaseStylePanelSimple';
 import MiniMapNavigator from './components/MiniMapNavigator';
 import IconMapNavigator from '@/components/icons/icon-map-navigator';
+import IconSelector from './components/IconSelector';
 
 interface MindMapToolbarProps {
   mindMap: any;
@@ -75,6 +83,14 @@ export default function MindMapToolbar({
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showBaseStyle, setShowBaseStyle] = useState(false);
   const [showMiniMap, setShowMiniMap] = useState(false);
+  const [showMoreBtn, setShowMoreBtn] = useState(false);
+  const [horizontalList, setHorizontalList] = useState<string[]>([]);
+  const [verticalList, setVerticalList] = useState<string[]>([]);
+  const [popoverShow, setPopoverShow] = useState(false);
+  const [showIconSelector, setShowIconSelector] = useState(false);
+  const [selectedIcons, setSelectedIcons] = useState<string[]>([]);
+  
+  const toolbarRef = useRef<HTMLDivElement>(null);
 
   // 通用的 toast 提示函数
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
@@ -133,6 +149,81 @@ export default function MindMapToolbar({
     }, 3000);
   };
 
+  // 定义默认按钮列表
+  const defaultBtnList = [
+    'back',
+    'forward',
+    'painter',
+    'siblingNode',
+    'childNode',
+    'deleteNode',
+    'image',
+    'icon',
+    'link',
+    'note',
+    'tag',
+    'summary',
+    'associativeLine',
+    'formula',
+    'attachment',
+    'outerFrame',
+    'copy',
+    'cut',
+    'paste',
+  ];
+
+  // 计算工具按钮如何显示
+  const computeToolbarShow = () => {
+    if (!toolbarRef.current) return;
+    
+    const windowWidth = window.innerWidth - 40;
+    const all = [...defaultBtnList];
+    let index = 1;
+    
+    const loopCheck = () => {
+      if (index > all.length) return done();
+      setHorizontalList(all.slice(0, index));
+      
+      // 使用 setTimeout 确保DOM更新后再计算
+      setTimeout(() => {
+        if (toolbarRef.current) {
+          const width = toolbarRef.current.getBoundingClientRect().width;
+          if (width < windowWidth) {
+            index++;
+            loopCheck();
+          } else if (index > 0 && width > windowWidth) {
+            index--;
+            setHorizontalList(all.slice(0, index));
+            done();
+          }
+        }
+      }, 0);
+    };
+    
+    const done = () => {
+      setVerticalList(all.slice(index));
+      setShowMoreBtn(all.slice(index).length > 0);
+    };
+    
+    loopCheck();
+  };
+
+  // 监听窗口大小变化重新计算工具栏显示
+  useEffect(() => {
+    computeToolbarShow();
+    
+    const throttledCompute = (() => {
+      let timeout: any;
+      return () => {
+        clearTimeout(timeout);
+        timeout = setTimeout(computeToolbarShow, 300);
+      };
+    })();
+    
+    window.addEventListener('resize', throttledCompute);
+    return () => window.removeEventListener('resize', throttledCompute);
+  }, []);
+
   // 监听历史记录变化和节点激活
   useEffect(() => {
     if (!mindMap) return;
@@ -145,6 +236,13 @@ export default function MindMapToolbar({
 
     const handleNodeActive = (node: any, nodeList: any[]) => {
       setActiveNodes(nodeList || []);
+      // 更新选中的图标列表
+      if (nodeList && nodeList.length > 0) {
+        const icons = nodeList[0].getData('icon') || [];
+        setSelectedIcons(icons);
+      } else {
+        setSelectedIcons([]);
+      }
     };
 
     const handleScale = (scale: number) => {
@@ -187,19 +285,23 @@ export default function MindMapToolbar({
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
+      if (!target.closest('.mindmap-toolbar-more-menu') && 
+          !target.closest('.mindmap-toolbar-btn-more')) {
+        setPopoverShow(false);
+      }
       if (!target.closest('.mindmap-more-menu') && !target.closest('.mindmap-nav-btn')) {
         setShowMoreMenu(false);
       }
     };
     
-    if (showMoreMenu) {
+    if (popoverShow || showMoreMenu) {
       document.addEventListener('click', handleClickOutside);
     }
     
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
-  }, [showMoreMenu]);
+  }, [popoverShow, showMoreMenu]);
 
   const execCommand = (command: string, ...args: any[]) => {
     try {
@@ -266,52 +368,89 @@ export default function MindMapToolbar({
   // 图标功能
   const handleIcon = () => {
     if (activeNodes.length <= 0) return;
-    // 简化的图标选择，实际应该有一个图标选择器
-    const icons = ['😀', '👍', '⭐', '✅', '❌', '💡', '🎯', '🔴'];
-    const icon = icons[Math.floor(Math.random() * icons.length)];
-    if (mindMap) {
-      mindMap.execCommand('SET_NODE_ICON', activeNodes[0], [icon]);
+    setShowIconSelector(true);
+  };
+
+  // 处理图标选择
+  const handleIconSelect = (iconKey: string, iconData: any) => {
+    if (activeNodes.length <= 0) return;
+    
+    // 获取当前节点的图标列表
+    let currentIcons = [...selectedIcons];
+    const iconType = iconData.type;
+    
+    // 查找是否已经选中了这个图标
+    const existingIndex = currentIcons.findIndex(icon => icon === iconKey);
+    
+    if (existingIndex !== -1) {
+      // 如果已选中，则删除
+      currentIcons.splice(existingIndex, 1);
+    } else {
+      // 查找是否已经有同类型的图标
+      const sameTypeIndex = currentIcons.findIndex(icon => icon.startsWith(iconType + '_'));
+      
+      if (sameTypeIndex !== -1) {
+        // 替换同类型图标
+        currentIcons.splice(sameTypeIndex, 1, iconKey);
+      } else {
+        // 添加新图标
+        currentIcons.push(iconKey);
+      }
     }
+    
+    // 更新节点图标 - 使用原项目的方式
+    activeNodes.forEach((node: any) => {
+      if (node && node.setIcon) {
+        // 直接传递图标键值数组，让 simple-mind-map 内部处理渲染
+        console.log('设置图标:', [...currentIcons]); // 调试日志
+        node.setIcon([...currentIcons]);
+      }
+    });
+    
+    // 更新状态
+    setSelectedIcons(currentIcons);
+    
+    showToast(`图标已${existingIndex !== -1 ? '删除' : '添加'}`, 'success');
   };
 
   // 链接功能
   const handleLink = () => {
     if (activeNodes.length <= 0) return;
-    const url = window.prompt('🔗 请输入链接地址\n\n示例：https://www.example.com');
+    const url = window.prompt(t('mindmap.prompts.enterLink'));
     if (url && mindMap) {
       mindMap.execCommand('SET_NODE_HYPERLINK', activeNodes[0], url, url);
-      showToast('链接已添加', 'success');
+      showToast(t('mindmap.messages.linkAdded'), 'success');
     }
   };
 
   // 备注功能
   const handleNote = () => {
     if (activeNodes.length <= 0) return;
-    const note = window.prompt('📝 请输入备注内容\n\n可以输入多行文本来详细说明这个节点');
+    const note = window.prompt(t('mindmap.prompts.enterNote'));
     if (note && mindMap) {
       mindMap.execCommand('SET_NODE_NOTE', activeNodes[0], note);
-      showToast('备注已添加', 'success');
+      showToast(t('mindmap.messages.noteAdded'), 'success');
     }
   };
 
   // 标签功能
   const handleTag = () => {
     if (activeNodes.length <= 0) return;
-    const tag = window.prompt('🏷️ 请输入标签内容\n\n示例：重要,待办,紧急\n（多个标签用逗号分隔）');
+    const tag = window.prompt(t('mindmap.prompts.enterTag'));
     if (tag && mindMap) {
       const tags = tag.split(',').map(t => t.trim()).filter(t => t);
       mindMap.execCommand('SET_NODE_TAG', activeNodes[0], tags);
-      showToast(`已添加 ${tags.length} 个标签`, 'success');
+      showToast(t('mindmap.messages.tagsAdded', { count: tags.length }), 'success');
     }
   };
 
   // 公式功能
   const handleFormula = () => {
     if (activeNodes.length <= 0 || hasGeneralization) return;
-    const formula = window.prompt('📊 请输入LaTeX公式\n\n示例：\n· E=mc^2\n· \\frac{a}{b}\n· \\sum_{i=1}^{n} x_i');
+    const formula = window.prompt(t('mindmap.prompts.enterFormula'));
     if (formula && mindMap) {
       mindMap.execCommand('INSERT_FORMULA', formula);
-      showToast('公式已添加', 'success');
+      showToast(t('mindmap.messages.formulaAdded'), 'success');
     }
   };
 
@@ -334,16 +473,198 @@ export default function MindMapToolbar({
               type: file.type,
               data: dataUrl
             });
-            showToast(`附件 ${file.name} 已添加`, 'success');
+            showToast(t('mindmap.messages.attachmentAdded', { name: file.name }), 'success');
           };
           reader.readAsDataURL(file);
         } catch (error) {
           console.error('附件添加失败:', error);
-          showToast('附件添加失败', 'error');
+          showToast(t('mindmap.messages.attachmentFailed'), 'error');
         }
       }
     };
     input.click();
+  };
+
+  // 复制功能
+  const handleCopy = () => {
+    if (activeNodes.length <= 0) return;
+    try {
+      if (mindMap && mindMap.renderer && mindMap.renderer.copy) {
+        mindMap.renderer.copy();
+        showToast(t('mindmap.messages.nodeCopied'), 'success');
+      }
+    } catch (error) {
+      console.error('复制失败:', error);
+      showToast(t('mindmap.messages.copyFailed'), 'error');
+    }
+  };
+
+  // 剪切功能
+  const handleCut = () => {
+    if (activeNodes.length <= 0) return;
+    try {
+      if (mindMap && mindMap.renderer && mindMap.renderer.cut) {
+        mindMap.renderer.cut();
+        showToast(t('mindmap.messages.nodeCut'), 'success');
+      }
+    } catch (error) {
+      console.error('剪切失败:', error);
+      showToast(t('mindmap.messages.cutFailed'), 'error');
+    }
+  };
+
+  // 粘贴功能
+  const handlePaste = () => {
+    try {
+      if (mindMap && mindMap.renderer && mindMap.renderer.paste) {
+        mindMap.renderer.paste();
+        showToast(t('mindmap.messages.nodePasted'), 'success');
+      }
+    } catch (error) {
+      console.error('粘贴失败:', error);
+      showToast(t('mindmap.messages.pasteFailed'), 'error');
+    }
+  };
+
+  // 渲染工具栏按钮
+  const renderToolbarButton = (item: string) => {
+    const buttonConfig: Record<string, any> = {
+      back: {
+        icon: <IconArrowBack size={16} />,
+        text: t('mindmap.toolbar.undo'),
+        disabled: !canUndo,
+        onClick: () => canUndo && execCommand('BACK')
+      },
+      forward: {
+        icon: <IconArrowForward size={16} />,
+        text: t('mindmap.toolbar.redo'), 
+        disabled: !canRedo,
+        onClick: () => canRedo && execCommand('FORWARD')
+      },
+      painter: {
+        icon: <IconBrush size={16} />,
+        text: t('mindmap.toolbar.painter'),
+        disabled: activeNodes.length <= 0 || hasGeneralization,
+        active: isInPainter,
+        onClick: handlePainter
+      },
+      siblingNode: {
+        icon: <IconShare2 size={16} />,
+        text: t('mindmap.toolbar.siblingNode'),
+        disabled: activeNodes.length <= 0 || hasRoot || hasGeneralization,
+        onClick: () => execCommand('INSERT_NODE')
+      },
+      childNode: {
+        icon: <IconGitBranch size={16} />,
+        text: t('mindmap.toolbar.childNode'),
+        disabled: activeNodes.length <= 0 || hasGeneralization,
+        onClick: () => execCommand('INSERT_CHILD_NODE')
+      },
+      deleteNode: {
+        icon: <IconTrash size={16} />,
+        text: t('mindmap.toolbar.deleteNode'),
+        disabled: activeNodes.length <= 0,
+        onClick: () => execCommand('REMOVE_NODE')
+      },
+      image: {
+        icon: <IconPhoto size={16} />,
+        text: t('mindmap.toolbar.image'),
+        disabled: activeNodes.length <= 0,
+        onClick: handleImage
+      },
+      icon: {
+        icon: <IconMoodSmile size={16} />,
+        text: t('mindmap.toolbar.icon'),
+        disabled: activeNodes.length <= 0,
+        onClick: handleIcon
+      },
+      link: {
+        icon: <IconLink size={16} />,
+        text: t('mindmap.toolbar.link'),
+        disabled: activeNodes.length <= 0,
+        onClick: handleLink
+      },
+      note: {
+        icon: <IconNote size={16} />,
+        text: t('mindmap.toolbar.note'),
+        disabled: activeNodes.length <= 0,
+        onClick: handleNote
+      },
+      tag: {
+        icon: <IconTag size={16} />,
+        text: t('mindmap.toolbar.tag'),
+        disabled: activeNodes.length <= 0,
+        onClick: handleTag
+      },
+      summary: {
+        icon: <IconBrackets size={16} />,
+        text: t('mindmap.toolbar.summary'),
+        disabled: activeNodes.length <= 0 || hasRoot || hasGeneralization,
+        onClick: () => execCommand('ADD_GENERALIZATION')
+      },
+      associativeLine: {
+        icon: <IconLine size={16} />,
+        text: t('mindmap.toolbar.associativeLine'),
+        disabled: activeNodes.length <= 0 || hasGeneralization,
+        onClick: () => {
+          if (activeNodes.length > 0 && !hasGeneralization && mindMap && mindMap.associativeLine) {
+            mindMap.associativeLine.createLineFromActiveNode();
+          }
+        }
+      },
+      formula: {
+        icon: <IconMathFunction size={16} />,
+        text: t('mindmap.toolbar.formula'),
+        disabled: activeNodes.length <= 0 || hasGeneralization,
+        onClick: handleFormula
+      },
+      attachment: {
+        icon: <IconUpload size={16} />,
+        text: t('mindmap.toolbar.attachment'),
+        disabled: activeNodes.length <= 0 || hasGeneralization,
+        onClick: handleAttachment
+      },
+      outerFrame: {
+        icon: <IconSquare size={16} />,
+        text: t('mindmap.toolbar.outerFrame'),
+        disabled: activeNodes.length <= 0 || hasGeneralization,
+        onClick: () => execCommand('ADD_OUTER_FRAME')
+      },
+      copy: {
+        icon: <IconCopy size={16} />,
+        text: t('mindmap.toolbar.copy'),
+        disabled: activeNodes.length <= 0,
+        onClick: handleCopy
+      },
+      cut: {
+        icon: <IconCut size={16} />,
+        text: t('mindmap.toolbar.cut'),
+        disabled: activeNodes.length <= 0,
+        onClick: handleCut
+      },
+      paste: {
+        icon: <IconClipboard size={16} />,
+        text: t('mindmap.toolbar.paste'),
+        disabled: false,
+        onClick: handlePaste
+      }
+    };
+
+    const config = buttonConfig[item];
+    if (!config) return null;
+
+    return (
+      <div
+        key={item}
+        className={`mindmap-toolbar-btn ${config.disabled ? 'disabled' : ''} ${config.active ? 'active' : ''}`}
+        onClick={config.onClick}
+      >
+        <span className="icon">
+          {config.icon}
+        </span>
+        <span className="text">{config.text}</span>
+      </div>
+    );
   };
 
   // 导出功能
@@ -503,185 +824,71 @@ export default function MindMapToolbar({
     <>
       {/* 顶部工具栏 */}
       <div className={`mindmap-toolbar-top ${theme === 'dark' ? 'isDark' : ''}`}>
-        {/* 第一组工具栏 - 节点操作 */}
-        <div className="mindmap-toolbar-block">
-          {/* 撤销/重做 */}
-          <div 
-            className={`mindmap-toolbar-btn ${!canUndo ? 'disabled' : ''}`}
-            onClick={() => canUndo && execCommand('BACK')}
-          >
-            <span className="icon">
-              <IconArrowBack size={16} />
-            </span>
-            <span className="text">撤销</span>
-          </div>
-          <div 
-            className={`mindmap-toolbar-btn ${!canRedo ? 'disabled' : ''}`}
-            onClick={() => canRedo && execCommand('FORWARD')}
-          >
-            <span className="icon">
-              <IconArrowForward size={16} />
-            </span>
-            <span className="text">前进</span>
-          </div>
-
-          {/* 格式刷 */}
-          <div 
-            className={`mindmap-toolbar-btn ${activeNodes.length <= 0 || hasGeneralization ? 'disabled' : ''} ${isInPainter ? 'active' : ''}`}
-            onClick={handlePainter}
-          >
-            <span className="icon">
-              <IconBrush size={16} />
-            </span>
-            <span className="text">格式刷</span>
-          </div>
-
-          {/* 插入同级节点 */}
-          <div 
-            className={`mindmap-toolbar-btn ${activeNodes.length <= 0 || hasRoot || hasGeneralization ? 'disabled' : ''}`}
-            onClick={() => execCommand('INSERT_NODE')}
-          >
-            <span className="icon">
-              <IconShare2 size={16} />
-            </span>
-            <span className="text">同级节点</span>
-          </div>
-
-          {/* 插入子节点 */}
-          <div 
-            className={`mindmap-toolbar-btn ${activeNodes.length <= 0 || hasGeneralization ? 'disabled' : ''}`}
-            onClick={() => execCommand('INSERT_CHILD_NODE')}
-          >
-            <span className="icon">
-              <IconGitBranch size={16} />
-            </span>
-            <span className="text">子节点</span>
-          </div>
-
-          {/* 删除节点 */}
-          <div 
-            className={`mindmap-toolbar-btn ${activeNodes.length <= 0 ? 'disabled' : ''}`}
-            onClick={() => execCommand('REMOVE_NODE')}
-          >
-            <span className="icon">
-              <IconTrash size={16} />
-            </span>
-            <span className="text">删除</span>
-          </div>
-
-          {/* 图片 */}
-          <div 
-            className={`mindmap-toolbar-btn ${activeNodes.length <= 0 ? 'disabled' : ''}`}
-            onClick={handleImage}
-          >
-            <span className="icon">
-              <IconPhoto size={16} />
-            </span>
-            <span className="text">图片</span>
-          </div>
-
-          {/* 图标 */}
-          <div 
-            className={`mindmap-toolbar-btn ${activeNodes.length <= 0 ? 'disabled' : ''}`}
-            onClick={handleIcon}
-          >
-            <span className="icon">
-              <IconMoodSmile size={16} />
-            </span>
-            <span className="text">图标</span>
-          </div>
-
-          {/* 链接 */}
-          <div 
-            className={`mindmap-toolbar-btn ${activeNodes.length <= 0 ? 'disabled' : ''}`}
-            onClick={handleLink}
-          >
-            <span className="icon">
-              <IconLink size={16} />
-            </span>
-            <span className="text">链接</span>
-          </div>
-
-          {/* 备注 */}
-          <div 
-            className={`mindmap-toolbar-btn ${activeNodes.length <= 0 ? 'disabled' : ''}`}
-            onClick={handleNote}
-          >
-            <span className="icon">
-              <IconNote size={16} />
-            </span>
-            <span className="text">备注</span>
-          </div>
-
-          {/* 标签 */}
-          <div 
-            className={`mindmap-toolbar-btn ${activeNodes.length <= 0 ? 'disabled' : ''}`}
-            onClick={handleTag}
-          >
-            <span className="icon">
-              <IconTag size={16} />
-            </span>
-            <span className="text">标签</span>
-          </div>
-
-          {/* 概要 */}
-          <div 
-            className={`mindmap-toolbar-btn ${activeNodes.length <= 0 || hasRoot || hasGeneralization ? 'disabled' : ''}`}
-            onClick={() => execCommand('ADD_GENERALIZATION')}
-          >
-            <span className="icon">
-              <IconBrackets size={16} />
-            </span>
-            <span className="text">概要</span>
-          </div>
-
-          {/* 关联线 */}
-          <div 
-            className={`mindmap-toolbar-btn ${activeNodes.length <= 0 || hasGeneralization ? 'disabled' : ''}`}
-            onClick={() => {
-              if (activeNodes.length > 0 && !hasGeneralization && mindMap && mindMap.associativeLine) {
-                mindMap.associativeLine.createLineFromActiveNode();
-              }
-            }}
-          >
-            <span className="icon">
-              <IconLine size={16} />
-            </span>
-            <span className="text">关联线</span>
-          </div>
-
-          {/* 公式 */}
-          <div 
-            className={`mindmap-toolbar-btn ${activeNodes.length <= 0 || hasGeneralization ? 'disabled' : ''}`}
-            onClick={handleFormula}
-          >
-            <span className="icon">
-              <IconMathFunction size={16} />
-            </span>
-            <span className="text">公式</span>
-          </div>
-
-          {/* 附件 */}
-          <div 
-            className={`mindmap-toolbar-btn ${activeNodes.length <= 0 || hasGeneralization ? 'disabled' : ''}`}
-            onClick={handleAttachment}
-          >
-            <span className="icon">
-              <IconUpload size={16} />
-            </span>
-            <span className="text">附件</span>
-          </div>
-
-          {/* 外框 */}
-          <div 
-            className={`mindmap-toolbar-btn ${activeNodes.length <= 0 || hasGeneralization ? 'disabled' : ''}`}
-            onClick={() => execCommand('ADD_OUTER_FRAME')}
-          >
-            <span className="icon">
-              <IconBrackets size={16} />
-            </span>
-            <span className="text">外框</span>
-          </div>
+        {/* 第一组工具栏 - 节点操作（响应式） */}
+        <div className="mindmap-toolbar-block" ref={toolbarRef}>
+          {/* 水平显示的按钮 */}
+          {horizontalList.map((item) => renderToolbarButton(item))}
+          
+          {/* 更多按钮 */}
+          {showMoreBtn && (
+            <div className="mindmap-toolbar-btn-more">
+              <div 
+                className="mindmap-toolbar-btn"
+                onClick={() => setPopoverShow(!popoverShow)}
+                style={{ marginRight: horizontalList.length > 0 ? '20px' : 0 }}
+              >
+                <span className="icon">
+                  <IconDotsVertical size={16} />
+                </span>
+                <span className="text">{t('mindmap.toolbar.more')}</span>
+              </div>
+              
+              {/* 垂直菜单 */}
+              {popoverShow && (
+                <div className="mindmap-toolbar-more-menu">
+                  {verticalList.map((item) => (
+                    <div 
+                      key={item} 
+                      className="mindmap-toolbar-more-item"
+                      onClick={() => {
+                        const config = {
+                          back: () => canUndo && execCommand('BACK'),
+                          forward: () => canRedo && execCommand('FORWARD'),
+                          painter: handlePainter,
+                          siblingNode: () => execCommand('INSERT_NODE'),
+                          childNode: () => execCommand('INSERT_CHILD_NODE'),
+                          deleteNode: () => execCommand('REMOVE_NODE'),
+                          image: handleImage,
+                          icon: handleIcon,
+                          link: handleLink,
+                          note: handleNote,
+                          tag: handleTag,
+                          summary: () => execCommand('ADD_GENERALIZATION'),
+                          associativeLine: () => {
+                            if (activeNodes.length > 0 && !hasGeneralization && mindMap && mindMap.associativeLine) {
+                              mindMap.associativeLine.createLineFromActiveNode();
+                            }
+                          },
+                          formula: handleFormula,
+                          attachment: handleAttachment,
+                          outerFrame: () => execCommand('ADD_OUTER_FRAME'),
+                          copy: handleCopy,
+                          cut: handleCut,
+                          paste: handlePaste
+                        };
+                        
+                        const handler = config[item as keyof typeof config];
+                        if (handler) handler();
+                        setPopoverShow(false);
+                      }}
+                    >
+                      {renderToolbarButton(item)}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* 第二组工具栏 - 导入导出、搜索、保存和退出 */}
@@ -690,13 +897,13 @@ export default function MindMapToolbar({
             <span className="icon">
               <IconFileImport size={16} />
             </span>
-            <span className="text">导入</span>
+            <span className="text">{t('mindmap.toolbar.import')}</span>
           </div>
           <div className="mindmap-toolbar-btn" onClick={handleExport}>
             <span className="icon">
               <IconFileExport size={16} />
             </span>
-            <span className="text">导出</span>
+            <span className="text">{t('mindmap.toolbar.export')}</span>
           </div>
           <div 
             className="mindmap-toolbar-btn" 
@@ -705,7 +912,7 @@ export default function MindMapToolbar({
             <span className="icon">
               <IconSearch size={16} />
             </span>
-            <span className="text">搜索</span>
+            <span className="text">{t('mindmap.toolbar.search')}</span>
           </div>
           
           {/* 保存按钮 */}
@@ -716,7 +923,7 @@ export default function MindMapToolbar({
             <span className="icon">
               <IconDeviceFloppy size={16} />
             </span>
-            <span className="text">{isSaving ? '保存中...' : '保存'}</span>
+            <span className="text">{isSaving ? t('mindmap.toolbar.saving') : t('mindmap.toolbar.save')}</span>
           </div>
           
           {/* 导出按钮 */}
@@ -728,7 +935,7 @@ export default function MindMapToolbar({
               <span className="icon">
                 <IconDownload size={16} />
               </span>
-              <span className="text">导出</span>
+              <span className="text">{t('mindmap.toolbar.export')}</span>
             </div>
           )}
           
@@ -741,7 +948,7 @@ export default function MindMapToolbar({
             <span className="icon">
               <IconX size={16} />
             </span>
-            <span className="text">退出</span>
+            <span className="text">{t('mindmap.toolbar.exit')}</span>
           </div>
         </div>
       </div>
@@ -917,6 +1124,16 @@ export default function MindMapToolbar({
         show={showMiniMap}
         theme={theme}
         onToggle={() => setShowMiniMap(!showMiniMap)}
+      />
+
+      {/* 图标选择器 */}
+      <IconSelector
+        show={showIconSelector}
+        onClose={() => setShowIconSelector(false)}
+        onIconSelect={handleIconSelect}
+        selectedIcons={selectedIcons}
+        mindMap={mindMap}
+        theme={theme}
       />
     </>
   );
