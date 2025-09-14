@@ -351,8 +351,15 @@
     gap: 4px;
   }
   
-  .mindmap-toolbar-btn .text {
+  /* 只隐藏顶部工具栏主按钮的文字，不影响更多菜单和底部导航 */
+  .mindmap-toolbar-block > .mindmap-toolbar-btn .text,
+  .mindmap-toolbar-btn-more .mindmap-toolbar-btn .text {
     display: none;
+  }
+  
+  /* 确保更多菜单中的文字显示 */
+  .mindmap-toolbar-more-menu .mindmap-toolbar-btn .text {
+    display: block !important;
   }
   
   .mindmap-toolbar-btn .icon {
@@ -381,8 +388,15 @@
     justify-content: center;
   }
   
-  .mindmap-toolbar-btn .text {
+  /* 只隐藏顶部工具栏主按钮的文字，不影响更多菜单和底部导航 */
+  .mindmap-toolbar-block > .mindmap-toolbar-btn .text,
+  .mindmap-toolbar-btn-more .mindmap-toolbar-btn .text {
     display: none;
+  }
+  
+  /* 确保更多菜单中的文字显示 */
+  .mindmap-toolbar-more-menu .mindmap-toolbar-btn .text {
+    display: block !important;
   }
   
   .mindmap-toolbar-btn .icon {

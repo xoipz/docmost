@@ -51,15 +51,23 @@ export default function MiniMapNavigator({ mindMap, show, theme, onToggle }: Min
   };
 
   // 渲染小地图
-  const drawMiniMap = async () => {
-    if (!mindMap || !mindMap.miniMap || !boxWidth || !boxHeight) {
+  const drawMiniMap = async (forceWidth?: number, forceHeight?: number) => {
+    if (!mindMap || !mindMap.miniMap) {
+      return;
+    }
+    
+    // 使用传入的尺寸或已有的状态尺寸
+    const width = forceWidth || boxWidth;
+    const height = forceHeight || boxHeight;
+    
+    if (!width || !height) {
       return;
     }
     
     try {
       setIsLoading(true);
       
-      const result = mindMap.miniMap.calculationMiniMap(boxWidth, boxHeight);
+      const result = mindMap.miniMap.calculationMiniMap(width, height);
       
       if (!result) {
         console.error('calculationMiniMap 返回空结果');
@@ -118,7 +126,10 @@ export default function MiniMapNavigator({ mindMap, show, theme, onToggle }: Min
     const handleDataChange = () => {
       clearTimeout(timer);
       timer = setTimeout(() => {
-        drawMiniMap();
+        // 确保有尺寸时才绘制
+        if (boxWidth && boxHeight) {
+          drawMiniMap(boxWidth, boxHeight);
+        }
       }, 500); // 使用原版的500ms延迟
     };
 
@@ -163,12 +174,14 @@ export default function MiniMapNavigator({ mindMap, show, theme, onToggle }: Min
       clearTimeout(sizeTimer);
       sizeTimer = setTimeout(() => {
         setSize();
-        if (show) {
+        if (show && navigatorBoxRef.current) {
+          const rect = navigatorBoxRef.current.getBoundingClientRect();
+          const width = rect?.width || Math.min(window.innerWidth - 80, 370);
+          const height = rect?.height || 220;
+          setBoxWidth(width);
+          setBoxHeight(height);
           setTimeout(() => {
-            init();
-            setTimeout(() => {
-              drawMiniMap();
-            }, 100);
+            drawMiniMap(width, height);
           }, 100);
         }
       }, 300);
@@ -191,20 +204,33 @@ export default function MiniMapNavigator({ mindMap, show, theme, onToggle }: Min
       const initMiniMap = () => {
         if (mindMap && mindMap.renderer && mindMap.renderer.root) {
           
-          // 先确保容器尺寸正确
+          // 获取容器尺寸并立即绘制
+          const rect = navigatorBoxRef.current?.getBoundingClientRect();
+          let width = rect?.width || 0;
+          let height = rect?.height || 0;
+          
+          // 如果没有获取到尺寸，使用默认值
+          if (!width || !height) {
+            width = Math.min(window.innerWidth - 80, 370);
+            height = 220;
+          }
+          
+          // 更新状态并立即绘制
+          setBoxWidth(width);
+          setBoxHeight(height);
+          
+          // 直接调用绘制，传入尺寸
           setTimeout(() => {
-            init(); // 获取实际DOM尺寸
-            setTimeout(() => {
-              drawMiniMap();
-            }, 300); // 增加延迟确保尺寸正确
-          }, 100);
+            drawMiniMap(width, height);
+          }, 50);
           
         } else {
-          setTimeout(initMiniMap, 200);
+          setTimeout(initMiniMap, 100);
         }
       };
       
-      setTimeout(initMiniMap, 100);
+      // 立即执行
+      initMiniMap();
     } else if (!show) {
       setMindMapImg('');
       setMindMapSvg('');
@@ -311,7 +337,7 @@ export default function MiniMapNavigator({ mindMap, show, theme, onToggle }: Min
               fontSize: '12px',
               cursor: isLoading ? 'default' : 'pointer'
             }}
-            onClick={() => !isLoading && drawMiniMap()}
+            onClick={() => !isLoading && drawMiniMap(boxWidth, boxHeight)}
           >
             {isLoading ? '生成中...' : '点击重试'}
           </div>

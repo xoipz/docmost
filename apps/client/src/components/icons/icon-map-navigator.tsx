@@ -12,34 +12,45 @@ function IconMapNavigator({ size }: Props) {
       viewBox="0 0 24 24"
       style={{ width: rem(size), height: rem(size) }}
     >
-      <path 
-        d="M3 5C3 3.89543 3.89543 3 5 3H19C20.1046 3 21 3.89543 21 5V15C21 16.1046 20.1046 17 19 17H5C3.89543 17 3 16.1046 3 15V5Z" 
+      {/* 指南针外圈 */}
+      <circle 
+        cx="12" 
+        cy="12" 
+        r="9" 
         stroke="currentColor" 
         strokeWidth="1.5"
         fill="none"
       />
+      {/* 指南针指针 - 北针 */}
       <path 
-        d="M6 8H9M6 11H12M15 8H18M15 11H16" 
-        stroke="currentColor" 
-        strokeWidth="1.5" 
-        strokeLinecap="round"
+        d="M12 3 L15 12 L12 9 L9 12 Z" 
+        fill="currentColor"
+        opacity="0.8"
       />
-      <rect 
-        x="4" 
+      {/* 指南针指针 - 南针 */}
+      <path 
+        d="M12 21 L9 12 L12 15 L15 12 Z" 
+        fill="currentColor"
+        opacity="0.4"
+      />
+      {/* 中心点 */}
+      <circle 
+        cx="12" 
+        cy="12" 
+        r="1.5" 
+        fill="currentColor"
+      />
+      {/* 方向标记 N */}
+      <text 
+        x="12" 
         y="6" 
-        width="6" 
-        height="4" 
-        stroke="currentColor" 
-        strokeWidth="1.5" 
-        fill="none"
-        opacity="0.3"
-      />
-      <path 
-        d="M7 19V21M17 19V21M7 21H17" 
-        stroke="currentColor" 
-        strokeWidth="1.5" 
-        strokeLinecap="round"
-      />
+        textAnchor="middle" 
+        fontSize="6" 
+        fill="currentColor"
+        fontWeight="bold"
+      >
+        N
+      </text>
     </svg>
   );
 }
