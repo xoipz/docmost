@@ -512,9 +512,11 @@ export default function MindMapView(props: NodeViewProps) {
             toolBar: false,
             nodeTextEditZIndex: 10000,
             nodeNoteTooltipZIndex: 10000,
-            enableNodeRichText: false,
+            enableNodeRichText: true,
             defaultExpandLevel: 3,
             enableFreeDrag: false,
+            enableAutoEnterTextEditWhenKeydown: true, // 启用键盘输入自动进入编辑
+            openRealtimeRenderOnNodeTextEdit: true, // 实时渲染编辑中的节点
             // 直接在初始化时设置样式
             backgroundColor: selectedTheme === 'dark' ? '#262626' : '#f9fafb',
             paddingX: 8,
@@ -723,75 +725,69 @@ export default function MindMapView(props: NodeViewProps) {
               }
             }
 
-            // 编辑操作快捷键
+            // 编辑操作快捷键 - 优先让 KeyboardNavigation 插件处理，如果不工作则使用备用方法
             if (e.ctrlKey && e.key === 'z') {
               e.preventDefault();
               e.stopPropagation();
-              e.stopImmediatePropagation();
-              mindMapInstance.current.execCommand('BACK');
+              try {
+                mindMapInstance.current.execCommand('BACK');
+              } catch (error) {
+                console.error('撤销失败:', error);
+              }
               return;
             }
 
             if (e.ctrlKey && e.key === 'y') {
               e.preventDefault();
               e.stopPropagation();
-              e.stopImmediatePropagation();
-              mindMapInstance.current.execCommand('FORWARD');
+              try {
+                mindMapInstance.current.execCommand('FORWARD');
+              } catch (error) {
+                console.error('重做失败:', error);
+              }
               return;
             }
 
             if (e.ctrlKey && e.key === 'a') {
               e.preventDefault();
               try {
-                if (mindMapInstance.current.execCommand) {
-                  mindMapInstance.current.execCommand('SELECT_ALL');
-                } else if (mindMapInstance.current.renderer && mindMapInstance.current.renderer.selectAll) {
-                  mindMapInstance.current.renderer.selectAll();
-                }
+                mindMapInstance.current.renderer.selectAll();
               } catch (error) {
                 console.error('全选失败:', error);
               }
+              return;
             }
 
             if (e.ctrlKey && e.key === 'c') {
               e.preventDefault();
               try {
-                if (mindMapInstance.current.execCommand) {
-                  mindMapInstance.current.execCommand('COPY_NODE');
-                } else if (mindMapInstance.current.renderer && mindMapInstance.current.renderer.copy) {
-                  mindMapInstance.current.renderer.copy();
-                }
+                mindMapInstance.current.renderer.copy();
               } catch (error) {
                 console.error('复制失败:', error);
               }
+              return;
             }
 
             if (e.ctrlKey && e.key === 'v') {
               e.preventDefault();
               try {
-                if (mindMapInstance.current.execCommand) {
-                  mindMapInstance.current.execCommand('PASTE_NODE');
-                } else if (mindMapInstance.current.renderer && mindMapInstance.current.renderer.paste) {
-                  mindMapInstance.current.renderer.paste();
-                }
+                mindMapInstance.current.renderer.paste();
               } catch (error) {
                 console.error('粘贴失败:', error);
               }
+              return;
             }
 
             if (e.ctrlKey && e.key === 'x') {
               e.preventDefault();
               try {
-                if (mindMapInstance.current.execCommand) {
-                  mindMapInstance.current.execCommand('CUT_NODE');
-                } else if (mindMapInstance.current.renderer && mindMapInstance.current.renderer.cut) {
-                  mindMapInstance.current.renderer.cut();
-                }
+                mindMapInstance.current.renderer.cut();
               } catch (error) {
                 console.error('剪切失败:', error);
               }
+              return;
             }
-
+            
             // 节点操作快捷键
             if (e.key === 'Tab') {
               e.preventDefault();

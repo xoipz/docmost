@@ -39,11 +39,6 @@ const sidebarItems = [
     icon: IconBrush,
   },
   {
-    name: '主题',
-    value: 'theme',
-    icon: IconPalette,
-  },
-  {
     name: '结构',
     value: 'structure',
     icon: IconLayout,
@@ -175,8 +170,6 @@ export default function SidebarPanel({ mindMap, theme, onClose }: SidebarPanelPr
         );
       case 'baseStyle':
         return <BaseStylePanel {...commonProps} />;
-      case 'theme':
-        return <ThemePanel {...commonProps} />;
       case 'structure':
         return <StructurePanel {...commonProps} />;
       case 'outline':
@@ -234,6 +227,33 @@ export default function SidebarPanel({ mindMap, theme, onClose }: SidebarPanelPr
 
 // 基础样式面板
 function BaseStylePanel({ mindMap, theme }: { mindMap: any; theme: string }) {
+  const [backgroundColor, setBackgroundColor] = useState('#f7f7f7');
+  
+  // 初始化时获取当前背景颜色
+  useEffect(() => {
+    if (mindMap) {
+      try {
+        const currentBg = mindMap.getThemeConfig?.()?.backgroundColor || '#f7f7f7';
+        setBackgroundColor(currentBg);
+      } catch (error) {
+        console.error('获取背景颜色失败:', error);
+      }
+    }
+  }, [mindMap]);
+  
+  const handleBackgroundColorChange = (color: string) => {
+    setBackgroundColor(color);
+    try {
+      if (mindMap && mindMap.setThemeConfig) {
+        mindMap.setThemeConfig({
+          backgroundColor: color
+        });
+      }
+    } catch (error) {
+      console.error('设置背景颜色失败:', error);
+    }
+  };
+  
   return (
     <div className="panel-section">
       <div className="section-title">画布设置</div>
@@ -241,18 +261,8 @@ function BaseStylePanel({ mindMap, theme }: { mindMap: any; theme: string }) {
         <label>背景颜色</label>
         <input 
           type="color" 
-          defaultValue="#f7f7f7"
-          onChange={(e) => {
-            try {
-              if (mindMap && mindMap.setThemeConfig) {
-                mindMap.setThemeConfig({
-                  backgroundColor: e.target.value
-                });
-              }
-            } catch (error) {
-              console.error('设置背景颜色失败:', error);
-            }
-          }}
+          value={backgroundColor}
+          onChange={(e) => handleBackgroundColorChange(e.target.value)}
         />
       </div>
       <div className="form-item">
@@ -273,43 +283,6 @@ function BaseStylePanel({ mindMap, theme }: { mindMap: any; theme: string }) {
             }
           }}
         />
-      </div>
-    </div>
-  );
-}
-
-// 主题面板
-function ThemePanel({ mindMap, theme }: { mindMap: any; theme: string }) {
-  const themes = [
-    'default', 'classic', 'minions', 'pinkGrape', 'mint', 'gold', 
-    'vitalityOrange', 'greenLeaf', 'dark2', 'skyGreen', 'classic2',
-    'classic3', 'classic4', 'classicGreen', 'classicBlue', 'blueSky',
-    'brainImpairedPink', 'dark', 'earthYellow', 'freshGreen', 'freshRed',
-    'romanticPurple', 'simpleBlack', 'courseGreen', 'coffee', 'redSpirit',
-    'blackHumour', 'lateNightOffice', 'blackGold'
-  ];
-
-  return (
-    <div className="panel-section">
-      <div className="section-title">选择主题</div>
-      <div className="theme-list">
-        {themes.map(themeName => (
-          <div
-            key={themeName}
-            className="theme-item"
-            onClick={() => {
-              try {
-                if (mindMap && mindMap.setTheme) {
-                  mindMap.setTheme(themeName);
-                }
-              } catch (error) {
-                console.error('设置主题失败:', error);
-              }
-            }}
-          >
-            {themeName}
-          </div>
-        ))}
       </div>
     </div>
   );

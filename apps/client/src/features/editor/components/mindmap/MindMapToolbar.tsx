@@ -35,6 +35,7 @@ import {
   IconMessage,
   IconX,
   IconDeviceFloppy,
+  IconUpload,
 } from '@tabler/icons-react';
 import './mindmap-toolbar.css';
 import SidebarPanel from './SidebarPanel';
@@ -312,6 +313,37 @@ export default function MindMapToolbar({
       mindMap.execCommand('INSERT_FORMULA', formula);
       showToast('公式已添加', 'success');
     }
+  };
+
+  // 附件功能
+  const handleAttachment = () => {
+    if (activeNodes.length <= 0 || hasGeneralization) return;
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '*';
+    input.onchange = (e: any) => {
+      const file = e.target.files[0];
+      if (file && mindMap) {
+        try {
+          const reader = new FileReader();
+          reader.onload = (e: any) => {
+            const dataUrl = e.target.result;
+            mindMap.execCommand('SET_NODE_ATTACHMENT', activeNodes[0], {
+              name: file.name,
+              size: file.size,
+              type: file.type,
+              data: dataUrl
+            });
+            showToast(`附件 ${file.name} 已添加`, 'success');
+          };
+          reader.readAsDataURL(file);
+        } catch (error) {
+          console.error('附件添加失败:', error);
+          showToast('附件添加失败', 'error');
+        }
+      }
+    };
+    input.click();
   };
 
   // 导出功能
@@ -627,6 +659,28 @@ export default function MindMapToolbar({
               <IconMathFunction size={16} />
             </span>
             <span className="text">公式</span>
+          </div>
+
+          {/* 附件 */}
+          <div 
+            className={`mindmap-toolbar-btn ${activeNodes.length <= 0 || hasGeneralization ? 'disabled' : ''}`}
+            onClick={handleAttachment}
+          >
+            <span className="icon">
+              <IconUpload size={16} />
+            </span>
+            <span className="text">附件</span>
+          </div>
+
+          {/* 外框 */}
+          <div 
+            className={`mindmap-toolbar-btn ${activeNodes.length <= 0 || hasGeneralization ? 'disabled' : ''}`}
+            onClick={() => execCommand('ADD_OUTER_FRAME')}
+          >
+            <span className="icon">
+              <IconBrackets size={16} />
+            </span>
+            <span className="text">外框</span>
           </div>
         </div>
 
