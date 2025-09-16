@@ -107,7 +107,7 @@ const FormulaEditor: React.FC<FormulaEditorProps> = ({
         <div className="formula-editor-header">
           <div className="formula-editor-title">
             <IconMathFunction size={20} />
-            <span>{t('mindmap.formula.title')}</span>
+            <span>{t('mindmap_formula_title')}</span>
           </div>
           <button 
             className="formula-editor-close" 
@@ -121,24 +121,24 @@ const FormulaEditor: React.FC<FormulaEditorProps> = ({
         <div className="formula-editor-content">
           {/* 输入区域 */}
           <div className="formula-input-section">
-            <label className="formula-label">{t('mindmap.formula.inputLabel')}</label>
+            <label className="formula-label">{t('mindmap_formula_inputLabel')}</label>
             <textarea
               ref={textareaRef}
               value={formulaText}
               onChange={(e) => setFormulaText(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={t('mindmap.formula.placeholder')}
+              placeholder={t('mindmap_formula_placeholder')}
               className="formula-input"
               rows={4}
             />
             <div className="formula-tip">
-              {t('mindmap.formula.tip')}
+              {t('mindmap_formula_tip')}
             </div>
           </div>
 
           {/* 常用公式 */}
           <div className="formula-list-section">
-              <h4 className="formula-section-title">{t('mindmap.formula.commonFormulas')}</h4>
+              <h4 className="formula-section-title">{t('mindmap_formula_commonFormulas')}</h4>
               <div className="formula-list">
                 {renderedFormulas.length > 0 ? renderedFormulas.map((item, index) => (
                   <div

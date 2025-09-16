@@ -118,7 +118,7 @@ const ExportEditor: React.FC<ExportEditorProps> = ({
         <div className="export-editor-header">
           <div className="export-editor-title">
             <IconFileExport size={20} />
-            <span>{t('mindmap.export.title')}</span>
+            <span>{t('mindmap_export_title')}</span>
           </div>
           <button 
             className="export-editor-close" 
@@ -157,7 +157,7 @@ const ExportEditor: React.FC<ExportEditorProps> = ({
             <div className="config-panel">
               {/* 文件名设置 */}
               <div className="config-section">
-                <label className="config-label">{t('mindmap.export.fileName')}</label>
+                <label className="config-label">{t('mindmap_export_fileName')}</label>
                 <input
                   type="text"
                   value={fileName}
@@ -171,11 +171,11 @@ const ExportEditor: React.FC<ExportEditorProps> = ({
               {/* 格式信息 */}
               <div className="format-details">
                 <div className="detail-row">
-                  <span className="detail-label">{t('mindmap.export.format')}:</span>
+                  <span className="detail-label">{t('mindmap_export_format')}:</span>
                   <span className="detail-value">.{selectedFormat}</span>
                 </div>
                 <div className="detail-row">
-                  <span className="detail-label">{t('mindmap.export.description')}:</span>
+                  <span className="detail-label">{t('mindmap_export_description')}:</span>
                   <span className="detail-value">{currentFormat?.description}</span>
                 </div>
               </div>
@@ -183,12 +183,12 @@ const ExportEditor: React.FC<ExportEditorProps> = ({
               {/* 高级选项 */}
               {currentFormat?.hasOptions && (
                 <div className="config-section">
-                  <h4 className="section-title">{t('mindmap.export.options')}</h4>
+                  <h4 className="section-title">{t('mindmap_export_options')}</h4>
                   
                   {(selectedFormat === 'png' || selectedFormat === 'svg' || selectedFormat === 'pdf') && (
                     <>
                       <div className="option-row">
-                        <label className="option-label">{t('mindmap.export.paddingX')}</label>
+                        <label className="option-label">{t('mindmap_export_paddingX')}</label>
                         <input
                           type="number"
                           value={options.paddingX}
@@ -201,7 +201,7 @@ const ExportEditor: React.FC<ExportEditorProps> = ({
                       </div>
                       
                       <div className="option-row">
-                        <label className="option-label">{t('mindmap.export.paddingY')}</label>
+                        <label className="option-label">{t('mindmap_export_paddingY')}</label>
                         <input
                           type="number"
                           value={options.paddingY}
@@ -222,7 +222,7 @@ const ExportEditor: React.FC<ExportEditorProps> = ({
                               onChange={(e) => setOptions({...options, isTransparent: e.target.checked})}
                               className="checkbox-input"
                             />
-                            <span className="checkbox-text">{t('mindmap.export.transparentBackground')}</span>
+                            <span className="checkbox-text">{t('mindmap_export_transparentBackground')}</span>
                           </label>
                         </div>
                       )}
@@ -251,12 +251,12 @@ const ExportEditor: React.FC<ExportEditorProps> = ({
             {isExporting ? (
               <>
                 <div className="loading-spinner" />
-                {t('mindmap.export.exporting')}
+                {t('mindmap_export_exporting')}
               </>
             ) : (
               <>
                 <IconDownload size={16} />
-                {t('mindmap.export.export')}
+                {t('mindmap_export_export')}
               </>
             )}
           </button>

@@ -5,7 +5,7 @@
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  top: 20px;
+  top: 10px;
   max-width: calc(100vw - 40px);
   width: max-content;
   display: flex;
@@ -28,6 +28,11 @@
   flex-shrink: 1; /* 允许收缩 */
   min-width: 0; /* 确保可以收缩 */
   gap: 12px; /* 使用gap替代margin-right */
+}
+
+/* 第二个工具栏块 - 较低的z-index，可以被第一个隐藏 */
+.mindmap-toolbar-block:nth-child(2) {
+  z-index: 1;
 }
 
 
@@ -636,7 +641,7 @@
 .mindmap-toolbar-more-menu {
   position: absolute;
   top: 100%;
-  left: 0;
+  right: -50%;
   margin-top: 10px;
   background: #fff;
   border: 1px solid #e9e9e9;

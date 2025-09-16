@@ -117,7 +117,7 @@ export default function NoteEditor({
         <div className="note-editor-header">
           <div className="header-title">
             <IconNote size={20} />
-            <h3>{t('mindmap.note.title')}</h3>
+            <h3>{t('mindmap_note_title')}</h3>
             <span className="word-count">({wordCount} 字)</span>
           </div>
           <div className="header-actions">
@@ -140,7 +140,7 @@ export default function NoteEditor({
             value={note}
             onChange={(e) => handleNoteChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={t('mindmap.note.placeholder')}
+            placeholder={t('mindmap_note_placeholder')}
             rows={12}
           />
           

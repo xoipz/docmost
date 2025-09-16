@@ -31,7 +31,7 @@ const ImportEditor: React.FC<ImportEditorProps> = ({
     const isSupported = supportedFormats.some(format => fileName.endsWith(format));
     
     if (!isSupported) {
-      setError(t('mindmap.import.unsupportedFormat', { formats: supportedFormats.join(', ') }));
+      setError(t('mindmap_import_unsupportedFormat', { formats: supportedFormats.join(', ') }));
       return;
     }
 
@@ -87,7 +87,7 @@ const ImportEditor: React.FC<ImportEditorProps> = ({
         }
         return data;
       } catch (error) {
-        throw new Error(t('mindmap.import.parseError'));
+        throw new Error(t('mindmap_import_parseError'));
       }
     } else if (fileName.endsWith('.md')) {
       // Markdown 文件解析
@@ -97,7 +97,7 @@ const ImportEditor: React.FC<ImportEditorProps> = ({
         const { default: markdown } = await import('simple-mind-map/src/parse/markdown.js');
         return markdown.transformMarkdownTo(text);
       } catch (error) {
-        throw new Error(t('mindmap.import.parseError'));
+        throw new Error(t('mindmap_import_parseError'));
       }
     } else if (fileName.endsWith('.xmind')) {
       // XMind 文件解析
@@ -106,16 +106,16 @@ const ImportEditor: React.FC<ImportEditorProps> = ({
         const { default: xmind } = await import('simple-mind-map/src/parse/xmind.js');
         return await xmind.parseXmindFile(file);
       } catch (error) {
-        throw new Error(t('mindmap.import.parseError'));
+        throw new Error(t('mindmap_import_parseError'));
       }
     }
     
-    throw new Error(t('mindmap.import.unsupportedFormat'));
+    throw new Error(t('mindmap_import_unsupportedFormat'));
   };
 
   const handleConfirm = async () => {
     if (!selectedFile) {
-      setError(t('mindmap.import.noFileSelected'));
+      setError(t('mindmap_import_noFileSelected'));
       return;
     }
 
@@ -126,7 +126,7 @@ const ImportEditor: React.FC<ImportEditorProps> = ({
       onClose();
       setSelectedFile(null);
     } catch (error) {
-      setError(error.message || t('mindmap.import.parseError'));
+      setError(error.message || t('mindmap_import_parseError'));
     } finally {
       setIsLoading(false);
     }
@@ -159,7 +159,7 @@ const ImportEditor: React.FC<ImportEditorProps> = ({
         <div className="import-editor-header">
           <div className="import-editor-title">
             <IconFileImport size={20} />
-            <span>{t('mindmap.import.title')}</span>
+            <span>{t('mindmap_import_title')}</span>
           </div>
           <button 
             className="import-editor-close" 
@@ -208,10 +208,10 @@ const ImportEditor: React.FC<ImportEditorProps> = ({
             ) : (
               <div className="upload-prompt">
                 <IconUpload size={48} className="upload-icon" />
-                <h3>{t('mindmap.import.dragDropText')}</h3>
-                <p>{t('mindmap.import.orClickToSelect')}</p>
+                <h3>{t('mindmap_import_dragDropText')}</h3>
+                <p>{t('mindmap_import_orClickToSelect')}</p>
                 <div className="supported-formats">
-                  <span>{t('mindmap.import.supportedFormats')}:</span>
+                  <span>{t('mindmap_import_supportedFormats')}:</span>
                   <span className="format-list">{supportedFormats.join(', ')}</span>
                 </div>
               </div>
@@ -228,11 +228,11 @@ const ImportEditor: React.FC<ImportEditorProps> = ({
 
           {/* 格式说明 */}
           <div className="format-info">
-            <h4>{t('mindmap.import.formatDescriptions')}</h4>
+            <h4>{t('mindmap_import_formatDescriptions')}</h4>
             <ul>
-              <li><strong>.smm/.json</strong>: {t('mindmap.import.smmDescription')}</li>
-              <li><strong>.xmind</strong>: {t('mindmap.import.xmindDescription')}</li>
-              <li><strong>.md</strong>: {t('mindmap.import.markdownDescription')}</li>
+              <li><strong>.smm/.json</strong>: {t('mindmap_import_smmDescription')}</li>
+              <li><strong>.xmind</strong>: {t('mindmap_import_xmindDescription')}</li>
+              <li><strong>.md</strong>: {t('mindmap_import_markdownDescription')}</li>
             </ul>
           </div>
         </div>
@@ -254,12 +254,12 @@ const ImportEditor: React.FC<ImportEditorProps> = ({
             {isLoading ? (
               <>
                 <div className="loading-spinner" />
-                {t('mindmap.import.importing')}
+                {t('mindmap_import_importing')}
               </>
             ) : (
               <>
                 <IconCheck size={16} />
-                {t('mindmap.import.import')}
+                {t('mindmap_import_import')}
               </>
             )}
           </button>

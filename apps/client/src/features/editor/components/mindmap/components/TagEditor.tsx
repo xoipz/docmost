@@ -156,7 +156,7 @@ const TagEditor: React.FC<TagEditorProps> = ({
     <div className={`tag-editor-overlay ${theme === 'dark' ? 'isDark' : ''}`} onClick={handleOverlayClick}>
       <div className="tag-editor-dialog">
         <div className="tag-editor-header">
-          <h3>{t('mindmap.tag.title')}</h3>
+          <h3>{t('mindmap_tag_title')}</h3>
           <button 
             className="tag-editor-close" 
             onClick={onClose}
@@ -175,7 +175,7 @@ const TagEditor: React.FC<TagEditorProps> = ({
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleInputKeyDown}
-              placeholder={tags.length >= MAX_TAGS ? t('mindmap.tag.maxTagsReached', { max: MAX_TAGS }) : t('mindmap.tag.placeholder')}
+              placeholder={tags.length >= MAX_TAGS ? t('mindmap_tag_maxTagsReached', { max: MAX_TAGS }) : t('mindmap_tag_placeholder')}
               disabled={tags.length >= MAX_TAGS}
               className="tag-input"
             />
@@ -219,7 +219,7 @@ const TagEditor: React.FC<TagEditorProps> = ({
                       <span 
                         className="tag-text"
                         onClick={() => startEdit(index)}
-                        title={t('mindmap.tag.clickToEdit')}
+                        title={t('mindmap_tag_clickToEdit')}
                       >
                         {tagText}
                       </span>
@@ -230,7 +230,7 @@ const TagEditor: React.FC<TagEditorProps> = ({
                           e.stopPropagation();
                           removeTag(index);
                         }}
-                        title={t('mindmap.tag.removeTag')}
+                        title={t('mindmap_tag_removeTag')}
                       >
                         <IconTrash size={12} />
                       </button>
@@ -243,7 +243,7 @@ const TagEditor: React.FC<TagEditorProps> = ({
 
           {tags.length === 0 && (
             <div className="tag-empty">
-              {t('mindmap.tag.emptyState')}
+              {t('mindmap_tag_emptyState')}
             </div>
           )}
         </div>

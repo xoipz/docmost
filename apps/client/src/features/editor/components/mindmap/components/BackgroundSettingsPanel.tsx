@@ -76,7 +76,7 @@ export const BackgroundSettingsPanel: React.FC<BackgroundSettingsPanelProps> = (
     backgroundSize: 'auto'
   });
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLButtonElement>(null);
 
   // 更新背景配置
   const updateBackground = (key: string, value: any) => {

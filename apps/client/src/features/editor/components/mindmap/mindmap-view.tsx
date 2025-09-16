@@ -507,46 +507,15 @@ export default function MindMapView(props: NodeViewProps) {
           };
 
 
-          mindMapInstance.current = new MindMap({
+          // 创建基础配置对象
+          const mindMapConfig = {
             el: mindMapContainerRef.current,
             data: defaultData,
-            theme: '', // 不使用预设主题
             layout: currentLayout,
-            keyboardNavigation: true,
-            readonly: false,
-            mouseScaleable: true,
-            contextMenu: true,
-            toolBar: false,
-            nodeTextEditZIndex: 10000,
-            nodeNoteTooltipZIndex: 10000,
-            enableNodeRichText: true,
-            defaultExpandLevel: 3,
-            enableFreeDrag: false,
-            enableAutoEnterTextEditWhenKeydown: true, // 启用键盘输入自动进入编辑
-            openRealtimeRenderOnNodeTextEdit: true, // 实时渲染编辑中的节点
-            // 直接在初始化时设置样式
-            backgroundColor: selectedTheme === 'dark' ? '#262626' : '#f9fafb',
-            paddingX: 8,
-            paddingY: 5,
-            nodeMargin: 20,
-            lineWidth: 1,
-            lineColor: '#9ca3af',
-            nodeFontSize: 12,
-            rootFontSize: 14,
-            secondFontSize: 12,
-            thirdFontSize: 11,
-            otherFontSize: 11,
-            borderWidth: 1,
-            borderColor: '#d1d5db',
-            fillColor: '#ffffff',
-            color: '#1f2937',
-            borderRadius: 3,
-            imgMaxWidth: 80,
-            imgMaxHeight: 80,
-            iconSize: 16,
-            // 添加自定义图标配置
-            iconList: customIconList,
-          });
+            readonly: false
+          } as any;
+
+          mindMapInstance.current = new MindMap(mindMapConfig);
 
           // 应用自定义主题配置，覆盖默认的彩色主题
           mindMapInstance.current.setThemeConfig({
@@ -676,7 +645,7 @@ export default function MindMapView(props: NodeViewProps) {
                             document.querySelector('.smm-node-edit-area') !== null ||
                             document.activeElement?.tagName === 'INPUT' ||
                             document.activeElement?.tagName === 'TEXTAREA' ||
-                            document.activeElement?.contentEditable === 'true';
+                            (document.activeElement as HTMLElement)?.contentEditable === 'true';
             
             // 文件操作快捷键 - 即使在编辑状态也要响应
             if (e.ctrlKey && e.key === 's') {
@@ -1053,7 +1022,7 @@ export default function MindMapView(props: NodeViewProps) {
               <IconBrain size={24} />
             </ActionIcon>
 
-            <Text component="span" size="sm" c="dimmed" weight={500}>
+            <Text component="span" size="sm" c="dimmed" fw={500}>
               {t("Double-click to edit Mind Map")}
             </Text>
             
@@ -1103,7 +1072,7 @@ export default function MindMapView(props: NodeViewProps) {
               <IconBrain size={24} />
             </ActionIcon>
 
-            <Text component="span" size="sm" c="dimmed" weight={500}>
+            <Text component="span" size="sm" c="dimmed" fw={500}>
               {t("Double-click to edit Mind Map")}
             </Text>
           </div>
@@ -1165,8 +1134,8 @@ export default function MindMapView(props: NodeViewProps) {
                       alignItems: 'center',
                       gap: '8px'
                     }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = '#45a049'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = '#4caf50'}
+                    onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#45a049'}
+                    onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#4caf50'}
                   >
                     💾 保存并退出
                   </button>
@@ -1185,8 +1154,8 @@ export default function MindMapView(props: NodeViewProps) {
                       alignItems: 'center',
                       gap: '8px'
                     }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = '#d32f2f'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = '#f44336'}
+                    onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#d32f2f'}
+                    onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#f44336'}
                   >
                     🗑️ 放弃更改并退出
                   </button>
@@ -1208,8 +1177,8 @@ export default function MindMapView(props: NodeViewProps) {
                       alignItems: 'center',
                       gap: '8px'
                     }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = '#45a049'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = '#4caf50'}
+                    onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#45a049'}
+                    onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#4caf50'}
                   >
                     ✅ 确认退出
                   </button>
@@ -1227,8 +1196,8 @@ export default function MindMapView(props: NodeViewProps) {
                   fontWeight: '500',
                   cursor: 'pointer'
                 }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = selectedTheme === 'dark' ? '#404040' : '#f5f5f5'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = selectedTheme === 'dark' ? '#404040' : '#f5f5f5'}
+                onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
               >
                 取消
               </button>
@@ -1284,8 +1253,8 @@ export default function MindMapView(props: NodeViewProps) {
                   gap: '8px',
                   justifyContent: 'flex-start'
                 }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#45a049'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = '#4caf50'}
+                onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#45a049'}
+                onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#4caf50'}
               >
                 <span style={{ fontSize: '18px' }}>🎨</span>
                 <div style={{ textAlign: 'left' }}>
@@ -1309,8 +1278,8 @@ export default function MindMapView(props: NodeViewProps) {
                   gap: '8px',
                   justifyContent: 'flex-start'
                 }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#1976d2'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = '#2196f3'}
+                onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = '#1976d2'}
+                onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = '#2196f3'}
               >
                 <span style={{ fontSize: '18px' }}>🖼️</span>
                 <div style={{ textAlign: 'left' }}>
@@ -1330,8 +1299,8 @@ export default function MindMapView(props: NodeViewProps) {
                   fontWeight: '500',
                   cursor: 'pointer'
                 }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = selectedTheme === 'dark' ? '#404040' : '#f5f5f5'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                onMouseEnter={(e) => (e.target as HTMLElement).style.backgroundColor = selectedTheme === 'dark' ? '#404040' : '#f5f5f5'}
+                onMouseLeave={(e) => (e.target as HTMLElement).style.backgroundColor = 'transparent'}
               >
                 取消
               </button>

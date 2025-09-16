@@ -152,7 +152,7 @@ export default function LinkEditor({
         <div className="link-editor-header">
           <div className="header-title">
             <IconLink size={20} />
-            <h3>{t('mindmap.link.title')}</h3>
+            <h3>{t('mindmap_link_title')}</h3>
           </div>
           <button className="close-btn" onClick={onClose}>
             <IconX size={20} />
@@ -163,7 +163,7 @@ export default function LinkEditor({
         <div className="link-editor-content">
           {/* URL输入 */}
           <div className="form-group">
-            <label className="form-label">{t('mindmap.link.url')}</label>
+            <label className="form-label">{t('mindmap_link_url')}</label>
             <div className="url-input-group">
               <select 
                 className="protocol-select"
@@ -185,27 +185,27 @@ export default function LinkEditor({
               />
             </div>
             {!isValidUrl && (
-              <div className="error-message">{t('mindmap.link.invalidUrl')}</div>
+              <div className="error-message">{t('mindmap_link_invalidUrl')}</div>
             )}
           </div>
 
           {/* 标题输入 */}
           <div className="form-group">
-            <label className="form-label">{t('mindmap.link.displayTitle')}</label>
+            <label className="form-label">{t('mindmap_link_displayTitle')}</label>
             <input
               type="text"
               className="title-input"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={t('mindmap.link.titlePlaceholder')}
+              placeholder={t('mindmap_link_titlePlaceholder')}
             />
           </div>
 
           {/* 预览 */}
           {url.trim() && isValidUrl && (
             <div className="link-preview">
-              <div className="preview-label">{t('mindmap.link.preview')}:</div>
+              <div className="preview-label">{t('mindmap_link_preview')}:</div>
               <div className="preview-link">
                 <IconExternalLink size={14} />
                 <span>{title.trim() || url.trim()}</span>

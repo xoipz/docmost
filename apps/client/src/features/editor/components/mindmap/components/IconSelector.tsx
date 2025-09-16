@@ -120,7 +120,7 @@ export default function IconSelector({
       >
         {/* 头部 */}
         <div className="icon-selector-header">
-          <h3>{t('mindmap.toolbar.icon')}</h3>
+          <h3>{t('mindmap_toolbar_icon')}</h3>
           <button className="close-btn" onClick={onClose}>
             <IconX size={20} />
           </button>
@@ -158,7 +158,7 @@ export default function IconSelector({
         {/* 底部说明 */}
         <div className="icon-selector-footer">
           <div className="icon-tip">
-            {t('mindmap.icons.tip')}
+            {t('mindmap_icons_tip')}
           </div>
         </div>
       </div>
