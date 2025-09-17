@@ -238,7 +238,7 @@ export default function MindMapToolbar({
           
           // 小屏幕时只按 availableWidth 计算，不关心实际 width
           if (isSmallScreen) {
-            if (index < all.length && index * 50 < availableWidth) { // 假设每个按钮约50px宽度
+            if (index < all.length && (index+1) * 50 < availableWidth) { // 假设每个按钮约50px宽度
               index++;
               loopCheck();
             } else {
@@ -1004,7 +1004,6 @@ export default function MindMapToolbar({
               <div 
                 className="mindmap-toolbar-btn"
                 onClick={() => setPopoverShow(!popoverShow)}
-                style={{ marginRight: horizontalList.length > 0 ? '20px' : 0 }}
               >
                 <span className="icon">
                   <IconDotsVertical size={16} />
